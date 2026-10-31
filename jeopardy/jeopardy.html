@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PartyBox - JeopardyLabs Italia</title>
+<meta name="description" content="La versione di JeopardyLabs Italia all'interno di PartyBox: crea il tuo tabellone di quiz e gioca online con gli amici, senza account.">
+<meta name="theme-color" content="#222222">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --giallo:#FFD700; --giallo-scuro:#b39700; --nero:#222222; --bianco:#f5f7fa;
+  --grigio-scuro:#2c3e50; --grigio-chiaro:#ecf0f1; --verde-plus:#2da94e; --rosso-minus:#ff0000;
+  --muted:#5d6d7e; --bounce:cubic-bezier(.34,1.56,.64,1);
+  --font:'Fredoka','Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+html,body{margin:0;min-height:100%}
+body{
+  min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;
+  font-family:var(--font);color:var(--bianco);line-height:1.4;
+  background:linear-gradient(120deg,#1d1d1d,#2c3e50,#26323f,#33475b,#222,#2c3e50);
+  background-size:400% 400%;animation:sfondo 70s ease-in-out infinite;overflow-x:hidden;
+}
+@keyframes sfondo{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+button,input,textarea{font:inherit;color:inherit}
+.hidden{display:none !important}
+a{color:inherit}
+
+/* Sfondo animato (ritmo rilassato) */
+#bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+#bg::before,#bg::after{content:"";position:absolute;width:75vmax;height:75vmax;border-radius:50%;filter:blur(80px);opacity:.16;animation:alone 40s ease-in-out infinite alternate}
+#bg::before{background:radial-gradient(circle,var(--giallo),transparent 65%);top:-30vmax;left:-25vmax}
+#bg::after{background:radial-gradient(circle,#4a90d9,transparent 65%);bottom:-38vmax;right:-30vmax;animation-delay:-20s}
+@keyframes alone{from{transform:translate(0,0) scale(1)}to{transform:translate(10vmax,6vmax) scale(1.15)}}
+.forma{position:absolute;left:var(--x);top:110%;color:var(--c);opacity:var(--o);font-weight:700;line-height:1;
+  font-size:var(--s);animation:sale var(--d) linear var(--w) infinite;will-change:transform;user-select:none}
+.forma.cella{width:calc(var(--s) * 1.6);height:calc(var(--s) * 1.1);border:3px solid currentColor;border-radius:14px;font-size:0}
+@keyframes sale{0%{transform:translate3d(0,0,0) rotate(0)}50%{transform:translate3d(var(--dx),-70vh,0) rotate(calc(var(--r) / 2))}100%{transform:translate3d(calc(var(--dx) * -.5),-130vh,0) rotate(var(--r))}}
+
+/* Link di ritorno all'hub */
+.back-hub{position:fixed;top:max(14px,env(safe-area-inset-top));left:14px;z-index:6;display:grid;place-items:center;width:50px;height:50px;
+  color:var(--nero);background:var(--giallo);border:3px solid #000;border-radius:16px;box-shadow:0 5px 0 #000;text-decoration:none;
+  transition:transform .25s var(--bounce),box-shadow .15s;animation:dropIn .6s var(--bounce) .5s backwards;-webkit-tap-highlight-color:transparent}
+.back-hub svg{transition:transform .25s var(--bounce)}
+.back-hub:hover{transform:translateY(-3px) rotate(-6deg) scale(1.08);box-shadow:0 8px 0 #000}
+.back-hub:hover svg{transform:translateX(-4px)}
+.back-hub:active{transform:translateY(3px) scale(.95);box-shadow:0 2px 0 #000}
+body.in-room .back-hub{display:none}
+:focus-visible{outline:3px solid #fff;outline-offset:3px}
+
+/* Intestazione */
+header{text-align:center;padding:max(34px,env(safe-area-inset-top)) 16px 6px}
+.logo{display:flex;justify-content:center;flex-wrap:wrap;margin:0;font-size:clamp(2.6rem,9vw,5rem);font-weight:700;line-height:1;letter-spacing:.01em;
+  animation:dropIn .8s var(--bounce) backwards;transition:font-size .3s}
+.logo span{display:inline-block;color:var(--c,var(--giallo));
+  text-shadow:-3px -3px 0 var(--nero),3px -3px 0 var(--nero),-3px 3px 0 var(--nero),3px 3px 0 var(--nero),0 7px 0 var(--nero),0 10px 0 rgba(0,0,0,.35);
+  animation:rimbalza 3.2s ease-in-out infinite;animation-delay:calc(var(--i) * .12s)}
+body.in-room .logo{font-size:clamp(1.9rem,5vw,2.8rem)}
+body.in-room .logo span{animation:none}
+.subtitle{display:inline-block;margin:14px 0 0;padding:4px 20px;font-size:clamp(1rem,2.8vw,1.3rem);font-weight:700;color:var(--nero);
+  background:var(--giallo);border:3px solid #000;border-radius:999px;box-shadow:0 4px 0 #000;transform:rotate(-2deg);animation:subIn .8s var(--bounce) .5s backwards}
+@keyframes rimbalza{0%,60%,100%{transform:translateY(0) rotate(0)}30%{transform:translateY(-.14em) rotate(-4deg)}45%{transform:translateY(0) rotate(3deg)}}
+@keyframes dropIn{from{opacity:0;transform:translateY(-36px) scale(.8)}}
+@keyframes subIn{from{opacity:0;transform:translateY(-14px) rotate(-8deg) scale(.6)}}
+@keyframes entra{from{opacity:0;transform:translateY(34px) scale(.92)}}
+@keyframes fade{from{opacity:0}}
+@keyframes pop{from{opacity:0;transform:scale(.7) translateY(20px)}}
+@keyframes scuoti{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+@keyframes respira{0%,100%{box-shadow:0 5px 0 var(--nero),0 0 0 0 rgba(255,215,0,0)}50%{box-shadow:0 5px 0 var(--nero),0 0 0 9px rgba(255,215,0,.28)}}
+
+main{flex:1;width:100%;max-width:1040px;margin:0 auto;padding:22px clamp(14px,4vw,28px) 10px}
+.screen{display:flex;flex-direction:column;gap:26px}
+
+/* Pannelli */
+.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:clamp(18px,3vw,28px)}
+.panel{position:relative;display:flex;flex-direction:column;gap:14px;padding:22px;color:var(--nero);background:var(--bianco);
+  border:4px solid var(--nero);border-radius:28px;box-shadow:0 8px 0 #000,0 22px 30px rgba(0,0,0,.35);animation:entra .7s var(--bounce) backwards}
+.panel:nth-child(2){animation-delay:.12s}
+.panel.drag{outline:4px dashed var(--giallo);outline-offset:4px;background:#fff9d6}
+.panel.shake{animation:scuoti .5s ease}
+.panel h2{margin:0;font-size:1.5rem;line-height:1.1;display:flex;align-items:center;gap:10px}
+.panel h2::before{content:"";flex:none;width:14px;height:30px;background:var(--giallo);border:3px solid var(--nero);border-radius:8px}
+.panel p{margin:0;color:var(--muted);font-size:.95rem}
+.riga{display:flex;flex-wrap:wrap;gap:10px}
+.riga > *{flex:1 1 130px}
+
+.quizcard{display:flex;align-items:center;gap:14px;padding:14px;background:var(--grigio-scuro);color:var(--bianco);border:4px solid var(--nero);border-radius:20px;box-shadow:0 5px 0 #000}
+.quizcard .ico{flex:none;display:grid;place-items:center;width:58px;height:58px;font-size:2rem;font-weight:700;color:var(--nero);background:var(--giallo);border:3px solid var(--nero);border-radius:34%;transform:rotate(-6deg)}
+.quizcard strong{display:block;font-size:1.15rem;line-height:1.15;overflow-wrap:anywhere}
+.quizcard small{color:#c8d3de;font-size:.88rem}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;min-height:46px;font-weight:700;font-size:1rem;color:var(--nero);background:var(--giallo);
+  border:3px solid var(--nero);border-radius:999px;box-shadow:0 5px 0 var(--nero);cursor:pointer;text-decoration:none;
+  transition:transform .22s var(--bounce),box-shadow .15s,background .2s;-webkit-tap-highlight-color:transparent}
+.btn.alt{background:var(--bianco)}
+.btn.scuro{background:var(--grigio-scuro);color:var(--bianco)}
+.btn.grande{min-height:56px;font-size:1.25rem}
+.btn.piccolo{min-height:34px;padding:4px 14px;font-size:.88rem;box-shadow:0 3px 0 var(--nero)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+@media (hover:hover){.btn:hover:not(:disabled){transform:translateY(-3px) scale(1.03);box-shadow:0 8px 0 var(--nero)}}
+.btn:active:not(:disabled){transform:translateY(3px) scale(.97);box-shadow:0 1px 0 var(--nero)}
+#createBtn{animation:respira 3s ease-in-out 1.6s infinite}
+
+label.campo{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:.95rem}
+input[type=text],input[type=number],textarea{width:100%;padding:11px 14px;color:var(--nero);background:#fff;border:3px solid var(--nero);border-radius:14px;outline:none;transition:box-shadow .2s,border-color .2s}
+input::placeholder,textarea::placeholder{color:#8896a4}
+input:focus,textarea:focus{border-color:var(--grigio-scuro);box-shadow:0 0 0 4px rgba(255,215,0,.65)}
+textarea{resize:vertical;min-height:110px;font-size:1rem}
+#codeIn{text-transform:uppercase;letter-spacing:.2em;font-weight:700;text-align:center}
+.msg{min-height:1.4em;color:#ff9a9a;font-weight:600;text-align:center}
+.panel .msg{color:#c0392b}
+
+/* FAQ */
+.faq{background:rgba(245,247,250,.1);border:3px solid rgba(255,255,255,.18);border-radius:24px;padding:18px 20px;backdrop-filter:blur(4px)}
+.faq h2{margin:0 0 12px;font-size:1.25rem;color:var(--giallo)}
+.faq details{margin-bottom:10px}
+.faq summary{cursor:pointer;padding:10px 14px;font-weight:600;color:var(--nero);background:var(--grigio-chiaro);border:3px solid var(--nero);border-radius:14px;transition:background .2s,transform .2s var(--bounce)}
+.faq summary:hover{background:#fff}
+.faq details[open] summary{background:var(--giallo)}
+.faq details p{margin:10px 6px 4px;color:#dce4ec;font-size:.95rem}
+
+/* Lobby */
+.lobby{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:clamp(16px,3vw,26px);align-items:start}
+.codebox{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;background:var(--grigio-scuro);color:var(--bianco);border:4px solid var(--nero);border-radius:20px;box-shadow:0 5px 0 #000}
+.codebox small{display:block;color:#c8d3de}
+#roomCode{font-size:2rem;font-weight:700;letter-spacing:.25em;color:var(--giallo);background:none;border:0;cursor:pointer;padding:0}
+#roomCode:hover{color:#fff}
+#players{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+#players li{display:flex;align-items:center;gap:10px;padding:8px 12px;font-weight:700;background:#fff;border:3px solid var(--nero);border-radius:999px;border-left:14px solid var(--pc);animation:pop .45s var(--bounce) backwards}
+#players li span.ruolo{margin-left:auto;font-size:.8rem;font-weight:600;color:var(--muted)}
+#feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:.88rem;font-style:italic;color:var(--muted);max-height:120px;overflow:auto}
+#feed li{animation:fade .4s}
+.tabellone{padding:14px;color:var(--bianco);background:var(--grigio-scuro);border:4px solid var(--nero);border-radius:24px;box-shadow:0 8px 0 #000,0 22px 30px rgba(0,0,0,.35);animation:entra .7s var(--bounce) .1s backwards}
+.tabellone h2{margin:0 0 12px;font-size:1.4rem;color:var(--giallo);overflow-wrap:anywhere}
+.pgrid{display:grid;gap:6px;overflow-x:auto;padding-bottom:6px}
+.pgrid div{display:grid;place-items:center;min-height:44px;padding:4px 6px;text-align:center;border:3px solid var(--nero);border-radius:10px;overflow-wrap:anywhere}
+.pgrid .cat{min-height:52px;font-weight:700;font-size:.85rem;color:var(--nero);background:var(--giallo);animation:pop .5s var(--bounce) backwards}
+.pgrid .val{font-weight:700;font-size:1.1rem;color:var(--giallo);background:#1d5b9a;background:linear-gradient(160deg,#2a6fb5,#1d4f85);animation:pop .5s var(--bounce) backwards;animation-delay:calc(var(--k,0) * 18ms)}
+.pgrid .val.vuota{opacity:.3}
+.nota{font-size:.88rem;color:#c8d3de;text-align:center;margin:10px 0 0}
+
+/* Modali */
+.modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(10,12,16,.78);animation:fade .25s ease-out}
+.modal-box{position:relative;width:100%;max-width:1100px;max-height:calc(100dvh - 28px);display:flex;flex-direction:column;gap:14px;padding:22px;color:var(--nero);
+  background:var(--bianco);border:4px solid var(--nero);border-radius:28px;box-shadow:0 8px 0 #000;animation:modalPop .55s var(--bounce)}
+.modal-box.stretto{max-width:520px}
+@keyframes modalPop{from{opacity:0;transform:translateY(30vh) scale(.85) rotate(-2deg)}}
+.modal-box h2{margin:0;font-size:1.5rem}
+.modal-x{position:absolute;top:12px;right:12px;width:40px;height:40px;padding:0;min-height:0;border-radius:50%}
+.modal-corpo{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:14px;padding:2px}
+.modal-piedi{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}
+.ed-barra{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ed-barra .btn{flex:none}
+.egrid{display:grid;gap:8px;grid-template-columns:96px repeat(var(--n),minmax(140px,1fr));overflow-x:auto;padding:4px 4px 10px}
+.egrid > *{min-width:0}
+.egrid .cat-in{font-weight:700;text-align:center;background:var(--giallo)}
+.egrid .val-in{text-align:center;font-weight:700;padding:8px}
+.cella-btn{display:flex;align-items:center;justify-content:center;min-height:62px;padding:6px 8px;font-size:.85rem;font-weight:600;text-align:center;line-height:1.2;color:var(--muted);
+  background:#fff;border:3px dashed #9aa7b3;border-radius:14px;cursor:pointer;overflow:hidden;transition:transform .2s var(--bounce),border-color .2s,background .2s}
+.cella-btn.piena{color:var(--nero);background:#eafaf0;border:3px solid var(--verde-plus)}
+.cella-btn:hover{transform:translateY(-3px) scale(1.03)}
+.contatore{font-weight:600;color:var(--muted)}
+
+#toast{position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom));z-index:80;max-width:min(92vw,520px);padding:12px 20px;font-weight:600;text-align:center;color:var(--nero);
+  background:var(--giallo);border:3px solid var(--nero);border-radius:999px;box-shadow:0 5px 0 #000;transform:translate(-50%,0);transition:transform .35s var(--bounce),opacity .3s}
+#toast.nascosto{opacity:0;pointer-events:none;transform:translate(-50%,40px)}
+
+footer{padding:22px 18px max(20px,env(safe-area-inset-bottom));text-align:center;font-size:.8rem;color:rgba(245,247,250,.75)}
+footer p{margin:4px auto;max-width:680px}
+
+@media (max-width:820px){.lobby{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:520px){
+  .panel{padding:18px 16px}
+  .modal-box{padding:18px 14px;border-radius:22px}
+  .modal-piedi .btn{flex:1 1 140px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+  .forma{display:none}
+}
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"></div>
+
+<a class="back-hub" href="../index.html" aria-label="Torna a PartyBox" title="Torna a PartyBox">
+  <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M19 12H6M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</a>
+
+<header>
+  <h1 class="logo" id="logo" aria-label="PartyBox">PartyBox</h1>
+  <p class="subtitle">JeopardyLabs Italia</p>
+</header>
+
+<main>
+  <section id="setup" class="screen" aria-label="Impostazioni partita">
+    <div class="panels">
+      <article class="panel" id="quizPanel" aria-labelledby="quizTit">
+        <h2 id="quizTit">Il tuo quiz</h2>
+        <div class="quizcard">
+          <div class="ico" aria-hidden="true">?</div>
+          <div>
+            <strong id="quizTitle">Nessun quiz caricato</strong>
+            <small id="quizMeta">Creane uno o carica un file JSON.</small>
+          </div>
+        </div>
+        <div class="riga">
+          <button class="btn" id="editBtn" type="button">Crea / Modifica</button>
+          <button class="btn alt" id="loadBtn" type="button">Carica JSON</button>
+        </div>
+        <div class="riga">
+          <button class="btn alt" id="exportBtn" type="button" disabled>Esporta JSON</button>
+          <button class="btn alt" id="sampleBtn" type="button">Quiz di esempio</button>
+        </div>
+        <p>Nessun account e nessuna password: il quiz resta nel tuo browser e si condivide come file. Puoi anche trascinare qui un file <strong>.json</strong>.</p>
+      </article>
+
+      <article class="panel" aria-labelledby="roomTit">
+        <h2 id="roomTit">Partita online</h2>
+        <label class="campo" for="nameIn">Il tuo nome
+          <input id="nameIn" type="text" maxlength="20" placeholder="Inserisci il tuo nome" autocomplete="off">
+        </label>
+        <button class="btn grande" id="createBtn" type="button">Crea stanza</button>
+        <div class="riga" style="flex-wrap:nowrap">
+          <input id="codeIn" type="text" maxlength="5" placeholder="CODICE" autocomplete="off" autocapitalize="characters" aria-label="Codice stanza" style="flex:1 1 auto">
+          <button class="btn" id="joinBtn" type="button" style="flex:0 0 auto">Entra</button>
+        </div>
+        <div class="msg" id="setupMsg" role="alert"></div>
+      </article>
+    </div>
+
+    <section class="faq" aria-label="Domande frequenti">
+      <h2>Domande frequenti</h2>
+      <details>
+        <summary>Come si gioca?</summary>
+        <p>Chi organizza prepara (o carica) un quiz e crea una stanza: condivide il codice di 5 lettere e gli altri entrano dal proprio dispositivo. Il tabellone viene inviato in automatico a tutti.</p>
+      </details>
+      <details>
+        <summary>Servono un account o una password?</summary>
+        <p>No. Non esistono account: il quiz vive nel tuo browser e si salva come file JSON che puoi conservare e condividere come preferisci.</p>
+      </details>
+      <details>
+        <summary>Come condivido un quiz?</summary>
+        <p>Dall'editor o dalla schermata iniziale scegli «Esporta JSON» e invia il file. Chi lo riceve lo carica con «Carica JSON». Chi entra in una stanza, invece, riceve il tabellone direttamente dall'host.</p>
+      </details>
+      <details>
+        <summary>Posso creare un "Final Jeopardy" o un "Double Jeopardy"?</summary>
+        <p>JeopardyLabs Italia è un gioco simile a Jeopardy, non è Jeopardy. Puoi aggiungere righe o colonne extra e regolare i punti a piacere.</p>
+      </details>
+    </section>
+  </section>
+
+  <section id="lobby" class="screen hidden" aria-label="Stanza">
+    <div class="lobby">
+      <div class="panel">
+        <h2>Stanza</h2>
+        <div class="codebox">
+          <div>
+            <small>Codice (tocca per copiare)</small>
+            <button id="roomCode" type="button" aria-label="Copia il codice della stanza">-----</button>
+          </div>
+        </div>
+        <h2 style="font-size:1.2rem">Giocatori</h2>
+        <ul id="players" aria-live="polite"></ul>
+        <ul id="feed" aria-live="polite"></ul>
+        <div class="riga">
+          <button class="btn" id="roomEditBtn" type="button">Modifica quiz</button>
+          <button class="btn alt" id="roomExportBtn" type="button">Esporta JSON</button>
+        </div>
+        <button class="btn scuro" id="startBtn" type="button" disabled>Avvia partita (prossimamente)</button>
+        <button class="btn alt" id="leaveBtn" type="button">Esci dalla stanza</button>
+      </div>
+      <div class="tabellone">
+        <h2 id="roomQuizTitle">Tabellone</h2>
+        <div class="pgrid" id="roomBoard"></div>
+        <p class="nota" id="roomNote"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Progetto amatoriale no-profit, creato per passatempo e didattica. Non è affiliato in alcun modo con <a href="https://www.jeopardy.com/" target="_blank" rel="noopener">Jeopardy!<sup>&reg;</sup></a>, Sony Pictures Digital Inc. o <a href="https://jeopardylabs.com/" target="_blank" rel="noopener">JeopardyLabs</a>. I marchi citati appartengono ai rispettivi proprietari.</p>
+</footer>
+
+<div id="editor" class="modal hidden">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="edTitle">
+    <button class="btn modal-x" type="button" id="edClose" aria-label="Chiudi">&#10005;</button>
+    <h2 id="edTitle">Editor del tabellone</h2>
+    <div class="modal-corpo">
+      <label class="campo" for="edNome">Titolo del quiz
+        <input id="edNome" type="text" maxlength="60" placeholder="Es. Quiz di cultura generale">
+      </label>
+      <div class="ed-barra">
+        <button class="btn piccolo alt" id="edAddCat" type="button">+ Categoria</button>
+        <button class="btn piccolo alt" id="edDelCat" type="button">- Categoria</button>
+        <button class="btn piccolo alt" id="edAddRow" type="button">+ Riga</button>
+        <button class="btn piccolo alt" id="edDelRow" type="button">- Riga</button>
+        <button class="btn piccolo alt" id="edImport" type="button">Importa JSON</button>
+        <span class="contatore" id="edCount"></span>
+      </div>
+      <div class="egrid" id="edGrid"></div>
+    </div>
+    <div class="modal-piedi">
+      <button class="btn alt" id="edExport" type="button">Esporta JSON</button>
+      <button class="btn alt" id="edCancel" type="button">Annulla</button>
+      <button class="btn" id="edSave" type="button">Usa questo quiz</button>
+    </div>
+  </div>
+</div>
+
+<div id="cellModal" class="modal hidden" style="z-index:60">
+  <div class="modal-box stretto" role="dialog" aria-modal="true" aria-labelledby="cellTitle">
+    <h2 id="cellTitle">Casella</h2>
+    <div class="modal-corpo">
+      <label class="campo" for="cellQ">Domanda
+        <textarea id="cellQ" maxlength="400" placeholder="Scrivi la domanda"></textarea>
+      </label>
+      <label class="campo" for="cellA">Risposta
+        <textarea id="cellA" maxlength="400" placeholder="Scrivi la risposta" style="min-height:70px"></textarea>
+      </label>
+    </div>
+    <div class="modal-piedi">
+      <button class="btn alt" id="cellClear" type="button">Svuota</button>
+      <button class="btn alt" id="cellCancel" type="button">Annulla</button>
+      <button class="btn" id="cellSave" type="button">Salva</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileIn" accept=".json,application/json" hidden>
+<div id="toast" class="nascosto" role="status" aria-live="polite"></div>
+
+<noscript><p style="text-align:center;padding:20px">Per usare JeopardyLabs Italia serve JavaScript.</p></noscript>
+
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  var PREFIX = 'partybox-jeopardy-';
+  var MAX_PLAYERS = 6;
+  var LIM = {cat:8, righe:8, titolo:60, nome:40, testo:400, punti:100000};
+  var DRAFT_KEY = 'partybox-jeopardy-bozza';
+  var PCOLORS = ['#5cc8ff', '#ff7eb6', '#b69cff', '#5be584', '#ff9f5a', '#f5f7fa'];
+  var ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+  /* ---------- Configurazione ICE (stessa di Indovina Chi?) ---------- */
+  var METERED_APP = '', METERED_KEY = '', METERED_USER = '', METERED_PASS = '';
+  var CUSTOM_TURN = [];
+  var STUN_SERVERS = [
+    {urls:'stun:stun.l.google.com:19302'}, {urls:'stun:stun1.l.google.com:19302'},
+    {urls:'stun:stun2.l.google.com:19302'}, {urls:'stun:stun.relay.metered.ca:80'},
+    {urls:'stun:global.stun.twilio.com:3478'}
+  ];
+  var FALLBACK_TURN = [
+    {urls:'turn:openrelay.metered.ca:80', username:'openrelayproject', credential:'openrelayproject'},
+    {urls:'turn:openrelay.metered.ca:80?transport=tcp', username:'openrelayproject', credential:'openrelayproject'},
+    {urls:'turn:openrelay.metered.ca:443', username:'openrelayproject', credential:'openrelayproject'},
+    {urls:'turns:openrelay.metered.ca:443?transport=tcp', username:'openrelayproject', credential:'openrelayproject'},
+    {urls:['turn:freestun.net:3478', 'turns:freestun.net:5349'], username:'free', credential:'free'}
+  ];
+  var iceCache = null, relayForced = false;
+  try{
+    var qs = new URLSearchParams(location.search);
+    if(qs.get('turnapp') && qs.get('turnkey')){
+      localStorage.setItem('indovinachi-turn', JSON.stringify({app:qs.get('turnapp'), key:qs.get('turnkey')}));
+    }
+    var sv = JSON.parse(localStorage.getItem('indovinachi-turn') || 'null');
+    if(sv && !METERED_APP){ METERED_APP = sv.app; METERED_KEY = sv.key; }
+    relayForced = sessionStorage.getItem('indovinachi-relay') === '1';
+  }catch(e){}
+  function relayTest(){ return /[?&]relay=1/.test(location.search); }
+  function dbg(){ console.log.apply(console, ['[Jeopardy]'].concat([].slice.call(arguments))); }
+  function dbgw(){ console.warn.apply(console, ['[Jeopardy]'].concat([].slice.call(arguments))); }
+
+  function mergeServers(){
+    var out = [], seen = {};
+    [].slice.call(arguments).forEach(function(list){
+      (list || []).forEach(function(s){
+        var k = [].concat(s.urls).join('|') + '#' + (s.username || '');
+        if(!seen[k]){ seen[k] = 1; out.push(s); }
+      });
+    });
+    return out;
+  }
+  function buildOpts(turn){
+    var cfg = {iceServers: STUN_SERVERS.concat(turn), iceCandidatePoolSize: 2};
+    if(relayTest() || relayForced){ cfg.iceTransportPolicy = 'relay'; dbgw('Modalità relay attiva: solo server TURN.'); }
+    return {debug:1, config:cfg};
+  }
+  function getOpts(cb){
+    if(iceCache){ cb(buildOpts(iceCache)); return; }
+    var statici = (METERED_USER && METERED_PASS) ? ['80', '80?transport=tcp', '443'].map(function(p){
+      return {urls:'turn:global.relay.metered.ca:' + p, username:METERED_USER, credential:METERED_PASS};
+    }).concat([{urls:'turns:global.relay.metered.ca:443?transport=tcp', username:METERED_USER, credential:METERED_PASS}]) : [];
+    var mine = mergeServers(statici, CUSTOM_TURN);
+    var hasKeys = !!(METERED_APP && METERED_KEY);
+    var base = (mine.length || hasKeys) ? mine : FALLBACK_TURN;
+    var done = false, t = null;
+    function finish(list, msg){
+      if(done){ return; }
+      done = true; clearTimeout(t);
+      if(msg){ dbgw(msg); }
+      iceCache = list;
+      dbg('Pool ICE:', STUN_SERVERS.length, 'STUN +', list.length, 'voci TURN');
+      cb(buildOpts(list));
+    }
+    if(!hasKeys){ finish(base, mine.length ? '' : 'Nessuna credenziale TURN personale: uso i relay pubblici di riserva (non garantiti).'); return; }
+    t = setTimeout(function(){ finish(base.length ? base : FALLBACK_TURN, 'Timeout nel recupero delle credenziali Metered.'); }, 5000);
+    fetch('https://' + METERED_APP + '.metered.live/api/v1/turn/credentials?apiKey=' + encodeURIComponent(METERED_KEY))
+      .then(function(r){ if(!r.ok){ throw new Error('HTTP ' + r.status); } return r.json(); })
+      .then(function(list){
+        if(!Array.isArray(list) || !list.length){ throw new Error('risposta vuota'); }
+        var c = list.filter(function(x){ return x.username; })[0];
+        var extra = (c && !list.some(function(x){ return /turns:.*:443/.test([].concat(x.urls).join(' ')); })) ?
+          [{urls:'turns:global.relay.metered.ca:443?transport=tcp', username:c.username, credential:c.credential}] : [];
+        finish(mergeServers(list, extra, mine));
+      })
+      .catch(function(e){ finish(base.length ? base : FALLBACK_TURN, 'Credenziali Metered non disponibili (' + e.message + ').'); });
+  }
+  function watchIce(conn, label, onFail){
+    var pc = conn.peerConnection;
+    if(!pc){ return; }
+    var fired = false;
+    function fail(why){ if(fired){ return; } fired = true; dbgw(label + ': ' + why); if(onFail){ onFail(why); } }
+    pc.addEventListener('iceconnectionstatechange', function(){
+      var st = pc.iceConnectionState;
+      dbg(label + ': ICE = ' + st);
+      if(st === 'connected' || st === 'completed'){
+        if(pc.getStats){ pc.getStats().then(function(stats){
+          var byId = {}, sel = null;
+          stats.forEach(function(r){ byId[r.id] = r; if(r.type === 'transport' && r.selectedCandidatePairId){ sel = byId[r.selectedCandidatePairId] || r.selectedCandidatePairId; } });
+          var pair = typeof sel === 'string' ? byId[sel] : sel;
+          if(pair){ var l = byId[pair.localCandidateId], r = byId[pair.remoteCandidateId];
+            dbg(label + ': percorso scelto locale=' + (l && l.candidateType) + ' remoto=' + (r && r.candidateType) + ' (relay = passa dal TURN)'); }
+        }).catch(function(){}); }
+      }
+      if(st === 'failed'){ fail('negoziazione ICE fallita (NAT restrittivo/CGNAT?).'); }
+    });
+    conn.on('error', function(err){ dbgw(label + ': errore canale dati', err); fail('errore del canale dati.'); });
+  }
+
+  /* ---------- Utilita ---------- */
+  function $(id){ return document.getElementById(id); }
+  function el(tag, cls, txt){
+    var e = document.createElement(tag);
+    if(cls){ e.className = cls; }
+    if(txt != null){ e.textContent = txt; }
+    return e;
+  }
+  function clone(o){ return JSON.parse(JSON.stringify(o)); }
+  function testo(t, max){
+    return String(t == null ? '' : t).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').trim().slice(0, max);
+  }
+  var toastTimer = null;
+  function toast(msg){
+    var t = $('toast');
+    t.textContent = msg;
+    t.classList.remove('nascosto');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.add('nascosto'); }, 4200);
+  }
+  function setMsg(t){ $('setupMsg').textContent = t || ''; }
+  function nomeGiocatore(){ return testo($('nameIn').value, 20) || 'Giocatore'; }
+  function randCode(){
+    var s = '';
+    for(var i = 0; i < 5; i++){ s += ALPHABET.charAt(Math.floor(Math.random() * ALPHABET.length)); }
+    return s;
+  }
+  function slug(t){
+    var s = String(t || '').normalize ? String(t).normalize('NFD').replace(/[̀-ͯ]/g, '') : String(t || '');
+    s = s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return 'jeopardy-' + (s || 'quiz');
+  }
+
+  /* ---------- Modello del quiz (JSON) ---------- */
+  function quizVuoto(cat, righe){
+    var q = {formato:'partybox-jeopardy', versione:1, titolo:'', valori:[], categorie:[]};
+    for(var r = 0; r < righe; r++){ q.valori.push((r + 1) * 100); }
+    for(var c = 0; c < cat; c++){
+      var cel = [];
+      for(var k = 0; k < righe; k++){ cel.push({domanda:'', risposta:''}); }
+      q.categorie.push({nome:'Categoria ' + (c + 1), celle:cel});
+    }
+    return q;
+  }
+  function validaQuiz(o){
+    if(!o || typeof o !== 'object' || o.formato !== 'partybox-jeopardy'){ throw new Error('Il file non è un quiz PartyBox Jeopardy.'); }
+    if(!Array.isArray(o.categorie) || !o.categorie.length || o.categorie.length > LIM.cat){ throw new Error('Servono da 1 a ' + LIM.cat + ' categorie.'); }
+    if(!Array.isArray(o.valori) || !o.valori.length || o.valori.length > LIM.righe){ throw new Error('Servono da 1 a ' + LIM.righe + ' righe di punti.'); }
+    var q = {formato:'partybox-jeopardy', versione:1, titolo:testo(o.titolo, LIM.titolo), valori:[], categorie:[]};
+    o.valori.forEach(function(v){
+      var n = Math.round(Number(v));
+      q.valori.push(isFinite(n) && n > 0 ? Math.min(n, LIM.punti) : 100);
+    });
+    o.categorie.forEach(function(c, i){
+      var celle = Array.isArray(c && c.celle) ? c.celle : [];
+      var out = [];
+      for(var r = 0; r < q.valori.length; r++){
+        var x = celle[r] || {};
+        out.push({domanda:testo(x.domanda, LIM.testo), risposta:testo(x.risposta, LIM.testo)});
+      }
+      q.categorie.push({nome:testo(c && c.nome, LIM.nome) || ('Categoria ' + (i + 1)), celle:out});
+    });
+    return q;
+  }
+  function giocabili(q){
+    var n = 0;
+    q.categorie.forEach(function(c){ c.celle.forEach(function(x){ if(x.domanda && x.risposta){ n++; } }); });
+    return n;
+  }
+  function quizEsempio(){
+    var dati = [
+      ['Geografia', [['Qual è la capitale d\'Italia?', 'Roma'], ['Qual è il fiume più lungo d\'Italia?', 'Il Po'], ['Come si chiama la vetta più alta delle Alpi?', 'Monte Bianco'], ['Quale stato ha come capitale Canberra?', 'L\'Australia']]],
+      ['Storia', [['Chi scopri l\'America nel 1492?', 'Cristoforo Colombo'], ['Chi fu il primo imperatore di Roma?', 'Augusto'], ['In che anno cadde il Muro di Berlino?', '1989'], ['Quale città fu sepolta dall\'eruzione del Vesuvio del 79 d.C. insieme a Ercolano?', 'Pompei']]],
+      ['Scienze', [['Quale organo pompa il sangue nel corpo?', 'Il cuore'], ['Quanti pianeti ha il Sistema Solare?', 'Otto'], ['Qual è il simbolo chimico dell\'oro?', 'Au'], ['Qual è la velocità approssimativa della luce nel vuoto?', 'Circa 300.000 km/s']]],
+      ['Intrattenimento', [['Come si chiama l\'idraulico baffuto di Nintendo?', 'Mario'], ['Chi è il protagonista della serie The Legend of Zelda?', 'Link'], ['Quale Pokémon è il numero 25 del Pokédex?', 'Pikachu'], ['Chi ha diretto la trilogia cinematografica de Il Signore degli Anelli?', 'Peter Jackson']]]
+    ];
+    var q = quizVuoto(dati.length, 4);
+    q.titolo = 'Quiz di esempio';
+    dati.forEach(function(d, c){
+      q.categorie[c].nome = d[0];
+      d[1].forEach(function(x, r){ q.categorie[c].celle[r] = {domanda:x[0], risposta:x[1]}; });
+    });
+    return q;
+  }
+  function salvaBozza(q){ try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(q)); }catch(e){} }
+  function scarica(q){
+    var blob = new Blob([JSON.stringify(q, null, 2)], {type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = slug(q.titolo) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+    toast('File salvato: ' + a.download);
+  }
+  function leggiFile(file, ok){
+    if(!file){ return; }
+    if(file.size > 512000){ toast('File troppo grande (massimo 500 KB).'); return; }
+    var fr = new FileReader();
+    fr.onload = function(){
+      try{ ok(validaQuiz(JSON.parse(String(fr.result)))); }
+      catch(e){ toast(e instanceof SyntaxError ? 'Il file non è un JSON valido.' : e.message); }
+    };
+    fr.onerror = function(){ toast('Impossibile leggere il file.'); };
+    fr.readAsText(file, 'utf-8');
+  }
+
+  /* ---------- Stato ---------- */
+  var quiz = null, roomQuiz = null, ed = null, edPerStanza = false, cellCtx = null, fileTarget = 'setup';
+  var peer = null, isHost = false, myN = 0, roomCode = '', roster = {}, conns = [], hostConn = null;
+  var inRoom = false, leaving = false, attemptSeq = 0, joinTimer = null;
+
+  /* ---------- Schermata iniziale ---------- */
+  function renderQuizInfo(){
+    if(quiz){
+      $('quizTitle').textContent = quiz.titolo || 'Quiz senza titolo';
+      $('quizMeta').textContent = quiz.categorie.length + ' categorie · ' + quiz.valori.length + ' righe · ' + giocabili(quiz) + ' domande pronte';
+    } else {
+      $('quizTitle').textContent = 'Nessun quiz caricato';
+      $('quizMeta').textContent = 'Creane uno o carica un file JSON.';
+    }
+    $('exportBtn').disabled = !quiz;
+  }
+  function usaQuiz(q, msg){
+    quiz = q;
+    salvaBozza(q);
+    renderQuizInfo();
+    if(msg){ toast(msg); }
+  }
+  function scuoti(){
+    var p = $('quizPanel');
+    p.classList.remove('shake');
+    void p.offsetWidth;
+    p.classList.add('shake');
+  }
+
+  /* ---------- Editor ---------- */
+  function conta(){
+    var tot = ed.categorie.length * ed.valori.length;
+    $('edCount').textContent = giocabili(ed) + ' / ' + tot + ' caselle compilate';
+  }
+  function renderEditor(){
+    var g = $('edGrid'), sx = g.scrollLeft;
+    g.textContent = '';
+    g.style.setProperty('--n', ed.categorie.length);
+    g.appendChild(el('div'));
+    ed.categorie.forEach(function(c, ci){
+      var inp = el('input', 'cat-in');
+      inp.type = 'text';
+      inp.maxLength = LIM.nome;
+      inp.value = c.nome;
+      inp.setAttribute('aria-label', 'Nome categoria ' + (ci + 1));
+      inp.addEventListener('input', function(){ c.nome = inp.value; });
+      g.appendChild(inp);
+    });
+    ed.valori.forEach(function(v, ri){
+      var vi = el('input', 'val-in');
+      vi.type = 'number';
+      vi.min = 1;
+      vi.max = LIM.punti;
+      vi.value = v;
+      vi.setAttribute('aria-label', 'Punti riga ' + (ri + 1));
+      vi.addEventListener('change', function(){
+        var n = Math.round(Number(vi.value));
+        ed.valori[ri] = isFinite(n) && n > 0 ? Math.min(n, LIM.punti) : 100;
+        vi.value = ed.valori[ri];
+      });
+      g.appendChild(vi);
+      ed.categorie.forEach(function(c, ci){
+        var x = c.celle[ri];
+        var b = el('button', 'cella-btn' + (x.domanda && x.risposta ? ' piena' : ''), x.domanda ? x.domanda : '+ Aggiungi');
+        b.type = 'button';
+        b.setAttribute('aria-label', c.nome + ', ' + ed.valori[ri] + ' punti');
+        b.addEventListener('click', function(){ apriCella(ci, ri); });
+        g.appendChild(b);
+      });
+    });
+    g.scrollLeft = sx;
+    $('edNome').value = ed.titolo;
+    conta();
+  }
+  function apriEditor(perStanza){
+    edPerStanza = !!perStanza;
+    var base = perStanza ? roomQuiz : quiz;
+    ed = base ? clone(base) : quizVuoto(5, 5);
+    renderEditor();
+    $('editor').classList.remove('hidden');
+    $('edNome').focus();
+  }
+  function chiudiEditor(){ $('editor').classList.add('hidden'); ed = null; }
+  function apriCella(ci, ri){
+    cellCtx = {c:ci, r:ri};
+    var x = ed.categorie[ci].celle[ri];
+    $('cellTitle').textContent = (ed.categorie[ci].nome || 'Categoria') + ' · ' + ed.valori[ri] + ' punti';
+    $('cellQ').value = x.domanda;
+    $('cellA').value = x.risposta;
+    $('cellModal').classList.remove('hidden');
+    $('cellQ').focus();
+  }
+  function chiudiCella(){ $('cellModal').classList.add('hidden'); cellCtx = null; }
+
+  /* ---------- Tabellone (anteprima) ---------- */
+  function renderBoard(q, box){
+    box.textContent = '';
+    box.style.gridTemplateColumns = 'repeat(' + q.categorie.length + ',minmax(86px,1fr))';
+    q.categorie.forEach(function(c, i){
+      var d = el('div', 'cat', c.nome);
+      d.style.animationDelay = (i * 40) + 'ms';
+      box.appendChild(d);
+    });
+    var k = 0;
+    q.valori.forEach(function(v, r){
+      q.categorie.forEach(function(c){
+        var x = c.celle[r];
+        var d = el('div', 'val' + (x.domanda && x.risposta ? '' : ' vuota'), String(v));
+        d.style.setProperty('--k', k++);
+        box.appendChild(d);
+      });
+    });
+  }
+  function renderLobbyQuiz(){
+    if(!roomQuiz){ return; }
+    $('roomQuizTitle').textContent = roomQuiz.titolo || 'Tabellone';
+    renderBoard(roomQuiz, $('roomBoard'));
+    $('roomNote').textContent = roomQuiz.categorie.length + ' categorie · ' + roomQuiz.valori.length + ' righe · ' + giocabili(roomQuiz) + ' domande pronte';
+  }
+  function colorOf(n){ return PCOLORS[(Number(n) - 1) % PCOLORS.length]; }
+  function renderPlayers(){
+    var ul = $('players');
+    ul.textContent = '';
+    Object.keys(roster).map(Number).sort(function(a, b){ return a - b; }).forEach(function(n){
+      var li = el('li');
+      li.style.setProperty('--pc', colorOf(n));
+      li.appendChild(el('span', '', roster[n].name + (n === myN ? ' (tu)' : '')));
+      li.appendChild(el('span', 'ruolo', n === 1 ? 'Host' : 'Giocatore'));
+      ul.appendChild(li);
+    });
+  }
+  function feed(t){
+    var f = $('feed');
+    f.appendChild(el('li', '', t));
+    while(f.children.length > 6){ f.removeChild(f.firstChild); }
+    f.scrollTop = f.scrollHeight;
+  }
+
+  /* ---------- Rete: stanza ---------- */
+  function haPeer(){
+    if(typeof Peer === 'undefined'){ setMsg('Il servizio di rete non è stato caricato. Controlla la connessione e ricarica la pagina.'); return false; }
+    return true;
+  }
+  function broadcast(d, except){ conns.forEach(function(c){ if(c !== except && c.open){ try{ c.send(d); }catch(e){} } }); }
+  function postRoster(){ broadcast({t:'roster', roster:roster}); renderPlayers(); }
+  function entraStanza(){
+    inRoom = true;
+    leaving = false;
+    document.body.classList.add('in-room');
+    $('setup').classList.add('hidden');
+    $('lobby').classList.remove('hidden');
+    $('roomCode').textContent = roomCode;
+    $('roomEditBtn').classList.toggle('hidden', !isHost);
+    $('feed').textContent = '';
+    renderPlayers();
+    renderLobbyQuiz();
+    window.scrollTo(0, 0);
+  }
+  function uscita(msg){
+    leaving = true;
+    try{ if(isHost){ broadcast({t:'bye'}); } else if(hostConn && hostConn.open){ hostConn.send({t:'leave'}); } }catch(e){}
+    clearTimeout(joinTimer);
+    var p = peer;
+    peer = null;
+    setTimeout(function(){ try{ if(p){ p.destroy(); } }catch(e){} }, 150);
+    conns = []; hostConn = null; roster = {}; roomQuiz = null; inRoom = false; isHost = false; myN = 0; attemptSeq++;
+    document.body.classList.remove('in-room');
+    $('lobby').classList.add('hidden');
+    $('setup').classList.remove('hidden');
+    setMsg(msg || '');
+    window.scrollTo(0, 0);
+  }
+
+  function creaStanza(){
+    setMsg('');
+    if(!quiz || giocabili(quiz) < 1){ setMsg('Prima carica o crea un quiz con almeno una domanda.'); scuoti(); return; }
+    if(!haPeer()){ return; }
+    isHost = true; myN = 1; leaving = false;
+    roomQuiz = clone(quiz);
+    roster = {1:{name:nomeGiocatore()}};
+    setMsg('Creazione della stanza...');
+    getOpts(function(opts){ startHost(0, opts); });
+  }
+  function startHost(attempt, opts){
+    var code = randCode();
+    var p = new Peer(PREFIX + code, opts);
+    var opened = false;
+    peer = p;
+    p.on('open', function(){
+      if(opened){ return; }
+      opened = true;
+      roomCode = code;
+      setMsg('');
+      entraStanza();
+      feed('Stanza creata. Condividi il codice con gli altri giocatori.');
+    });
+    p.on('connection', onIncoming);
+    p.on('disconnected', function(){ if(!p.destroyed && !leaving){ dbgw('Segnalazione persa, riconnetto...'); try{ p.reconnect(); }catch(e){} } });
+    p.on('error', function(e){
+      dbgw('Errore peer (host):', e.type);
+      if(e.type === 'unavailable-id' && attempt < 4){ try{ p.destroy(); }catch(x){} startHost(attempt + 1, opts); return; }
+      if(!opened){ setMsg('Errore di rete: ' + e.type + '. Controlla la connessione e riprova.'); }
+    });
+  }
+  function onIncoming(conn){
+    dbg('Connessione in ingresso da', conn.peer);
+    watchIce(conn, 'host');
+    var t = setTimeout(function(){ if(!conn.n){ try{ conn.close(); }catch(e){} } }, 12000);
+    conn.on('data', function(d){ onHostData(conn, d); });
+    conn.on('close', function(){
+      clearTimeout(t);
+      var i = conns.indexOf(conn);
+      if(i >= 0){ conns.splice(i, 1); }
+      if(conn.n && roster[conn.n]){
+        feed(roster[conn.n].name + ' ha lasciato la stanza.');
+        delete roster[conn.n];
+        postRoster();
+      }
+    });
+  }
+  function liberoSeat(){
+    for(var n = 2; n <= MAX_PLAYERS; n++){ if(!roster[n]){ return n; } }
+    return 0;
+  }
+  function nomeUnico(nome){
+    var usati = Object.keys(roster).map(function(k){ return roster[k].name; });
+    var out = nome, k = 2;
+    while(usati.indexOf(out) >= 0){ out = nome.slice(0, 17) + ' ' + k++; }
+    return out;
+  }
+  function onHostData(conn, d){
+    if(!d || typeof d !== 'object'){ return; }
+    if(d.t === 'leave'){ try{ conn.close(); }catch(e){} return; }
+    if(d.t !== 'hello' || conn.n){ return; }
+    var n = liberoSeat();
+    if(!n){ try{ conn.send({t:'full'}); }catch(e){} setTimeout(function(){ try{ conn.close(); }catch(e){} }, 300); return; }
+    conn.n = n;
+    var nome = nomeUnico(testo(d.name, 20) || 'Giocatore');
+    roster[n] = {name:nome};
+    conns.push(conn);
+    conn.send({t:'welcome', n:n, code:roomCode, quiz:roomQuiz, roster:roster});
+    feed(nome + ' è entrato nella stanza.');
+    postRoster();
+  }
+
+  function entra(){
+    setMsg('');
+    var code = $('codeIn').value.trim().toUpperCase();
+    if(!code){ setMsg('Inserisci il codice della stanza.'); return; }
+    if(!haPeer()){ return; }
+    isHost = false; roomCode = code; myN = 0; leaving = false;
+    setMsg('Connessione in corso...');
+    getOpts(function(opts){ startGuest(code, opts); });
+  }
+  function startGuest(code, opts){
+    var id = ++attemptSeq, linked = false, finito = false;
+    hostConn = null;
+    if(peer && !peer.destroyed){ try{ peer.destroy(); }catch(e){} }
+    function fallisci(msg){
+      if(finito || id !== attemptSeq){ return; }
+      finito = true;
+      clearTimeout(joinTimer);
+      if(peer){ try{ peer.destroy(); }catch(e){} }
+      setMsg(msg);
+    }
+    function passaARelay(why){
+      if(finito || linked || id !== attemptSeq || relayForced || relayTest()){ return false; }
+      relayForced = true;
+      try{ sessionStorage.setItem('indovinachi-relay', '1'); }catch(e){}
+      dbgw('Passo alla modalità relay (motivo: ' + why + ').');
+      setMsg('Connessione diretta non disponibile, passaggio al server di relay...');
+      clearTimeout(joinTimer);
+      getOpts(function(o){ if(id === attemptSeq && !leaving){ startGuest(code, o); } });
+      return true;
+    }
+    var p = new Peer(undefined, opts);
+    peer = p;
+    p.on('open', function(){
+      if(id !== attemptSeq){ return; }
+      var c = p.connect(PREFIX + code, {reliable:true});
+      hostConn = c;
+      watchIce(c, 'guest' + (relayForced || relayTest() ? '[relay]' : ''), function(why){
+        if(!passaARelay(why)){ fallisci('Connessione non riuscita nemmeno tramite relay. Prova a cambiare rete o riprova tra poco.'); }
+      });
+      c.on('open', function(){ linked = true; c.send({t:'hello', name:nomeGiocatore()}); });
+      c.on('data', function(d){ if(c === hostConn){ handle(d, id); } });
+      c.on('close', function(){
+        if(c !== hostConn || leaving){ return; }
+        if(inRoom){ uscita('La connessione con l\'host si è chiusa.'); }
+        else { fallisci('Connessione chiusa.'); }
+      });
+      clearTimeout(joinTimer);
+      joinTimer = setTimeout(function(){
+        if(passaARelay('timeout')){ return; }
+        fallisci(relayForced ? 'Stanza non raggiungibile nemmeno tramite relay. Controlla il codice o la rete.' : 'Stanza non raggiungibile. Controlla il codice o la rete.');
+      }, relayForced ? 25000 : 12000);
+    });
+    p.on('error', function(e){
+      dbgw('Errore peer (guest):', e.type);
+      if(id !== attemptSeq || inRoom){ return; }
+      if(!linked && ['webrtc', 'negotiation-failed', 'connection-failed'].indexOf(e.type) >= 0 && passaARelay(e.type)){ return; }
+      fallisci(e.type === 'peer-unavailable' ? 'Stanza non trovata. Controlla il codice.' : 'Errore di rete: ' + e.type);
+    });
+  }
+  function pulisciRoster(r){
+    var out = {};
+    if(r && typeof r === 'object'){
+      Object.keys(r).forEach(function(k){
+        var n = Number(k);
+        if(n >= 1 && n <= MAX_PLAYERS && r[k] && typeof r[k].name === 'string'){ out[n] = {name:testo(r[k].name, 20) || 'Giocatore'}; }
+      });
+    }
+    return out;
+  }
+  function handle(d, id){
+    if(!d || typeof d !== 'object'){ return; }
+    switch(d.t){
+      case 'welcome':
+        clearTimeout(joinTimer);
+        try{ roomQuiz = validaQuiz(d.quiz); }
+        catch(e){ uscita('Il quiz ricevuto dall\'host non è valido.'); return; }
+        myN = Number(d.n) || 0;
+        roster = pulisciRoster(d.roster);
+        roomCode = String(d.code || roomCode).slice(0, 5);
+        entraStanza();
+        feed('Sei entrato nella stanza.');
+        break;
+      case 'roster':
+        roster = pulisciRoster(d.roster);
+        renderPlayers();
+        break;
+      case 'quiz':
+        try{ roomQuiz = validaQuiz(d.quiz); renderLobbyQuiz(); feed('L\'host ha aggiornato il quiz.'); }catch(e){ dbgw('Quiz ricevuto non valido'); }
+        break;
+      case 'full':
+        clearTimeout(joinTimer);
+        setMsg('La stanza è piena.');
+        break;
+      case 'bye':
+        uscita('L\'host ha chiuso la stanza.');
+        break;
+    }
+  }
+
+  function copiaCodice(){
+    var done = function(){ toast('Codice copiato: ' + roomCode); };
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(roomCode).then(done, function(){ toast('Copia non riuscita.'); }); }
+    else { toast('Codice: ' + roomCode); }
+  }
+
+  /* ---------- Eventi ---------- */
+  $('editBtn').addEventListener('click', function(){ apriEditor(false); });
+  $('sampleBtn').addEventListener('click', function(){ usaQuiz(quizEsempio(), 'Quiz di esempio caricato.'); });
+  $('exportBtn').addEventListener('click', function(){ if(quiz){ scarica(quiz); } });
+  $('loadBtn').addEventListener('click', function(){ fileTarget = 'setup'; $('fileIn').click(); });
+  $('fileIn').addEventListener('change', function(){
+    var f = this.files && this.files[0];
+    var tgt = fileTarget;
+    this.value = '';
+    leggiFile(f, function(q){
+      if(tgt === 'editor' && ed){ ed = q; renderEditor(); toast('Quiz importato nell\'editor.'); }
+      else { usaQuiz(q, 'Quiz caricato: ' + (q.titolo || 'senza titolo')); }
+    });
+  });
+  var pq = $('quizPanel');
+  ['dragenter', 'dragover'].forEach(function(ev){ pq.addEventListener(ev, function(e){ e.preventDefault(); pq.classList.add('drag'); }); });
+  ['dragleave', 'drop'].forEach(function(ev){ pq.addEventListener(ev, function(e){ e.preventDefault(); pq.classList.remove('drag'); }); });
+  pq.addEventListener('drop', function(e){
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    leggiFile(f, function(q){ usaQuiz(q, 'Quiz caricato: ' + (q.titolo || 'senza titolo')); });
+  });
+
+  $('createBtn').addEventListener('click', creaStanza);
+  $('joinBtn').addEventListener('click', entra);
+  $('codeIn').addEventListener('keydown', function(e){ if(e.key === 'Enter'){ entra(); } });
+  $('nameIn').addEventListener('keydown', function(e){ if(e.key === 'Enter'){ creaStanza(); } });
+  $('roomCode').addEventListener('click', copiaCodice);
+  $('leaveBtn').addEventListener('click', function(){ if(window.confirm('Vuoi uscire dalla stanza?')){ uscita(''); } });
+  $('roomEditBtn').addEventListener('click', function(){ apriEditor(true); });
+  $('roomExportBtn').addEventListener('click', function(){ if(roomQuiz){ scarica(roomQuiz); } });
+
+  $('edNome').addEventListener('input', function(){ if(ed){ ed.titolo = this.value; } });
+  $('edAddCat').addEventListener('click', function(){
+    if(ed.categorie.length >= LIM.cat){ toast('Massimo ' + LIM.cat + ' categorie.'); return; }
+    var n = ed.categorie.length + 1, cel = [];
+    for(var r = 0; r < ed.valori.length; r++){ cel.push({domanda:'', risposta:''}); }
+    ed.categorie.push({nome:'Categoria ' + n, celle:cel});
+    renderEditor();
+  });
+  $('edDelCat').addEventListener('click', function(){
+    if(ed.categorie.length <= 1){ toast('Serve almeno una categoria.'); return; }
+    ed.categorie.pop(); renderEditor();
+  });
+  $('edAddRow').addEventListener('click', function(){
+    if(ed.valori.length >= LIM.righe){ toast('Massimo ' + LIM.righe + ' righe.'); return; }
+    ed.valori.push(Math.min((ed.valori[ed.valori.length - 1] || 0) + 100, LIM.punti));
+    ed.categorie.forEach(function(c){ c.celle.push({domanda:'', risposta:''}); });
+    renderEditor();
+  });
+  $('edDelRow').addEventListener('click', function(){
+    if(ed.valori.length <= 1){ toast('Serve almeno una riga.'); return; }
+    ed.valori.pop();
+    ed.categorie.forEach(function(c){ c.celle.pop(); });
+    renderEditor();
+  });
+  $('edImport').addEventListener('click', function(){
+    if(giocabili(ed) > 0 && !window.confirm('Sostituire il quiz in modifica con quello del file?')){ return; }
+    fileTarget = 'editor'; $('fileIn').click();
+  });
+  $('edExport').addEventListener('click', function(){
+    try{ scarica(validaQuiz(ed)); }catch(e){ toast(e.message); }
+  });
+  $('edClose').addEventListener('click', chiudiEditor);
+  $('edCancel').addEventListener('click', chiudiEditor);
+  $('edSave').addEventListener('click', function(){
+    var q;
+    try{ q = validaQuiz(ed); }catch(e){ toast(e.message); return; }
+    if(giocabili(q) < 1){ toast('Compila almeno una casella con domanda e risposta.'); return; }
+    var perStanza = edPerStanza;
+    chiudiEditor();
+    usaQuiz(q, 'Quiz salvato.');
+    if(perStanza && isHost && inRoom){
+      roomQuiz = clone(q);
+      broadcast({t:'quiz', quiz:roomQuiz});
+      renderLobbyQuiz();
+      feed('Hai aggiornato il quiz.');
+    }
+  });
+  $('cellSave').addEventListener('click', function(){
+    if(!cellCtx || !ed){ return; }
+    ed.categorie[cellCtx.c].celle[cellCtx.r] = {domanda:testo($('cellQ').value, LIM.testo), risposta:testo($('cellA').value, LIM.testo)};
+    chiudiCella();
+    renderEditor();
+  });
+  $('cellClear').addEventListener('click', function(){ $('cellQ').value = ''; $('cellA').value = ''; $('cellQ').focus(); });
+  $('cellCancel').addEventListener('click', chiudiCella);
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Escape'){ return; }
+    if(!$('cellModal').classList.contains('hidden')){ chiudiCella(); }
+    else if(!$('editor').classList.contains('hidden')){ chiudiEditor(); }
+  });
+  ['editor', 'cellModal'].forEach(function(id){
+    $(id).addEventListener('mousedown', function(e){ if(e.target === this){ if(id === 'cellModal'){ chiudiCella(); } } });
+  });
+  window.addEventListener('pagehide', function(){ if(inRoom && !leaving){ try{ if(isHost){ broadcast({t:'bye'}); } else if(hostConn && hostConn.open){ hostConn.send({t:'leave'}); } }catch(e){} } });
+
+  /* ---------- Avvio ---------- */
+  (function(){
+    var logo = $('logo'), t = logo.textContent;
+    var cols = ['#FFD700', '#f5f7fa'];
+    logo.textContent = '';
+    for(var i = 0; i < t.length; i++){
+      var s = el('span', '', t.charAt(i));
+      s.setAttribute('aria-hidden', 'true');
+      s.style.setProperty('--i', i);
+      s.style.setProperty('--c', cols[i % cols.length]);
+      logo.appendChild(s);
+    }
+    var bg = $('bg'), glifi = ['?', '100', '?', '200', '?', '300', '?', '500', '?', '400'];
+    var pal = ['#FFD700', '#f5f7fa', '#4a90d9'];
+    var quante = window.innerWidth < 640 ? 8 : 14;
+    function rnd(a, b){ return a + Math.random() * (b - a); }
+    for(var k = 0; k < quante; k++){
+      var cella = k % 5 === 4;
+      var f = el('span', 'forma' + (cella ? ' cella' : ''), cella ? '' : glifi[k % glifi.length]);
+      f.style.setProperty('--x', rnd(-2, 96).toFixed(1) + '%');
+      f.style.setProperty('--s', (cella ? rnd(26, 48) : rnd(26, 70)).toFixed(0) + 'px');
+      f.style.setProperty('--c', pal[k % pal.length]);
+      f.style.setProperty('--o', rnd(.06, .16).toFixed(2));
+      f.style.setProperty('--d', rnd(34, 62).toFixed(1) + 's');
+      f.style.setProperty('--w', (-rnd(0, 50)).toFixed(1) + 's');
+      f.style.setProperty('--dx', rnd(-80, 80).toFixed(0) + 'px');
+      f.style.setProperty('--r', rnd(-200, 200).toFixed(0) + 'deg');
+      bg.appendChild(f);
+    }
+    try{
+      var bozza = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
+      if(bozza){ quiz = validaQuiz(bozza); }
+    }catch(e){ quiz = null; }
+    renderQuizInfo();
+  })();
+})();
+</script>
+</body>
+</html>

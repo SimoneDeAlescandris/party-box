@@ -2,2853 +2,319 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Indovina Chi?</title>
-<meta name="description" content="Indovina Chi? Online per 2 o 3 giocatori. Crea una stanza e gioca con gli amici direttamente dal browser.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PartyBox - Minigiochi online da fare con gli amici</title>
+<meta name="description" content="Una raccolta di minigiochi da browser da giocare con gli amici: Indovina Chi?, Jeopardy e molto altro in arrivo.">
+<meta name="theme-color" content="#3b1d8f">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0f1115; --bg2:#161920; --panel:#1b1f29; --panel2:#262b38; --line:#000;
-  --text:#f4f1e6; --muted:#9aa0b2; --gold:#ffd700; --goldd:#b39700; --ink:#1a1500;
-  --accent:#ffd700; --accent2:#4de1d2; --ok:#7be495; --bad:#ff4d6d;
+  --ink:#1b1340;
+  --paper:#fffaf0;
+  --gold:#ffd23f;
+  --radius:30px;
+  --border:4px solid var(--ink);
+  --font:'Fredoka','Baloo 2','Comic Sans MS',system-ui,sans-serif;
 }
 *{box-sizing:border-box}
-html,body{margin:0}
-body{background:linear-gradient(160deg,var(--bg),var(--bg2));background-attachment:fixed;color:var(--text);font-family:'Fredoka','Comic Sans MS',cursive,sans-serif;line-height:1.4;min-height:100vh}
-button,input,select{font:inherit;color:inherit}
-button{background:var(--gold);color:var(--ink);border:3px solid var(--line);border-radius:12px;padding:8px 16px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 var(--goldd);transition:transform .08s,box-shadow .08s}
-button:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 var(--goldd)}
-button.alt{background:var(--panel2);color:var(--text);box-shadow:0 4px 0 #000}
-button:disabled{opacity:.4;cursor:not-allowed}
-button:focus-visible,input:focus-visible,select:focus-visible,.card:focus-visible,#roomCode:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
-input,select{background:#0b0d11;border:3px solid var(--line);border-radius:12px;padding:10px 12px;width:100%;color:var(--text)}
-input::placeholder{color:var(--muted)}
-.hidden{display:none !important}
-
-/* Header adattivo */
-header{display:flex;align-items:center;justify-content:center;gap:16px;padding:28px 16px 8px}
-header img{height:90px;width:auto;transition:height .3s}
-header h1{margin:0;font-size:clamp(2.4rem,7vw,4.2rem);line-height:1;white-space:pre-wrap;letter-spacing:.02em;transition:font-size .3s;
-  text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 6px 0 #000}
-body.in-game header{position:fixed;top:0;left:0;z-index:5;justify-content:flex-start;gap:8px;padding:8px 14px;background:rgba(15,17,21,.92);border-bottom-right-radius:14px}
-body.in-game header img{height:28px}
-body.in-game header h1{font-size:1.2rem;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 2px 0 #000}
-
-/* Setup */
-#setup{max-width:480px;margin:0 auto;padding:24px 16px 16px;display:flex;flex-direction:column;gap:14px}
-#setup .big{width:100%;font-size:1.6rem;padding:14px}
-#setup .join{display:flex;gap:10px}
-#setup .join button{white-space:nowrap}
-#setupMsg{color:var(--bad);min-height:1.4em;text-align:center}
-footer{margin-top:40px;text-align:center;font-size:.7rem;opacity:.6}
-footer .legal{max-width:640px;margin:8px auto;line-height:1.5}
-footer p{margin:2px 0}
-footer a{color:inherit;cursor:pointer;text-decoration:underline}
-footer .links a{margin:0 12px}
-footer a:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
-
-/* Setup centrato con footer in fondo */
-body:not(.in-game){display:flex;flex-direction:column;min-height:100vh;gap:14px}
-body:not(.in-game) main,body:not(.in-game) #setup{display:contents}
-body:not(.in-game) header{margin-top:auto;align-self:center}
-body:not(.in-game) #setup > :not(footer){width:min(480px,calc(100% - 32px));align-self:center}
-body:not(.in-game) #setupMsg{margin-bottom:auto}
-body:not(.in-game) footer{margin-top:0;padding:24px 16px 12px;align-self:stretch}
-
-/* Gioco */
-#game{display:grid;grid-template-columns:minmax(0,1fr) clamp(220px,19%,340px);grid-template-rows:minmax(0,1fr);gap:16px;padding:56px 16px 16px;height:100vh;height:100dvh}
-.play{min-width:0;min-height:0;height:100%;display:flex;flex-direction:column}
-.top{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;margin-bottom:12px}
-#secretBox{width:150px;background:var(--panel);border:3px solid var(--accent2);border-radius:14px;padding:10px;text-align:center}
-#secretBox small{display:block;color:var(--muted);font-size:.8rem;margin-bottom:6px}
-#secretBox .face{width:96px;height:96px;aspect-ratio:1/1;margin:0 auto}
-#secretName{font-weight:700;margin-top:6px;font-size:.9rem;min-height:1.3em}
-#secretBox.masked #secretFace{-webkit-filter:blur(12px) brightness(.2);filter:blur(12px) brightness(.2)}
-#secretBox.masked #secretName{letter-spacing:.2em}
-.info{display:flex;flex-direction:column;gap:10px}
-#roster{flex:none;display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-.chip{background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:1px 10px;font-size:.8rem}
-.chip.ready{border-color:var(--ok)}
-.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.actions select{width:auto}
-.hint{color:var(--muted);font-size:.9rem;margin:0 0 10px}
-
-.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px;flex:1;min-height:0;overflow:hidden;align-content:start;padding:2px 4px 8px}
-.card{position:relative;display:flex;min-width:0;min-height:0;cursor:pointer;text-align:center;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;-webkit-perspective:700px;perspective:700px}
-.card-inner{flex:1;min-width:0;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);-webkit-transform-style:preserve-3d;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,.2,.2,1)}
-.card-front,.card-back{grid-area:1/1;min-width:0;min-height:0;border-radius:12px;box-shadow:0 4px 0 #000;-webkit-backface-visibility:hidden;backface-visibility:hidden}
-.card-front{position:relative;display:flex;flex-direction:column;background:var(--panel);border:3px solid var(--line);padding:clamp(3px,calc(var(--cw,100px)*.06),8px);transition:border-color .15s}
-.card-back{display:flex;align-items:center;justify-content:center;border:3px solid var(--gold);background:repeating-linear-gradient(45deg,#14161c 0 7px,#1d1a0e 7px 14px);color:var(--gold);font-weight:700;font-size:calc(var(--cw,100px)*.4);text-shadow:0 2px 0 #000;-webkit-transform:rotateY(180deg);transform:rotateY(180deg)}
-.card.out .card-inner{-webkit-transform:rotateY(180deg);transform:rotateY(180deg)}
-.card .face{position:relative;flex:1;min-height:0;height:auto}
-.card .face img{position:absolute;top:0;left:0}
-.card .face .emo{font-size:calc(var(--cw,100px)*.38)}
-.card .nm{flex:none;font-size:clamp(.55rem,calc(var(--cw,100px)*.13),.95rem);font-weight:600;margin-top:clamp(2px,calc(var(--cw,100px)*.04),6px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.face{display:flex;align-items:center;justify-content:center;border-radius:8px;background:var(--panel2);overflow:hidden}
-.face img{width:100%;height:100%;object-fit:cover;display:block}
-.face .emo{font-size:2.8rem}
-.card.pick .card-front{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(77,225,210,.35)}
-.card.mine .card-front::before{content:"\2605";position:absolute;top:4px;right:6px;font-size:clamp(.9rem,calc(var(--cw,100px)*.18),1.4rem);line-height:1;color:var(--accent);z-index:1;-webkit-text-stroke:1.5px #000}
-.board.guessing .card{cursor:crosshair}
-.board.guessing .card-front{border-color:var(--gold)}
-
-/* Selezione categoria */
-.modal{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.78);z-index:50;padding:16px}
-.modal-box{background:var(--panel);border:3px solid var(--line);border-radius:16px;box-shadow:0 6px 0 #000;padding:28px;width:100%;max-width:880px;max-height:calc(100vh - 32px);overflow-y:auto;text-align:center;position:relative;animation:slideUp .35s ease-out}
-.modal-box.rules-box {max-width: 850px;width: calc(100%-64px);max-height: 80vh;padding: 48px 40px 36px;}
-.modal-box .rules {font-size: 1.15rem;text-align: justify;text-justify: inter-word;line-height: 1.6;}
-.modal-box .rules li {margin-bottom: 20px;}
-.modal-box .rules li > strong {display: block;margin-bottom: 4px;}
-@keyframes slideUp{from{transform:translateY(40vh);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-box h2{margin:0 0 20px;font-size:1.8rem;color:var(--gold);text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 3px 0 #000}
-.cat-modal-title{margin:0 0 8px;font-size:1.8rem;color:var(--gold);text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 3px 0 #000}
-.cat-subtitle{margin:0 0 14px;font-size:1.12rem;color:var(--text)}
-.cat-box{min-height:210px}
-.cat-box.selected{border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,215,0,.25),0 4px 0 #000;transform:translateY(-2px)}
-.room-settings{display:flex;flex-direction:column;gap:18px;max-width:760px;margin:0 auto 20px;text-align:left}
-.setting-panel{background:#13161d;border:2px solid #000;border-radius:14px;padding:16px;text-align:left}
-.setting-panel h3,.setting-panel h4{margin:0 0 12px;color:var(--gold);line-height:1.25}
-.setting-panel h3{font-size:1.12rem}
-.setting-panel h4{font-size:1.02rem}
-.setting-help{margin:8px 0 0;color:var(--muted);font-size:.83rem}
-.gen-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}
-.gen-option{display:flex;align-items:center;gap:9px;padding:10px;background:var(--panel2);border:2px solid #000;border-radius:10px;text-align:left;cursor:pointer;font-size:.88rem}
-.gen-option input[type="checkbox"],.jolly-option input[type="checkbox"]{width:19px;height:19px;min-width:19px;margin:0;padding:0;border:2px solid #000;border-radius:4px;accent-color:var(--gold);cursor:pointer}
-.gen-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px}
-.gen-actions button{font-size:.82rem;padding:6px 12px;border-width:2px;box-shadow:0 2px 0 var(--goldd)}
-.slider-row{display:grid;grid-template-columns:42px minmax(80px,1fr) minmax(76px,auto) 42px;align-items:center;gap:10px}
-.slider-btn{width:42px;height:42px;padding:0;font-size:1.45rem;line-height:1;background:var(--gold);color:var(--ink);border:3px solid #000;box-shadow:0 3px 0 var(--goldd)}
-#deckSizeRange{width:100%;height:28px;margin:0;padding:0;border:0;border-radius:0;background:transparent;accent-color:var(--gold);cursor:pointer;appearance:none;-webkit-appearance:none}
-#deckSizeRange::-webkit-slider-runnable-track{height:7px;background:#000;border:1px solid #000;border-radius:99px}
-#deckSizeRange::-moz-range-track{height:7px;background:#000;border:1px solid #000;border-radius:99px}
-#deckSizeRange::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;margin-top:-9px;background:var(--gold);border:3px solid #000;border-radius:50%;box-shadow:0 1px 0 rgba(0,0,0,.35)}
-#deckSizeRange::-moz-range-thumb{width:17px;height:17px;background:var(--gold);border:3px solid #000;border-radius:50%}
-.deck-value{min-width:82px;padding:7px 10px;border:3px solid #000;border-radius:10px;background:var(--gold);color:var(--ink);font-weight:700;text-align:center;font-size:.95rem;box-shadow:0 3px 0 var(--goldd)}
-.penalty-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
-.penalty-option{display:flex;align-items:center;gap:9px;padding:12px;background:var(--panel2);border:2px solid #000;border-radius:10px;text-align:left;cursor:pointer}
-.penalty-option input[type="radio"]{width:18px;height:18px;min-width:18px;margin:0;padding:0;border:0;accent-color:var(--gold)}
-.penalty-option:has(input:checked){border-color:var(--gold);box-shadow:0 0 0 2px rgba(255,215,0,.16)}
-.jolly-option{display:flex;align-items:center;gap:11px;padding:12px;background:var(--panel2);border:2px solid #000;border-radius:10px;cursor:pointer}
-.jolly-option strong{display:block}
-.jolly-option small{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}
-.cat-modal-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:8px}
-.cat-modal-actions button{min-width:150px}
-#catSetupMsg{min-height:1.2em;margin:6px 0 0;color:var(--bad);font-size:.87rem;text-align:center}
-.cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,250px));justify-content:center;gap:18px;margin-bottom:22px}
-.cat-box{background:var(--panel2);color:var(--text);border:3px solid var(--line);border-radius:14px;padding:18px 26px 22px;box-shadow:0 4px 0 #000;display:flex;flex-direction:column;align-items:center;gap:14px}
-.cat-box:hover,.cat-box:focus-visible{border-color:var(--gold);transform:translateY(-2px)}
-.cat-title{font-size:1.15rem;font-weight:700;color:var(--gold);line-height:1.2}
-.cat-prev{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:170px}
-.cat-prev .face,.cat-more{height:74px}
-.cat-prev .face .emo{font-size:1.8rem}
-.cat-more{display:flex;align-items:center;justify-content:center;border:2px dashed var(--gold);border-radius:8px;font-weight:700;font-size:1.1rem;color:var(--gold)}
-
-/* Pop-up Regole e Crediti */
-.info-box{max-width:520px;text-align:left;padding:40px 32px 28px}
-.modal-x{position:absolute;top:10px;right:10px;width:38px;height:38px;padding:0;border-radius:50%;font-size:1.1rem;line-height:1}
-.rules{margin:0;padding-left:1.6em;font-size:1.1rem}
-.rules li{margin-bottom:16px;padding-left:6px;color:var(--text)}
-.rules li:last-child{margin-bottom:0}
-.rules li::marker{color:var(--gold);font-weight:700}
-.credits{list-style:none;margin:0;padding:0;text-align:center;font-size:1.4rem;color:var(--text)}
-.credits li{margin-bottom:12px}
-.credits li:last-child{margin-bottom:0}
-.credits li small {display: block;margin-top: 4px;font-size: 0.8rem;color: var(--muted);}
-.credits li small a{color:var(--gold);text-decoration:underline;text-underline-offset:2px}
-.credits li small a:hover,.credits li small a:focus-visible{color:var(--text)}
-
-/* Codice stanza */
-.roombar{flex:none;margin-top:8px;padding-top:6px;border-top:2px solid var(--line);display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px 6px;font-size:.7rem;color:var(--muted)}
-#roomCode{font-weight:700;letter-spacing:.14em;background:var(--panel);border:2px dashed var(--gold);border-radius:7px;padding:3px 7px;font-size:.75rem;color:var(--text);cursor:pointer}
-#roomCode:hover{background:var(--panel2)}
-.roombar button{padding:1px 8px;min-height:28px;font-size:.7rem;border-width:2px;box-shadow:0 2px 0 #000}
-
-/* Chat a destra */
-.logwrap{height:100%;display:flex;flex-direction:column;background:var(--panel);border:3px solid var(--line);border-radius:14px;padding:10px;min-width:0}
-.logwrap h2{margin:0 0 8px;font-size:1rem}
-#log{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:6px;background:#0b0d11;border-radius:10px;padding:8px 10px;font-size:.85rem;word-wrap:break-word;overflow-wrap:anywhere}
-.line{flex:none;padding:2px 0;color:var(--muted)}
-.ts{font-size:.65rem;font-weight:400;font-style:normal;opacity:.7;white-space:nowrap}
-.pn{color:var(--pc,var(--text));font-weight:700}
-
-/* Messaggi dei giocatori: fumetti */
-.line.chat{display:flex;flex-wrap:wrap;align-items:baseline;max-width:88%;align-self:flex-start;padding:6px 10px 7px;color:var(--text);
-  background:var(--panel2);border:1px solid #000;border-left:4px solid var(--pc,var(--gold));border-radius:12px 12px 12px 4px;box-shadow:0 2px 0 #000}
-.line.chat .pn{order:1;font-size:.8rem}
-.line.chat .ts{order:2;margin-left:auto;padding-left:10px;color:var(--muted)}
-.line.chat .sep{font-size:0}
-.line.chat .msg{order:3;flex:0 0 100%;margin-top:2px;font-size:.92rem;line-height:1.35}
-.line.chat.me{align-self:flex-end;background:#2f2a14;border-left:1px solid #000;border-right:4px solid var(--pc,var(--gold));border-radius:12px 12px 4px 12px}
-.line.chat .msg .ans-yes,.line.chat .msg .ans-no,.line.chat .msg .ans-jolly{font-size:.95rem;padding:1px 12px}
-/* Eventi di sistema */
-.line.sys{align-self:center;max-width:94%;margin:4px 0;padding:2px 10px;text-align:center;font-style:italic;font-size:.78rem;color:#8b92a6}
-/* Vittorie e azioni chiave */
-.line.win{align-self:stretch;margin:6px 0;padding:8px 12px;text-align:center;font-weight:700;color:var(--ink);
-  background:linear-gradient(135deg,#ffd700,#7be495);border:2px solid #000;border-radius:12px;box-shadow:0 3px 0 #000}
-.line.win::before{content:'\1F3C6\00a0'}
-.line.win .ts{color:rgba(26,21,0,.65)}
-.line.win .pn{color:inherit;text-decoration:underline;text-decoration-color:var(--pc);text-decoration-thickness:3px;text-underline-offset:3px}
-/* Errori e tentativi sbagliati */
-.line.err{align-self:stretch;margin:4px 0;padding:5px 10px;text-align:center;color:#ff8da1;background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.45);border-radius:10px}
-.ans-yes,.ans-no,.ans-jolly{display:inline-block;font-weight:700;border:1px solid currentColor;border-radius:6px;padding:0 6px}
-.ans-yes{color:var(--ok)}
-.ans-no{color:var(--bad)}
-.ans-jolly{color:var(--gold)}
-.quick-replies{flex:none;display:flex;gap:6px;margin-top:8px}
-.btn-quick{flex:1;min-width:0;min-height:32px;padding:3px 4px;font-size:.8rem;border-width:2px;border-radius:9px;box-shadow:0 2px 0 #000;white-space:nowrap}
-.btn-yes{background:var(--ok);color:#06210f}
-.btn-no{background:var(--bad);color:#2a0610}
-.btn-jolly{background:var(--gold);color:var(--ink)}
-#soundBtn{min-width:34px}
-#chatForm{display:flex;flex-direction:column;gap:6px;margin-top:8px}
-
-/* Turno, rivincita, selettore avversario */
-.rosterbar{flex:none;display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;margin-bottom:10px}
-.rosterbar #roster{margin-bottom:0}
-#turnCtl{display:flex;align-items:center;gap:6px}
-.badge{font-size:.78rem;font-weight:700;padding:1px 10px;border:2px solid var(--line);border-radius:999px;background:var(--panel2);color:var(--muted);white-space:nowrap}
-.badge.mine{background:var(--gold);color:var(--ink);animation:pulseGold 1.4s ease-in-out infinite}
-#passBtn,#rematchBtn{min-height:30px;padding:2px 12px;font-size:.78rem;border-width:2px;box-shadow:0 2px 0 var(--goldd)}
-#passBtn:disabled{box-shadow:0 2px 0 #000}
-.chip.active{border-color:var(--gold);color:var(--gold);background:#2a2410;box-shadow:0 0 0 2px rgba(255,215,0,.3)}
-.chip.offline{opacity:.5}
-.chip.target{outline:2px dashed var(--gold);outline-offset:2px}
-#target.target-active{border-color:var(--gold);animation:pulseGold 1.4s ease-in-out infinite}
-@keyframes pulseGold{0%,100%{box-shadow:0 0 0 2px rgba(255,215,0,.15)}50%{box-shadow:0 0 0 5px rgba(255,215,0,.5)}}
-.end-box{max-width:420px;text-align:center}
-.end-box h2{margin-bottom:12px}
-.end-box p{margin:0 0 14px;line-height:1.4}
-.end-card .face{width:110px;height:110px;margin:0 auto}
-.end-card .nm{margin:6px 0 16px;font-weight:700}
-#endWait{color:var(--muted);font-size:.9rem;margin:0}
-@media (max-width:900px){
-  #game{grid-template-columns:1fr;grid-template-rows:auto;height:auto;min-height:100vh}
-  .play{height:auto}
-  .board{overflow:visible;gap:6px;grid-template-columns:repeat(auto-fill,minmax(clamp(64px,11vw,110px),1fr));padding:2px 3px 6px}
-  .card-front,.card-back{border-width:2px;border-radius:9px;box-shadow:0 3px 0 #000}
-  .card-inner{grid-template-rows:auto}
-  .card .face{flex:none;height:auto;aspect-ratio:1/1}
-  .logwrap{height:360px}
+html{-webkit-text-size-adjust:100%}
+html,body{margin:0;min-height:100%}
+body{
+  min-height:100vh;min-height:100dvh;
+  font-family:var(--font);color:#fff;line-height:1.35;
+  background:linear-gradient(120deg,#3b1d8f,#1f6fe5,#12b8c9,#ff4fa3,#7b3fe4,#3b1d8f);
+  background-size:400% 400%;
+  animation:sfondo 28s ease-in-out infinite;
+  overflow-x:hidden;
+  display:flex;flex-direction:column;
 }
-@media (max-width:560px){
-  .modal-box{padding:20px 12px}
-  .cat-grid{grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
-  .cat-box{padding:12px 10px 14px;min-height:185px;gap:10px}
-  .setting-panel{padding:12px}
-  .slider-row{grid-template-columns:34px minmax(70px,1fr) 72px 34px;gap:6px}
-  .slider-btn{width:34px;height:38px;font-size:1.2rem}
-  .deck-value{min-width:70px;padding:6px 4px;font-size:.82rem}
-  .gen-grid{grid-template-columns:1fr}
-  #game{padding:50px 10px 10px}
-  #roster{gap:4px;margin-bottom:6px}
-  .rosterbar{gap:4px 8px;margin-bottom:6px}
-  .badge{font-size:.7rem;padding:0 8px}
-  #passBtn,#rematchBtn{min-height:28px;font-size:.72rem;padding:1px 8px}
-  .chip{padding:0 8px;font-size:.72rem;border-width:2px}
-  .top{grid-template-columns:96px 1fr;gap:8px;align-items:start;margin-bottom:6px}
-  #secretBox{width:96px;padding:5px;border-width:2px;border-radius:10px}
-  #secretBox small{font-size:.55rem;line-height:1.1;margin-bottom:3px}
-  #secretBox .face{width:70px;height:70px}
-  #secretName{font-size:.68rem;margin-top:3px;min-height:1.1em;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .actions{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-  .actions button{width:100%;min-height:38px;padding:5px 8px;font-size:.75rem;line-height:1.1;border-width:2px;border-radius:9px;box-shadow:0 2px 0 var(--goldd)}
-  .actions button.alt{box-shadow:0 2px 0 #000}
-  .actions select{grid-column:1/-1;width:100%;padding:5px 8px;font-size:.8rem}
-  .hint{font-size:.75rem;margin:0 0 6px}
-  header img{height:60px}
+@keyframes sfondo{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+#bg{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+#bg::before,#bg::after{
+  content:"";position:absolute;width:70vmax;height:70vmax;border-radius:50%;filter:blur(60px);opacity:.35;
+  animation:alone 22s ease-in-out infinite alternate;
 }
-@media (min-width:901px) and (max-width:1500px){.roombar>span:first-child{display:none}}
-@media (min-width:901px){html:has(body.in-game),body.in-game{overflow:hidden;height:100vh;height:100dvh}}
-@media (prefers-reduced-motion:reduce){.card,header img,header h1,button,.switch,.switch::after,.card-inner{transition:none}.modal-box,.badge.mine,#target.target-active{animation:none}}
-
-
-/* Layout adattivo del pannello Impostazioni Partita */
-.modal-box.cat-settings-box{max-width:1180px;padding:20px 22px}
-.settings-layout{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(340px,.92fr);gap:16px;align-items:start;text-align:left}
-.settings-left,.settings-right{display:flex;flex-direction:column;gap:12px;min-width:0}
-.settings-left .cat-subtitle{margin:0 0 2px;text-align:left}
-.settings-left .setting-panel,.settings-right .setting-panel{width:100%;min-width:0}
-.settings-left .cat-grid{grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin:0}
-.settings-left .cat-box{min-height:150px;padding:11px 10px 12px;gap:8px}
-.settings-left .cat-prev{gap:5px;max-width:140px}
-.settings-left .cat-prev .face,.settings-left .cat-more{height:56px}
-.settings-left .cat-prev .face .emo{font-size:1.35rem}
-.settings-right .room-settings{max-width:none;margin:0;gap:12px}
-.settings-right .setting-panel{padding:13px}
-.settings-right .penalty-options{grid-template-columns:1fr;gap:7px}
-.settings-right .penalty-option{padding:9px}
-.settings-right .jolly-option{padding:10px}
-.cat-settings-box #catSetupMsg{margin:10px 0 4px}
-.cat-settings-box .cat-modal-actions{margin-top:10px}
-
-/* Roster con ruolo e conteggio scarti */
-button.roster-chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border:2px solid #000;border-radius:999px;background:var(--panel);color:var(--text);font-size:.78rem;line-height:1.25;box-shadow:none;white-space:normal;text-align:left}
-button.roster-chip:hover:not(:disabled){border-color:var(--gold);transform:none;box-shadow:none}
-button.roster-chip.active{border-color:var(--gold);color:var(--gold);background:#2a2410;box-shadow:0 0 0 2px rgba(255,215,0,.22)}
-button.roster-chip.ready{border-color:var(--ok)}
-button.roster-chip .discard-count{font-size:.7rem;color:var(--muted);font-weight:600;white-space:nowrap}
-button.roster-chip.spectator{border-style:dashed;color:var(--muted)}
-body.is-spectator .top,body.is-spectator #hint,body.is-spectator #board,body.is-spectator #quickReplies{display:none!important}
-body.is-spectator #spectatorInfo{display:block!important}
-.spectator-view{display:flex;flex-direction:column;gap:12px;min-height:180px;padding:14px;background:#13161d;border:2px solid #000;border-radius:14px;overflow:hidden}
-.spectator-view-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.spectator-view-header h2{margin:0;font-size:1.15rem;color:var(--gold)}
-.spectator-view-header p{margin:4px 0 0}
-.spectator-view-header button{flex:none;padding:5px 10px;font-size:.78rem;border-width:2px;box-shadow:0 2px 0 #000}
-.spectator-secret-panel{display:flex;align-items:center;gap:12px;padding:10px;background:var(--panel);border:2px solid var(--accent2);border-radius:10px}
-#spectatorSecretFace{width:76px;height:76px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:8px;background:var(--panel2);overflow:hidden}
-#spectatorSecretFace .face{width:100%;height:100%}
-#spectatorSecretName{display:block}
-.spectator-board{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px;align-content:start;overflow:auto;max-height:calc(100dvh - 330px);padding:3px}
-.spectator-board .card{min-height:108px}
-.spectator-board .card .face{aspect-ratio:1/1}
-.spectator-board .card .nm{font-size:.68rem}
-.spectator-board .card.spectator-secret-card .card-front{border-color:var(--accent2);box-shadow:0 0 0 2px rgba(77,225,210,.35)}
-.spectator-notice-box{max-width:560px}
-#spectatorNoticeModal{z-index:80}
-.spectator-notice-box p{margin:0 0 14px}
-.spectator-notice-box #spectatorNoticeOk{display:block;margin:6px auto 0}
-
-@media (max-width:900px){
-  .modal-box.cat-settings-box{max-width:680px;padding:18px}
-  .settings-layout{grid-template-columns:minmax(0,1fr);gap:14px}
-  .settings-left .cat-grid{grid-template-columns:repeat(auto-fit,minmax(145px,1fr))}
-  .settings-right .penalty-options{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
-  .spectator-board{max-height:none}
+#bg::before{background:radial-gradient(circle,#ffd23f,transparent 65%);top:-25vmax;left:-20vmax}
+#bg::after{background:radial-gradient(circle,#ff4fa3,transparent 65%);bottom:-30vmax;right:-25vmax;animation-delay:-11s}
+@keyframes alone{from{transform:translate(0,0) scale(1)}to{transform:translate(12vmax,8vmax) scale(1.2)}}
+.forma{
+  position:absolute;left:var(--x);top:110%;width:var(--s);height:var(--s);
+  background:var(--c);opacity:var(--o);
+  border:3px solid rgba(255,255,255,.55);
+  animation:sale var(--d) linear var(--w) infinite;
+  will-change:transform;
 }
-@media (max-width:560px){
-  .modal-box.cat-settings-box{padding:16px 11px}
-  .settings-layout{gap:10px}
-  .settings-left,.settings-right,.settings-right .room-settings{gap:10px}
-  .settings-left .cat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-  .settings-left .cat-box{min-height:132px;padding:9px 7px;gap:7px}
-  .settings-left .cat-prev .face,.settings-left .cat-more{height:48px}
-  .settings-right .setting-panel{padding:10px}
-  button.roster-chip{font-size:.69rem;padding:3px 7px}
-  button.roster-chip .discard-count{font-size:.63rem}
-  .spectator-view{padding:9px}
-  .spectator-view-header{flex-direction:column}
-  .spectator-secret-panel{align-items:center}
-  #spectatorSecretFace{width:58px;height:58px}
-  .spectator-board{grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:6px}
-  .spectator-board .card{min-height:94px}
+.forma.cerchio{border-radius:50%}
+.forma.quadro{border-radius:22%}
+.forma.stella{border:0;clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+.forma.triangolo{border:0;clip-path:polygon(50% 6%,96% 92%,4% 92%)}
+@keyframes sale{
+  0%{transform:translate3d(0,0,0) rotate(0deg)}
+  50%{transform:translate3d(var(--dx),-70vh,0) rotate(calc(var(--r) / 2))}
+  100%{transform:translate3d(calc(var(--dx) * -.5),-130vh,0) rotate(var(--r))}
 }
 
+.pagina{position:relative;z-index:1;flex:1;width:100%;max-width:1120px;margin:0 auto;
+  padding:max(28px,env(safe-area-inset-top)) clamp(16px,4vw,32px) 16px;display:flex;flex-direction:column;align-items:center}
+
+header{text-align:center;margin:clamp(8px,3vw,28px) 0 clamp(22px,4vw,44px)}
+.logo{display:flex;justify-content:center;flex-wrap:wrap;gap:.08em;margin:0;font-size:clamp(2.8rem,10vw,6rem);font-weight:700;line-height:1;letter-spacing:.01em;
+  -webkit-text-stroke:0;paint-order:stroke fill}
+.logo span{display:inline-block;color:var(--c);
+  text-shadow:-3px -3px 0 var(--ink),3px -3px 0 var(--ink),-3px 3px 0 var(--ink),3px 3px 0 var(--ink),0 7px 0 var(--ink),0 10px 0 rgba(27,19,64,.35);
+  animation:rimbalza 2.8s ease-in-out infinite;animation-delay:calc(var(--i) * .12s)}
+.logo .spazio{width:.3em}
+@keyframes rimbalza{0%,60%,100%{transform:translateY(0) rotate(0)}30%{transform:translateY(-.14em) rotate(-4deg)}45%{transform:translateY(0) rotate(3deg)}}
+.sottotitolo{display:inline-block;margin:18px 0 0;padding:8px 20px;font-size:clamp(1rem,2.6vw,1.3rem);font-weight:600;color:var(--ink);
+  background:var(--paper);border:var(--border);border-radius:999px;box-shadow:0 5px 0 var(--ink);transform:rotate(-1.5deg)}
+
+.griglia{list-style:none;margin:0;padding:0;width:100%;display:grid;gap:clamp(18px,3vw,32px);
+  grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr))}
+.griglia li{display:flex;perspective:900px}
+
+.card{
+  --rx:0deg;--ry:0deg;
+  position:relative;flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;
+  min-height:340px;padding:26px 22px 24px;color:var(--ink);text-decoration:none;
+  background:linear-gradient(160deg,var(--a),var(--b));
+  border:var(--border);border-radius:var(--radius);box-shadow:0 10px 0 var(--ink),0 22px 30px rgba(10,5,40,.35);
+  overflow:hidden;isolation:isolate;
+  transform:translateY(0) rotateX(var(--rx)) rotateY(var(--ry));
+  transition:transform .28s cubic-bezier(.34,1.56,.64,1),box-shadow .28s ease,filter .3s;
+  opacity:0;animation:entra .7s cubic-bezier(.34,1.56,.64,1) forwards;animation-delay:calc(var(--i) * .1s + .15s);
+  -webkit-tap-highlight-color:transparent;
+}
+@keyframes entra{from{opacity:0;transform:translateY(46px) scale(.88) rotate(-3deg)}to{opacity:1;transform:translateY(0) scale(1) rotate(0)}}
+.card::before{
+  content:"";position:absolute;inset:0;z-index:-1;opacity:.28;
+  background:radial-gradient(circle at 20% 15%,#fff 0 12%,transparent 13%),
+             radial-gradient(circle at 85% 85%,#fff 0 18%,transparent 19%),
+             radial-gradient(circle at 92% 12%,#fff 0 6%,transparent 7%);
+}
+.card::after{
+  content:"";position:absolute;top:0;left:-70%;width:45%;height:100%;z-index:0;pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-18deg);transition:none;
+}
+.card.attivo{cursor:pointer}
+.card.attivo:hover,.card.attivo:focus-visible{
+  transform:translateY(-12px) rotateX(var(--rx)) rotateY(var(--ry)) scale(1.03);
+  box-shadow:0 18px 0 var(--ink),0 36px 40px rgba(10,5,40,.4);
+}
+.card.attivo:hover::after,.card.attivo:focus-visible::after{left:130%;transition:left .75s ease}
+.card.attivo:active{transform:translateY(4px) scale(.98);box-shadow:0 4px 0 var(--ink),0 10px 14px rgba(10,5,40,.3);transition-duration:.08s}
+.card:focus-visible{outline:5px solid #fff;outline-offset:5px}
+
+.icona{
+  flex:none;display:grid;place-items:center;width:112px;height:112px;margin-top:6px;font-size:3.6rem;line-height:1;
+  background:var(--paper);border:var(--border);border-radius:34%;box-shadow:0 6px 0 var(--ink);transform:rotate(-6deg);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+}
+.icona span{display:block;animation:galleggia 3.4s ease-in-out infinite}
+@keyframes galleggia{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.card.attivo:hover .icona,.card.attivo:focus-visible .icona{transform:rotate(7deg) scale(1.14)}
+.card.attivo:hover .icona span,.card.attivo:focus-visible .icona span{animation:scuoti .6s ease-in-out}
+@keyframes scuoti{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg)}45%{transform:rotate(12deg)}70%{transform:rotate(-7deg)}}
+
+.card h2{margin:6px 0 0;font-size:clamp(1.55rem,4.4vw,1.95rem);line-height:1.05;font-weight:700;color:#fff;
+  text-shadow:-2px -2px 0 var(--ink),2px -2px 0 var(--ink),-2px 2px 0 var(--ink),2px 2px 0 var(--ink),0 4px 0 var(--ink)}
+.card p{margin:0;flex:1;font-size:1rem;font-weight:500;line-height:1.35}
+.tag{display:inline-block;padding:3px 12px;font-size:.82rem;font-weight:600;background:rgba(255,255,255,.75);border:3px solid var(--ink);border-radius:999px}
+.gioca{
+  display:inline-flex;align-items:center;gap:8px;margin-top:6px;padding:10px 26px;font-size:1.25rem;font-weight:700;letter-spacing:.04em;
+  color:var(--ink);background:var(--gold);border:var(--border);border-radius:999px;box-shadow:0 5px 0 var(--ink);
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .2s;
+}
+.gioca svg{width:1em;height:1em;transition:transform .25s}
+.card.attivo:hover .gioca,.card.attivo:focus-visible .gioca{transform:scale(1.1);background:#fff}
+.card.attivo:hover .gioca svg,.card.attivo:focus-visible .gioca svg{transform:translateX(5px)}
+
+.card.presto{cursor:not-allowed;filter:saturate(.75)}
+.card.presto > *:not(.nastro):not(h2){opacity:.5;filter:blur(.6px)}
+.card.presto p{opacity:.4}
+.card.presto .gioca{background:#ddd}
+.nastro{
+  position:absolute;left:-12%;top:66%;width:124%;padding:9px 0;z-index:3;
+  text-align:center;font-size:clamp(1.25rem,3.6vw,1.55rem);font-weight:700;letter-spacing:.14em;color:var(--ink);
+  background:repeating-linear-gradient(135deg,var(--gold) 0 18px,#ffb81c 18px 36px);
+  border-block:var(--border);box-shadow:0 6px 0 rgba(27,19,64,.4);
+  transform:translateY(-50%) rotate(-9deg);transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+}
+.card.presto:hover .nastro{transform:translateY(-50%) rotate(-6deg) scale(1.05);animation:pulsa 1s ease-in-out infinite}
+@keyframes pulsa{50%{filter:brightness(1.12)}}
+
+main{width:100%}
+footer{position:relative;z-index:1;padding:26px 20px max(22px,env(safe-area-inset-bottom));text-align:center;font-size:.85rem;font-weight:500;
+  color:rgba(255,255,255,.85);text-shadow:0 2px 0 rgba(27,19,64,.6)}
+footer p{margin:0 auto;max-width:640px}
+
+noscript .card{opacity:1;animation:none}
+
+@media (max-width:520px){
+  .card{min-height:0;padding:22px 18px 22px}
+  .icona{width:92px;height:92px;font-size:2.9rem}
+  .sottotitolo{padding:6px 16px}
+}
+@media (hover:none){
+  .card.attivo:hover{transform:none;box-shadow:0 10px 0 var(--ink),0 22px 30px rgba(10,5,40,.35)}
+  .card.attivo:hover .icona{transform:rotate(-6deg)}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+  .forma{display:none}
+  .card{opacity:1}
+}
 </style>
 </head>
 <body>
+<div id="bg" aria-hidden="true"></div>
 
-<header>
-  <img src="logo.png" alt="Logo Indovina Chi?" onerror="this.style.display='none'">
-  <h1 id="title">Indovina Chi?</h1>
-</header>
+<div class="pagina">
+  <header>
+    <h1 class="logo" id="logo" aria-label="PartyBox">PartyBox</h1>
+    <p class="sottotitolo">Scegli un gioco e sfida i tuoi amici!</p>
+  </header>
 
-<main>
-  <section id="setup" aria-label="Impostazioni partita">
-    <input id="nameIn" maxlength="20" placeholder="Inserisci il tuo nome" autocomplete="off" aria-label="Il tuo nome">
-    <button id="createBtn" class="big" type="button">Crea stanza</button>
-    <div class="join">
-      <input id="codeIn" maxlength="5" placeholder="Inserisci il codice della stanza" autocomplete="off" autocapitalize="characters" aria-label="Codice stanza">
-      <button id="joinBtn" type="button">Entra</button>
-    </div>
-    <div id="setupMsg" role="alert"></div>
-    <footer>
-      <p class="links"><a href="regole.html" id="rulesLink">Regole</a><a href="crediti.html" id="creditsLink">Crediti</a></p>
-      <p class="legal">Questo sito è un progetto amatoriale indipendente, creato a scopo puramente ricreativo e dimostrativo. &laquo;Indovina Chi?&raquo; è un marchio registrato di Hasbro, Inc. Il gioco da tavolo originale è stato ideato da Ora e Theo Coster (Theora Design). Questo sito non è ufficiale e non è affiliato né sponsorizzato da Hasbro o dai titolari dei diritti sui marchi, sui nomi e sulle immagini dei personaggi rappresentati.</p>
-      <p>Il proprietario di questo sito non è responsabile per i contenuti generati dagli utenti (messaggi, nomi utente e personalizzazioni).</p>
-    </footer>
-  </section>
-
-  <section id="game" class="hidden" aria-label="Partita">
-    <div class="play">
-      <div class="rosterbar">
-        <div id="roster"></div>
-        <div id="turnCtl" class="hidden">
-          <span id="turnBadge" class="badge" aria-live="polite"></span>
-          <button id="passBtn" class="hidden" type="button" disabled>Passa turno</button>
-          <button id="rematchBtn" class="hidden" type="button">Nuova partita</button>
-        </div>
-      </div>
-      <div class="top">
-        <div id="secretBox" aria-live="polite">
-          <small>La tua carta segreta (solo tu la vedi)</small>
-          <div id="secretFace" class="face"><span class="emo">?</span></div>
-          <div id="secretName">Nessuna scelta</div>
-        </div>
-        <div class="info">
-          <div class="actions">
-            <button id="confirmBtn" type="button" disabled>Conferma carta segreta</button>
-            <button id="hideSecretBtn" class="alt hidden" type="button">Nascondi carta segreta</button>
-            <button id="guessBtn" class="alt" type="button" disabled>Tenta di indovinare</button>
-            <select id="target" class="hidden" aria-label="Avversario da indovinare"></select>
-            <button id="resetBtn" class="alt" type="button">Ripristina tabellone</button>
-          </div>
-        </div>
-      </div>
-      <p class="hint" id="hint">Clicca una carta per sceglierla come segreta, poi conferma.</p>
-      <p id="spectatorInfo" class="hint hidden">Modalità spettatore: clicca il nome di un giocatore nell'elenco per ispezionare il suo tabellone e la sua carta segreta.</p>
-      <section id="spectatorView" class="spectator-view hidden" aria-label="Visuale spettatore">
-        <div class="spectator-view-header">
-          <div>
-            <h2 id="spectatorViewTitle">Visuale spettatore</h2>
-            <p id="spectatorViewStatus" class="setting-help">Seleziona un giocatore dall'elenco.</p>
-          </div>
-          <button id="spectatorViewClose" class="alt" type="button">Chiudi visuale</button>
-        </div>
-        <div class="spectator-secret-panel">
-          <div id="spectatorSecretFace" class="spectator-secret-preview"><span class="emo">?</span></div>
-          <div><strong id="spectatorSecretName">Carta segreta non ancora confermata</strong><p id="spectatorSecretHelp" class="setting-help">La carta apparirà qui quando il giocatore la conferma.</p></div>
-        </div>
-        <div id="spectatorBoard" class="spectator-board" aria-label="Tabellone del giocatore selezionato"></div>
-      </section>
-      <div class="board" id="board"></div>
-    </div>
-
-    <aside class="logwrap" aria-label="Log e chat">
-      <h2>Log e chat</h2>
-      <div id="log" role="log" aria-live="polite"></div>
-      <div id="quickReplies" class="quick-replies">
-        <button type="button" class="btn-quick btn-yes" data-kind="yes">SÌ</button>
-        <button type="button" class="btn-quick btn-no" data-kind="no">NO</button>
-        <button type="button" class="btn-quick btn-jolly" data-kind="jolly">JOLLY</button>
-      </div>
-      <form id="chatForm" autocomplete="off">
-        <input id="chatIn" maxlength="200" placeholder="Scrivi un messaggio...">
-        <button type="submit">Invia</button>
-      </form>
-      <div class="roombar">
-        <span>Stanza</span>
-        <span id="roomCode" role="button" tabindex="0" title="Clicca per copiare il codice">-----</span>
-        <button id="hideBtn" class="alt" type="button">Nascondi codice</button>
-        <button id="soundBtn" class="alt" type="button" aria-pressed="true" aria-label="Audio attivo" title="Audio">🔊</button>
-        <button id="leaveBtn" class="alt" type="button" title="Esci dalla stanza">Esci</button>
-      </div>
-    </aside>
-  </section>
-</main>
-
-<div id="catModal" class="modal hidden">
-  <div class="modal-box cat-settings-box" role="dialog" aria-modal="true" aria-labelledby="catTitle">
-    <h2 id="catTitle" class="cat-modal-title">Impostazioni della partita</h2>
-    <div class="settings-layout">
-      <div class="settings-left">
-        <h3 class="cat-subtitle">Scegli la categoria</h3>
-        <div id="catGrid" class="cat-grid"></div>
-
-        <div id="pokemonGenerations" class="setting-panel hidden" aria-labelledby="pokemonGenerationsTitle">
-          <h3 id="pokemonGenerationsTitle">Seleziona le Generazioni Pokémon</h3>
-          <div class="gen-grid" id="genGrid">
-            <label class="gen-option"><input type="checkbox" value="1" checked> <span>Gen 1 - Kanto (151)</span></label>
-            <label class="gen-option"><input type="checkbox" value="2" checked> <span>Gen 2 - Johto (100)</span></label>
-            <label class="gen-option"><input type="checkbox" value="3" checked> <span>Gen 3 - Hoenn (135)</span></label>
-            <label class="gen-option"><input type="checkbox" value="4" checked> <span>Gen 4 - Sinnoh (107)</span></label>
-            <label class="gen-option"><input type="checkbox" value="5" checked> <span>Gen 5 - Unova (156)</span></label>
-            <label class="gen-option"><input type="checkbox" value="6" checked> <span>Gen 6 - Kalos (72)</span></label>
-            <label class="gen-option"><input type="checkbox" value="7" checked> <span>Gen 7 - Alola (88)</span></label>
-            <label class="gen-option"><input type="checkbox" value="8" checked> <span>Gen 8 - Galar (96)</span></label>
-            <label class="gen-option"><input type="checkbox" value="9" checked> <span>Gen 9 - Paldea (120)</span></label>
-          </div>
-          <div class="gen-actions">
-            <span id="genSelectionCount" class="setting-help">9 generazioni selezionate</span>
-            <button id="toggleAllGens" type="button">Deseleziona tutte</button>
-          </div>
-          <p id="genSetupHelp" class="setting-help">Puoi combinare liberamente più generazioni. Deve rimanerne selezionata almeno una.</p>
-        </div>
-
-        <div id="deckSliderSection" class="setting-panel hidden" aria-labelledby="deckSliderTitle">
-          <h4 id="deckSliderTitle">Quanti personaggi includere nella categoria?</h4>
-          <div class="slider-row">
-            <button id="deckSizeMinus" class="slider-btn" type="button" aria-label="Diminuisci numero di personaggi">−</button>
-            <input id="deckSizeRange" type="range" min="24" max="24" step="1" value="24" aria-label="Numero di personaggi nella partita">
-            <output id="deckSizeValue" class="deck-value" for="deckSizeRange" aria-live="polite">24</output>
-            <button id="deckSizePlus" class="slider-btn" type="button" aria-label="Aumenta numero di personaggi">+</button>
-          </div>
-          <p id="deckSizeHelp" class="setting-help">Seleziona il numero di carte da includere nel mazzo.</p>
-        </div>
-      </div>
-
-      <div class="settings-right">
-        <div class="room-settings">
-          <section class="setting-panel" aria-labelledby="mistakePenaltyTitle">
-            <h3 id="mistakePenaltyTitle">Penalità per Errore sul Tentativo</h3>
-            <div class="penalty-options">
-              <label class="penalty-option"><input type="radio" name="wrongGuessPenalty" value="skip" checked><span><strong>Salta il Turno</strong><br><small>La partita continua e il turno passa al prossimo giocatore.</small></span></label>
-              <label class="penalty-option"><input type="radio" name="wrongGuessPenalty" value="instantLoss"><span><strong>Sconfitta Istantanea</strong><br><small>Un tentativo errato conclude immediatamente la partita.</small></span></label>
-            </div>
-          </section>
-
-          <section class="setting-panel" aria-labelledby="jollyOptionTitle">
-            <h3 id="jollyOptionTitle">Uso del JOLLY</h3>
-            <label class="jolly-option" for="jollyEnabled">
-              <input id="jollyEnabled" type="checkbox" checked>
-              <span><strong>&quot;Mutismo Selettivo&quot;</strong><small>Quando disattivato, il comando JOLLY è nascosto e non utilizzabile da nessun giocatore.</small></span>
-            </label>
-          </section>
-
-          <section class="setting-panel" aria-labelledby="maxPlayersTitle">
-            <h3 id="maxPlayersTitle">Numero massimo di giocatori attivi</h3>
-            <div class="penalty-options">
-              <label class="penalty-option"><input type="radio" name="maxActivePlayers" value="2" checked><span><strong>2 giocatori</strong><br><small>Host compreso</small></span></label>
-              <label class="penalty-option"><input type="radio" name="maxActivePlayers" value="3"><span><strong>3 giocatori</strong><br><small>Host compreso</small></span></label>
-            </div>
-          </section>
-
-          <section class="setting-panel" aria-labelledby="spectatorsOptionTitle">
-            <h3 id="spectatorsOptionTitle">Spettatori</h3>
-            <label class="jolly-option" for="allowSpectators">
-              <input id="allowSpectators" type="checkbox" checked>
-              <span><strong>Permetti Spettatori</strong><small>La stanza può ospitare fino a 5 utenti complessivi; gli utenti oltre il limite dei giocatori attivi entrano come spettatori.</small></span>
-            </label>
-          </section>
-        </div>
-      </div>
-    </div>
-    <p id="catSetupMsg" role="status" aria-live="polite"></p>
-    <div class="cat-modal-actions">
-      <button id="catCancel" class="alt" type="button">Annulla</button>
-      <button id="catCreate" type="button" disabled>Crea Stanza</button>
-    </div>
-  </div>
-</div>
-
-<div id="spectatorNoticeModal" class="modal hidden">
-  <div class="modal-box info-box spectator-notice-box" role="dialog" aria-modal="true" aria-labelledby="spectatorNoticeTitle">
-    <button id="spectatorNoticeClose" class="modal-x" type="button" aria-label="Chiudi avviso">&#10005;</button>
-    <h2 id="spectatorNoticeTitle">Sei entrato come Spettatore</h2>
-    <p>La stanza è piena e, in base alle impostazioni della partita, sei entrato come Spettatore.</p>
-    <p>Puoi seguire i turni, leggere la chat e monitorare gli scarti. Per aprire la visuale regia, clicca sul nome di un giocatore nell'elenco: vedrai il suo tabellone aggiornato e la sua carta segreta. Non puoi scegliere carte, fare tentativi o partecipare ai turni.</p>
-    <button id="spectatorNoticeOk" type="button">Ho capito</button>
-  </div>
-</div>
-
-<div id="endModal" class="modal hidden">
-  <div class="modal-box info-box end-box" role="dialog" aria-modal="true" aria-labelledby="endTitle">
-    <button class="modal-x" type="button" aria-label="Chiudi">&#10005;</button>
-    <h2 id="endTitle"></h2>
-    <p id="endText"></p>
-    <div id="endCard" class="end-card"></div>
-    <button id="endRematch" class="hidden" type="button">Nuova partita</button>
-    <p id="endWait" class="hidden"></p>
-  </div>
-</div>
-
-<div id="rulesModal" class="modal hidden">
-  <div class="modal-box info-box rules-box" role="dialog" aria-modal="true" aria-label="Regole">
-    <button class="modal-x" type="button" aria-label="Chiudi">&#10005;</button>
-    <ol class="rules">
-      <li>
-        <strong>Scopo del gioco:</strong>
-        Indovina la carta segreta degli avversari prima che indovinino la tua,
-        eliminando i personaggi dal tabellone.
-      </li>
-      <li>
-        <strong>Impostazioni della partita:</strong>
-        L'Host sceglie categoria, numero di carte, penalità per gli errori,
-        disponibilità del Jolly e numero di giocatori attivi (2 o 3).
-        Può inoltre abilitare gli spettatori e, per i Pokémon, selezionare
-        le generazioni da includere.
-      </li>
-      <li>
-        <strong>Giocatori e spettatori:</strong>
-        La stanza può ospitare fino a 5 utenti complessivi. Gli spettatori,
-        se consentiti dall'Host, possono usare la chat e osservare il tabellone
-        e la carta segreta dei giocatori tramite la visuale regia, senza
-        partecipare ai turni.
-      </li>
-      <li>
-        <strong>Carta segreta:</strong>
-        Scegli un personaggio e confermalo con
-        <em>Conferma carta segreta</em>. La sua identità deve rimanere nascosta
-        agli avversari.
-      </li>
-      <li>
-        <strong>Domande e risposte:</strong>
-        Durante il tuo turno, fai una domanda sulle caratteristiche del
-        personaggio avversario. Le risposte sono <b>SÌ</b> o
-        <b>NO</b>. In base alla risposta, elimina i personaggi
-        incompatibili. Non ripetere domande già formulate nella partita.
-      </li>
-      <li>
-        <strong>Jolly (&quot;Mutismo Selettivo&quot;):</strong>
-        Se abilitato dall'Host, ogni giocatore dispone di un Jolly per partita
-        con cui può rifiutarsi di rispondere a una domanda.
-      </li>
-      <li>
-        <strong>Tentativo di vittoria:</strong>
-        Usa <em>Tenta di indovinare</em> quando pensi di aver trovato la carta
-        segreta dell'avversario. Se sbagli, in base alle impostazioni dell'Host,
-        salti il turno oppure subisci una sconfitta istantanea.
-      </li>
-      <li>
-        <strong>Ripristina tabellone:</strong>
-        Riporta tutte le carte abbassate al loro stato iniziale senza modificare
-        la carta segreta confermata o lo stato della partita.
-      </li>
-    </ol>
-  </div>
-</div>
-
-<div id="creditsModal" class="modal hidden">
-  <div class="modal-box info-box" role="dialog" aria-modal="true" aria-label="Crediti">
-    <button class="modal-x" type="button" aria-label="Chiudi">&#10005;</button>
-    <ul class="credits">
-      <li>
-        <strong>Simone</strong>
-        <small>Ideazione, progettazione e sviluppo del gioco.</small>
-      </li>
-      <li>
-        <strong>Davide</strong>
-        <small>Supporto nella ricerca degli sprite Pokémon tramite <a href="https://github.com/PokeAPI/sprites" target="_blank" rel="noopener noreferrer">PokeAPI Sprites</a>.</small>
-      </li>
-      <li>
-        <strong>Immagini</strong>
-        <small>Foto con licenza libera da <a href="https://commons.wikimedia.org" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a> e <a href="https://openverse.org" target="_blank" rel="noopener noreferrer">Openverse</a>. <a href="img/crediti.txt" target="_blank" rel="noopener noreferrer">Autori e licenze</a>.</small>
-      </li>
+  <main>
+    <ul class="griglia" id="griglia" role="list">
+      <noscript>
+        <li><a class="card attivo" style="--a:#ffd23f;--b:#ff8a1f;--i:0" href="indovina-chi/indovina-chi.html"><h2>Indovina Chi?</h2><span class="gioca">GIOCA</span></a></li>
+      </noscript>
     </ul>
-  </div>
+  </main>
 </div>
 
-<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<footer>
+  <p>Progetto amatoriale senza scopo di lucro. I nomi, i marchi e i personaggi citati appartengono ai rispettivi proprietari.</p>
+</footer>
+
 <script>
 (function(){
-'use strict';
+  'use strict';
 
-var DEFAULTS = [
-  {name:'Pixelone',      img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=Pixelone',      emoji:'🎮'},
-  {name:'Capitan Meme',  img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=CapitanMeme',   emoji:'😎'},
-  {name:'Nonna Streamer',img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=NonnaStreamer', emoji:'👵'},
-  {name:'Dr. Glitch',    img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=DrGlitch',      emoji:'🧪'},
-  {name:'Sir Lag',       img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=SirLag',        emoji:'🐢'},
-  {name:'Mister Clip',   img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=MisterClip',    emoji:'🎬'},
-  {name:'Lady Loot',     img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=LadyLoot',      emoji:'💎'},
-  {name:'Turbo Noob',    img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=TurboNoob',     emoji:'🚀'},
-  {name:'Zio Ban',       img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=ZioBan',        emoji:'🔨'},
-  {name:'Chef Combo',    img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=ChefCombo',     emoji:'🍳'},
-  {name:'Ninja Ping',    img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=NinjaPing',     emoji:'🥷'},
-  {name:'Baby Boss',     img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=BabyBoss',      emoji:'👶'},
-  {name:'Re Speedrun',   img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=ReSpeedrun',    emoji:'⏱️'},
-  {name:'Strega Mod',    img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=StregaMod',     emoji:'🧙'},
-  {name:'Robot Rage',    img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=RobotRage',     emoji:'🤖'},
-  {name:'Gatto Gamer',   img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=GattoGamer',    emoji:'🐱'},
-  {name:'Pirata Pixel',  img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=PirataPixel',   emoji:'🏴‍☠️'},
-  {name:'Alieno Chat',   img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=AlienoChat',    emoji:'👽'},
-  {name:'Coach Tilt',    img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=CoachTilt',     emoji:'🏆'},
-  {name:'Fantasma AFK',  img:'https://api.dicebear.com/9.x/fun-emoji/svg?seed=FantasmaAFK',   emoji:'👻'}
-];
-
-/* Categorie: name = titolo mostrato, folder = cartella delle immagini,
-   images = nomi dei file (il nome della carta è il nome file senza estensione).
-   Per aggiungere una categoria copia un blocco e crea la sua cartella in img/. */
-var CATEGORIES = [
-  {
-    name: 'Youtuber',
-    folder: 'img/youtuber',
-    images: ['Andrea Moccia.jpg', 'andreagaleazzi.jpeg', 'Attrix.jpg', 'Barbascura X.png', 'Blur.jpg', 'CiccioGamer89.jpg', 'Crappo.png', 'Cydonia.jpeg', 'Danny Lazzarin.jpg', 'Dario Moccia.jpg', 'Dlarzz.jpg', 'falconero.jpg', 'Favji.jpg', 'Fierik.jpg', 'fraffrog.jpg', 'GaBBoDSQ.jpg', 'Giampytek.jpg', 'Haxo.jpg', 'ilMasseo.jpg', 'iNoobChannel.jpg', 'J0k3R.jpg', 'Jakidale.jpg', 'Kurolily.jpg', 'Leo.jpg', 'Lollolacustre.jpg', 'Luca Mastrangelo.jpg', 'LyonWGF.png', 'Maurizio Merluzzo.jpg', 'Me Contro Te.jpg', 'MikeShowSha.jpg', 'Neschio.jpg', 'Nicolò Balini.jpeg', 'PLAYERINSIDE.jpg', 'Poketonx.png', 'Poldo.jpg', 'Poly.webp', 'RichardHTT.jpg', 'Sabaku.jpg', 'Sickwolf.jpg', 'St3pNy.jpg', 'Surry.jpeg', 'Synergo.jpeg', 'Tearless Raptor.jpg', 'TheRealMarza.jpg', 'victorlaszlo88.jpg', 'xMurry.jpg', 'Yotobi.jpg']
-  },
-  {
-    name: 'Personaggi dei Videogiochi',
-    folder: 'img/personaggi dei videogiochi',
-    images: ['Aloy.webp', 'Altair.webp', 'Arthur Morgan.jpeg', 'Asura.jpg', 'Barry Wheeler.webp', 'Boozer.webp', 'Chloe Frazer.webp', 'Claire Redfield.jpg', 'Clank.webp', 'Cole Phelps.png', 'Connor.jpg', 'Crash Bandicoot.jpg', 'Dante.jpg', 'Daxter.jpg', 'Doomguy.jpg', 'Ellie.webp', 'Gehrman.webp', 'Geppetto.webp', 'Geralt.jpg', 'Ghost.webp', 'Gwyn.jpg', 'Hornet.jpg', 'Isaac.png', 'Joel.webp', 'Kirby.png', 'Kratos.png', 'Lara Croft.png', 'Leon.webp', 'Link.webp', 'Mario.webp', 'N.jpg', 'Otacon.webp', 'Pikachu.png', 'Poppy.webp', 'SANS.webp', 'Snake.jpg', 'Sonic.webp', 'Spyro.png', 'Steve.jpg', 'Tiger Shark.jpg']
-  },
-  {
-    name: 'Calciatori',
-    folder: 'img/calciatori',
-    images: ['Alessandro Del Piero.webp', 'Cristiano Ronaldo.webp', 'Diego Maradona.webp', 'Francesco Totti.webp', 'Marco van Basten.webp', 'Paolo Maldini.webp', 'Roberto Baggio.webp', 'Ronaldo Nazario.webp', 'Zinedine Zidane.webp']
-  },
-  {
-    name: 'Pokémon',
-    folder: 'img/pokémon',
-    images: ['abomasnow.webp', 'abra.webp', 'absol.webp', 'accelgor.webp', 'aegislash-shield.webp', 'aerodactyl.webp', 'aggron.webp', 'aipom.webp', 'alakazam.webp', 'alcremie.webp', 'alomomola.webp', 'altaria.webp', 'amaura.webp', 'ambipom.webp', 'amoonguss.webp', 'ampharos.webp', 'annihilape.webp', 'anorith.webp', 'appletun.webp', 'applin.webp', 'araquanid.webp', 'arbok.webp', 'arboliva.webp', 'arcanine.webp', 'arceus.webp', 'archaludon.webp', 'archen.webp', 'archeops.webp', 'arctibax.webp', 'arctovish.webp', 'arctozolt.webp', 'ariados.webp', 'armaldo.webp', 'armarouge.webp', 'aromatisse.webp', 'aron.webp', 'arrokuda.webp', 'articuno.webp', 'audino.webp', 'aurorus.webp', 'avalugg.webp', 'axew.webp', 'azelf.webp', 'azumarill.webp', 'azurill.webp', 'bagon.webp', 'baltoy.webp', 'banette.webp', 'barbaracle.webp', 'barboach.webp', 'barraskewda.webp', 'basculegion-male.webp', 'basculin-red-striped.webp', 'bastiodon.webp', 'baxcalibur.webp', 'bayleef.webp', 'beartic.webp', 'beautifly.webp', 'beedrill.webp', 'beheeyem.webp', 'beldum.webp', 'bellibolt.webp', 'bellossom.webp', 'bellsprout.webp', 'bergmite.webp', 'bewear.webp', 'bibarel.webp', 'bidoof.webp', 'binacle.webp', 'bisharp.webp', 'blacephalon.webp', 'blastoise.webp', 'blaziken.webp', 'blipbug.webp', 'blissey.webp', 'blitzle.webp', 'boldore.webp', 'boltund.webp', 'bombirdier.webp', 'bonsly.webp', 'bouffalant.webp', 'bounsweet.webp', 'braixen.webp', 'brambleghast.webp', 'bramblin.webp', 'braviary.webp', 'breloom.webp', 'brionne.webp', 'bronzong.webp', 'bronzor.webp', 'brute-bonnet.webp', 'bruxish.webp', 'budew.webp', 'buizel.webp', 'bulbasaur.webp', 'buneary.webp', 'bunnelby.webp', 'burmy.webp', 'butterfree.webp', 'buzzwole.webp', 'cacnea.webp', 'cacturne.webp', 'calyrex.webp', 'camerupt.webp', 'capsakid.webp', 'carbink.webp', 'carkol.webp', 'carnivine.webp', 'carracosta.webp', 'carvanha.webp', 'cascoon.webp', 'castform.webp', 'caterpie.webp', 'celebi.webp', 'celesteela.webp', 'centiskorch.webp', 'ceruledge.webp', 'cetitan.webp', 'cetoddle.webp', 'chandelure.webp', 'chansey.webp', 'charcadet.webp', 'charizard.webp', 'charjabug.webp', 'charmander.webp', 'charmeleon.webp', 'chatot.webp', 'cherrim.webp', 'cherubi.webp', 'chesnaught.webp', 'chespin.webp', 'chewtle.webp', 'chien-pao.webp', 'chikorita.webp', 'chimchar.webp', 'chimecho.webp', 'chinchou.webp', 'chingling.webp', 'chi-yu.webp', 'cinccino.webp', 'cinderace.webp', 'clamperl.webp', 'clauncher.webp', 'clawitzer.webp', 'claydol.webp', 'clefable.webp', 'clefairy.webp', 'cleffa.webp', 'clobbopus.webp', 'clodsire.webp', 'cloyster.webp', 'coalossal.webp', 'cobalion.webp', 'cofagrigus.webp', 'combee.webp', 'combusken.webp', 'comfey.webp', 'conkeldurr.webp', 'copperajah.webp', 'corphish.webp', 'corsola.webp', 'corviknight.webp', 'corvisquire.webp', 'cosmoem.webp', 'cosmog.webp', 'cottonee.webp', 'crabominable.webp', 'crabrawler.webp', 'cradily.webp', 'cramorant.webp', 'cranidos.webp', 'crawdaunt.webp', 'cresselia.webp', 'croagunk.webp', 'crobat.webp', 'crocalor.webp', 'croconaw.webp', 'crustle.webp', 'cryogonal.webp', 'cubchoo.webp', 'cubone.webp', 'cufant.webp', 'cursola.webp', 'cutiefly.webp', 'cyclizar.webp', 'cyndaquil.webp', 'dachsbun.webp', 'darkrai.webp', 'darmanitan-standard.webp', 'dartrix.webp', 'darumaka.webp', 'decidueye.webp', 'dedenne.webp', 'deerling.webp', 'deino.webp', 'delcatty.webp', 'delibird.webp', 'delphox.webp', 'deoxys-normal.webp', 'dewgong.webp', 'dewott.webp', 'dewpider.webp', 'dhelmise.webp', 'dialga.webp', 'diancie.webp', 'diggersby.webp', 'diglett.webp', 'dipplin.webp', 'ditto.webp', 'dodrio.webp', 'doduo.webp', 'dolliv.webp', 'dondozo.webp', 'donphan.webp', 'dottler.webp', 'doublade.webp', 'dracovish.webp', 'dracozolt.webp', 'dragalge.webp', 'dragapult.webp', 'dragonair.webp', 'dragonite.webp', 'drakloak.webp', 'drampa.webp', 'drapion.webp', 'dratini.webp', 'drednaw.webp', 'dreepy.webp', 'drifblim.webp', 'drifloon.webp', 'drilbur.webp', 'drizzile.webp', 'drowzee.webp', 'druddigon.webp', 'dubwool.webp', 'ducklett.webp', 'dudunsparce-two-segment.webp', 'dugtrio.webp', 'dunsparce.webp', 'duosion.webp', 'duraludon.webp', 'durant.webp', 'dusclops.webp', 'dusknoir.webp', 'duskull.webp', 'dustox.webp', 'dwebble.webp', 'eelektrik.webp', 'eelektross.webp', 'eevee.webp', 'eiscue-ice.webp', 'ekans.webp', 'eldegoss.webp', 'electabuzz.webp', 'electivire.webp', 'electrike.webp', 'electrode.webp', 'elekid.webp', 'elgyem.webp', 'emboar.webp', 'emolga.webp', 'empoleon.webp', 'enamorus-incarnate.webp', 'entei.webp', 'escavalier.webp', 'espathra.webp', 'espeon.webp', 'espurr.webp', 'eternatus.webp', 'excadrill.webp', 'exeggcute.webp', 'exeggutor.webp', 'exploud.webp', 'falinks.webp', 'farfetchd.webp', 'farigiraf.webp', 'fearow.webp', 'feebas.webp', 'fennekin.webp', 'feraligatr.webp', 'ferroseed.webp', 'ferrothorn.webp', 'fezandipiti.webp', 'fidough.webp', 'finizen.webp', 'finneon.webp', 'flaaffy.webp', 'flabebe.webp', 'flamigo.webp', 'flapple.webp', 'flareon.webp', 'fletchinder.webp', 'fletchling.webp', 'flittle.webp', 'floatzel.webp', 'floette.webp', 'floragato.webp', 'florges.webp', 'flutter-mane.webp', 'flygon.webp', 'fomantis.webp', 'foongus.webp', 'forretress.webp', 'fraxure.webp', 'frigibax.webp', 'frillish-male.webp', 'froakie.webp', 'frogadier.webp', 'froslass.webp', 'frosmoth.webp', 'fuecoco.webp', 'furfrou.webp', 'furret.webp', 'gabite.webp', 'gallade.webp', 'galvantula.webp', 'garbodor.webp', 'garchomp.webp', 'gardevoir.webp', 'garganacl.webp', 'gastly.webp', 'gastrodon.webp', 'genesect.webp', 'gengar.webp', 'geodude.webp', 'gholdengo.webp', 'gible.webp', 'gigalith.webp', 'gimmighoul.webp', 'girafarig.webp', 'giratina-altered.webp', 'glaceon.webp', 'glalie.webp', 'glameow.webp', 'glastrier.webp', 'gligar.webp', 'glimmet.webp', 'glimmora.webp', 'gliscor.webp', 'gloom.webp', 'gogoat.webp', 'golbat.webp', 'goldeen.webp', 'golduck.webp', 'golem.webp', 'golett.webp', 'golisopod.webp', 'golurk.webp', 'goodra.webp', 'goomy.webp', 'gorebyss.webp', 'gossifleur.webp', 'gothita.webp', 'gothitelle.webp', 'gothorita.webp', 'gouging-fire.webp', 'gourgeist-average.webp', 'grafaiai.webp', 'granbull.webp', 'grapploct.webp', 'graveler.webp', 'great-tusk.webp', 'greavard.webp', 'greedent.webp', 'greninja.webp', 'grimer.webp', 'grimmsnarl.webp', 'grookey.webp', 'grotle.webp', 'groudon.webp', 'grovyle.webp', 'growlithe.webp', 'grubbin.webp', 'grumpig.webp', 'gulpin.webp', 'gumshoos.webp', 'gurdurr.webp', 'guzzlord.webp', 'gyarados.webp', 'hakamo-o.webp', 'happiny.webp', 'hariyama.webp', 'hatenna.webp', 'hatterene.webp', 'hattrem.webp', 'haunter.webp', 'hawlucha.webp', 'haxorus.webp', 'heatmor.webp', 'heatran.webp', 'heliolisk.webp', 'helioptile.webp', 'heracross.webp', 'herdier.webp', 'hippopotas.webp', 'hippowdon.webp', 'hitmonchan.webp', 'hitmonlee.webp', 'hitmontop.webp', 'honchkrow.webp', 'honedge.webp', 'ho-oh.webp', 'hoopa.webp', 'hoothoot.webp', 'hoppip.webp', 'horsea.webp', 'houndoom.webp', 'houndour.webp', 'houndstone.webp', 'huntail.webp', 'hydrapple.webp', 'hydreigon.webp', 'hypno.webp', 'igglybuff.webp', 'illumise.webp', 'impidimp.webp', 'incineroar.webp', 'indeedee-male.webp', 'infernape.webp', 'inkay.webp', 'inteleon.webp', 'iron-boulder.webp', 'iron-bundle.webp', 'iron-crown.webp', 'iron-hands.webp', 'iron-jugulis.webp', 'iron-leaves.webp', 'iron-moth.webp', 'iron-thorns.webp', 'iron-treads.webp', 'iron-valiant.webp', 'ivysaur.webp', 'jangmo-o.webp', 'jellicent-male.webp', 'jigglypuff.webp', 'jirachi.webp', 'jolteon.webp', 'joltik.webp', 'jumpluff.webp', 'jynx.webp', 'kabuto.webp', 'kabutops.webp', 'kadabra.webp', 'kakuna.webp', 'kangaskhan.webp', 'karrablast.webp', 'kartana.webp', 'kecleon.webp', 'keldeo-ordinary.webp', 'kilowattrel.webp', 'kingambit.webp', 'kingdra.webp', 'kingler.webp', 'kirlia.webp', 'klang.webp', 'klawf.webp', 'kleavor.webp', 'klefki.webp', 'klink.webp', 'klinklang.webp', 'koffing.webp', 'komala.webp', 'kommo-o.webp', 'koraidon.webp', 'krabby.webp', 'kricketot.webp', 'kricketune.webp', 'krokorok.webp', 'krookodile.webp', 'kubfu.webp', 'kyogre.webp', 'kyurem.webp', 'lairon.webp', 'lampent.webp', 'landorus-incarnate.webp', 'lanturn.webp', 'lapras.webp', 'larvesta.webp', 'larvitar.webp', 'latias.webp', 'latios.webp', 'leafeon.webp', 'leavanny.webp', 'lechonk.webp', 'ledian.webp', 'ledyba.webp', 'lickilicky.webp', 'lickitung.webp', 'liepard.webp', 'lileep.webp', 'lilligant.webp', 'lillipup.webp', 'linoone.webp', 'litleo.webp', 'litten.webp', 'litwick.webp', 'lokix.webp', 'lombre.webp', 'lopunny.webp', 'lotad.webp', 'loudred.webp', 'lucario.webp', 'ludicolo.webp', 'lugia.webp', 'lumineon.webp', 'lunala.webp', 'lunatone.webp', 'lurantis.webp', 'luvdisc.webp', 'luxio.webp', 'luxray.webp', 'lycanroc-midday.webp', 'mabosstiff.webp', 'machamp.webp', 'machoke.webp', 'machop.webp', 'magby.webp', 'magcargo.webp', 'magearna.webp', 'magikarp.webp', 'magmar.webp', 'magmortar.webp', 'magnemite.webp', 'magneton.webp', 'magnezone.webp', 'makuhita.webp', 'malamar.webp', 'mamoswine.webp', 'manaphy.webp', 'mandibuzz.webp', 'manectric.webp', 'mankey.webp', 'mantine.webp', 'mantyke.webp', 'maractus.webp', 'mareanie.webp', 'mareep.webp', 'marill.webp', 'marowak.webp', 'marshadow.webp', 'marshtomp.webp', 'maschiff.webp', 'masquerain.webp', 'maushold-family-of-four.webp', 'mawile.webp', 'medicham.webp', 'meditite.webp', 'meganium.webp', 'melmetal.webp', 'meloetta-aria.webp', 'meltan.webp', 'meowscarada.webp', 'meowstic-male.webp', 'meowth.webp', 'mesprit.webp', 'metagross.webp', 'metang.webp', 'metapod.webp', 'mew.webp', 'mewtwo.webp', 'mienfoo.webp', 'mienshao.webp', 'mightyena.webp', 'milcery.webp', 'milotic.webp', 'miltank.webp', 'mime-jr.webp', 'mimikyu-disguised.webp', 'minccino.webp', 'minior-red-meteor.webp', 'minun.webp', 'miraidon.webp', 'misdreavus.webp', 'mismagius.webp', 'moltres.webp', 'monferno.webp', 'morelull.webp', 'morgrem.webp', 'morpeko-full-belly.webp', 'mothim.webp', 'mr-mime.webp', 'mr-rime.webp', 'mudbray.webp', 'mudkip.webp', 'mudsdale.webp', 'muk.webp', 'munchlax.webp', 'munkidori.webp', 'munna.webp', 'murkrow.webp', 'musharna.webp', 'nacli.webp', 'naclstack.webp', 'naganadel.webp', 'natu.webp', 'necrozma.webp', 'nickit.webp', 'nidoking.webp', 'nidoqueen.webp', 'nidoran-f.webp', 'nidoran-m.webp', 'nidorina.webp', 'nidorino.webp', 'nihilego.webp', 'nincada.webp', 'ninetales.webp', 'ninjask.webp', 'noctowl.webp', 'noibat.webp', 'noivern.webp', 'nosepass.webp', 'numel.webp', 'nuzleaf.webp', 'nymble.webp', 'obstagoon.webp', 'octillery.webp', 'oddish.webp', 'ogerpon.webp', 'oinkologne-male.webp', 'okidogi.webp', 'omanyte.webp', 'omastar.webp', 'onix.webp', 'oranguru.webp', 'orbeetle.webp', 'oricorio-baile.webp', 'orthworm.webp', 'oshawott.webp', 'overqwil.webp', 'pachirisu.webp', 'palafin-zero.webp', 'palkia.webp', 'palossand.webp', 'palpitoad.webp', 'pancham.webp', 'pangoro.webp', 'panpour.webp', 'pansage.webp', 'pansear.webp', 'paras.webp', 'parasect.webp', 'passimian.webp', 'patrat.webp', 'pawmi.webp', 'pawmo.webp', 'pawmot.webp', 'pawniard.webp', 'pecharunt.webp', 'pelipper.webp', 'perrserker.webp', 'persian.webp', 'petilil.webp', 'phanpy.webp', 'phantump.webp', 'pheromosa.webp', 'phione.webp', 'pichu.webp', 'pidgeot.webp', 'pidgeotto.webp', 'pidgey.webp', 'pidove.webp', 'pignite.webp', 'pikachu.webp', 'pikipek.webp', 'piloswine.webp', 'pincurchin.webp', 'pineco.webp', 'pinsir.webp', 'piplup.webp', 'plusle.webp', 'poipole.webp', 'politoed.webp', 'poliwag.webp', 'poliwhirl.webp', 'poliwrath.webp', 'poltchageist.webp', 'polteageist.webp', 'ponyta.webp', 'poochyena.webp', 'popplio.webp', 'porygon.webp', 'porygon2.webp', 'porygon-z.webp', 'primarina.webp', 'primeape.webp', 'prinplup.webp', 'probopass.webp', 'psyduck.webp', 'pumpkaboo-average.webp', 'pupitar.webp', 'purrloin.webp', 'purugly.webp', 'pyroar-male.webp', 'pyukumuku.webp', 'quagsire.webp', 'quaquaval.webp', 'quaxly.webp', 'quaxwell.webp', 'quilava.webp', 'quilladin.webp', 'qwilfish.webp', 'raboot.webp', 'rabsca.webp', 'raging-bolt.webp', 'raichu.webp', 'raikou.webp', 'ralts.webp', 'rampardos.webp', 'rapidash.webp', 'raticate.webp', 'rattata.webp', 'rayquaza.webp', 'regice.webp', 'regidrago.webp', 'regieleki.webp', 'regigigas.webp', 'regirock.webp', 'registeel.webp', 'relicanth.webp', 'rellor.webp', 'remoraid.webp', 'reshiram.webp', 'reuniclus.webp', 'revavroom.webp', 'rhydon.webp', 'rhyhorn.webp', 'rhyperior.webp', 'ribombee.webp', 'rillaboom.webp', 'riolu.webp', 'roaring-moon.webp', 'rockruff.webp', 'roggenrola.webp', 'rolycoly.webp', 'rookidee.webp', 'roselia.webp', 'roserade.webp', 'rotom.webp', 'rowlet.webp', 'rufflet.webp', 'runerigus.webp', 'sableye.webp', 'salamence.webp', 'salandit.webp', 'salazzle.webp', 'samurott.webp', 'sandaconda.webp', 'sandile.webp', 'sandshrew.webp', 'sandslash.webp', 'sandygast.webp', 'sandy-shocks.webp', 'sawk.webp', 'sawsbuck.webp', 'scatterbug.webp', 'sceptile.webp', 'scizor.webp', 'scolipede.webp', 'scorbunny.webp', 'scovillain.webp', 'scrafty.webp', 'scraggy.webp', 'scream-tail.webp', 'scyther.webp', 'seadra.webp', 'seaking.webp', 'sealeo.webp', 'seedot.webp', 'seel.webp', 'seismitoad.webp', 'sentret.webp', 'serperior.webp', 'servine.webp', 'seviper.webp', 'sewaddle.webp', 'sharpedo.webp', 'shaymin-land.webp', 'shedinja.webp', 'shelgon.webp', 'shellder.webp', 'shellos.webp', 'shelmet.webp', 'shieldon.webp', 'shiftry.webp', 'shiinotic.webp', 'shinx.webp', 'shroodle.webp', 'shroomish.webp', 'shuckle.webp', 'shuppet.webp', 'sigilyph.webp', 'silcoon.webp', 'silicobra.webp', 'silvally.webp', 'simipour.webp', 'simisage.webp', 'simisear.webp', 'sinistcha.webp', 'sinistea.webp', 'sirfetchd.webp', 'sizzlipede.webp', 'skarmory.webp', 'skeledirge.webp', 'skiddo.webp', 'skiploom.webp', 'skitty.webp', 'skorupi.webp', 'skrelp.webp', 'skuntank.webp', 'skwovet.webp', 'slaking.webp', 'slakoth.webp', 'sliggoo.webp', 'slither-wing.webp', 'slowbro.webp', 'slowking.webp', 'slowpoke.webp', 'slugma.webp', 'slurpuff.webp', 'smeargle.webp', 'smoliv.webp', 'smoochum.webp', 'sneasel.webp', 'sneasler.webp', 'snivy.webp', 'snom.webp', 'snorlax.webp', 'snorunt.webp', 'snover.webp', 'snubbull.webp', 'sobble.webp', 'solgaleo.webp', 'solosis.webp', 'solrock.webp', 'spearow.webp', 'spectrier.webp', 'spewpa.webp', 'spheal.webp', 'spidops.webp', 'spinarak.webp', 'spinda.webp', 'spiritomb.webp', 'spoink.webp', 'sprigatito.webp', 'spritzee.webp', 'squawkabilly-green-plumage.webp', 'squirtle.webp', 'stakataka.webp', 'stantler.webp', 'staraptor.webp', 'staravia.webp', 'starly.webp', 'starmie.webp', 'staryu.webp', 'steelix.webp', 'steenee.webp', 'stonjourner.webp', 'stoutland.webp', 'stufful.webp', 'stunfisk.webp', 'stunky.webp', 'sudowoodo.webp', 'suicune.webp', 'sunflora.webp', 'sunkern.webp', 'surskit.webp', 'swablu.webp', 'swadloon.webp', 'swalot.webp', 'swampert.webp', 'swanna.webp', 'swellow.webp', 'swinub.webp', 'swirlix.webp', 'swoobat.webp', 'sylveon.webp', 'tadbulb.webp', 'taillow.webp', 'talonflame.webp', 'tandemaus.webp', 'tangela.webp', 'tangrowth.webp', 'tapu-bulu.webp', 'tapu-fini.webp', 'tapu-koko.webp', 'tapu-lele.webp', 'tarountula.webp', 'tatsugiri-curly.webp', 'tauros.webp', 'teddiursa.webp', 'tentacool.webp', 'tentacruel.webp', 'tepig.webp', 'terapagos.webp', 'terrakion.webp', 'thievul.webp', 'throh.webp', 'thundurus-incarnate.webp', 'thwackey.webp', 'timburr.webp', 'ting-lu.webp', 'tinkatink.webp', 'tinkaton.webp', 'tinkatuff.webp', 'tirtouga.webp', 'toedscool.webp', 'toedscruel.webp', 'togedemaru.webp', 'togekiss.webp', 'togepi.webp', 'togetic.webp', 'torchic.webp', 'torkoal.webp', 'tornadus-incarnate.webp', 'torracat.webp', 'torterra.webp', 'totodile.webp', 'toucannon.webp', 'toxapex.webp', 'toxel.webp', 'toxicroak.webp', 'toxtricity-amped.webp', 'tranquill.webp', 'trapinch.webp', 'treecko.webp', 'trevenant.webp', 'tropius.webp', 'trubbish.webp', 'trumbeak.webp', 'tsareena.webp', 'turtonator.webp', 'turtwig.webp', 'tympole.webp', 'tynamo.webp', 'type-null.webp', 'typhlosion.webp', 'tyranitar.webp', 'tyrantrum.webp', 'tyrogue.webp', 'tyrunt.webp', 'umbreon.webp', 'unfezant.webp', 'unown.webp', 'ursaluna.webp', 'ursaring.webp', 'urshifu-single-strike.webp', 'uxie.webp', 'vanillish.webp', 'vanillite.webp', 'vanilluxe.webp', 'vaporeon.webp', 'varoom.webp', 'veluza.webp', 'venipede.webp', 'venomoth.webp', 'venonat.webp', 'venusaur.webp', 'vespiquen.webp', 'vibrava.webp', 'victini.webp', 'victreebel.webp', 'vigoroth.webp', 'vikavolt.webp', 'vileplume.webp', 'virizion.webp', 'vivillon.webp', 'volbeat.webp', 'volcanion.webp', 'volcarona.webp', 'voltorb.webp', 'vullaby.webp', 'vulpix.webp', 'wailmer.webp', 'wailord.webp', 'walking-wake.webp', 'walrein.webp', 'wartortle.webp', 'watchog.webp', 'wattrel.webp', 'weavile.webp', 'weedle.webp', 'weepinbell.webp', 'weezing.webp', 'whimsicott.webp', 'whirlipede.webp', 'whiscash.webp', 'whismur.webp', 'wigglytuff.webp', 'wiglett.webp', 'wimpod.webp', 'wingull.webp', 'wishiwashi-solo.webp', 'wobbuffet.webp', 'wo-chien.webp', 'woobat.webp', 'wooloo.webp', 'wooper.webp', 'wormadam-plant.webp', 'wugtrio.webp', 'wurmple.webp', 'wynaut.webp', 'wyrdeer.webp', 'xatu.webp', 'xerneas.webp', 'xurkitree.webp', 'yamask.webp', 'yamper.webp', 'yanma.webp', 'yanmega.webp', 'yungoos.webp', 'yveltal.webp', 'zacian.webp', 'zamazenta.webp', 'zangoose.webp', 'zapdos.webp', 'zarude.webp', 'zebstrika.webp', 'zekrom.webp', 'zeraora.webp', 'zigzagoon.webp', 'zoroark.webp', 'zorua.webp', 'zubat.webp', 'zweilous.webp', 'zygarde-50.webp']
-  }
-];
-var MIN_CARDS = 24;
-var DEFAULT_DECK_SIZE = 24;
-var MIX_POKEMON_LIMIT = 6;
-var MIX_CATEGORY = {name:'Mix', special:'mix', folder:'', images:[]};
-var POKEMON_GENERATION_BY_NAME = null;
-var POKEMON_GENERATION_LOAD = null;
-var POKEMON_GENERATION_CACHE_KEY = 'indovinachi-pokemon-generations-v1';
-var POKEMON_DEX_BY_NAME = null;
-var POKEMON_DEX_LOAD = null;
-var POKEMON_DEX_CACHE_KEY = 'indovinachi-pokemon-national-dex-v1';
-var ALL_POKEMON_GENERATIONS = [1,2,3,4,5,6,7,8,9];
-var selectedPokemonGenerations = ALL_POKEMON_GENERATIONS.slice();
-var selectedCategory = null;
-var selectedDeckSize = DEFAULT_DECK_SIZE;
-var roomConfig = {
-  wrongGuessPenalty:'skip',
-  jollyEnabled:true,
-  maxPlayers:2,
-  allowSpectators:true,
-  deckSize:DEFAULT_DECK_SIZE,
-  category:'',
-  pokemonGenerations:ALL_POKEMON_GENERATIONS.slice()
-};
-var EMOJI_POOL = ['🎮','😎','🎬','🚀','⭐','🎧','🔥','🎯'];
-
-function seedUrl(name){ return 'https://api.dicebear.com/9.x/fun-emoji/svg?seed=' + encodeURIComponent(name); }
-function folderUrl(folder){ return folder.split('/').map(encodeURIComponent).join('/'); }
-
-function buildCharacters(cat){
-  var list = [], used = {};
-  var base = folderUrl(cat.folder || 'img');
-  (cat.images || []).forEach(function(f, i){
-    var name = f.replace(/\.[^.]+$/, '');
-    var key = name.toLowerCase();
-    if(!name || used[key]){ return; }
-    used[key] = true;
-    list.push({name:name, file:base + '/' + encodeURIComponent(f), fb:seedUrl(name), emoji:EMOJI_POOL[i % EMOJI_POOL.length]});
-  });
-  DEFAULTS.forEach(function(d){
-    if(list.length >= MIN_CARDS){ return; }
-    var key = d.name.toLowerCase();
-    if(used[key]){ return; }
-    used[key] = true;
-    list.push({name:d.name, file:null, fb:d.img, emoji:d.emoji});
-  });
-  while(list.length < MIN_CARDS){
-    list.push({name:'Carta ' + (list.length + 1), file:null, fb:null, emoji:'🃏'});
-  }
-  return list;
-}
-function shuffle(a){
-  a = a.slice();
-  for(var i = a.length - 1; i > 0; i--){
-    var j = Math.floor(Math.random() * (i + 1));
-    var t = a[i]; a[i] = a[j]; a[j] = t;
-  }
-  return a;
-}
-function normalizePokemonKey(value){
-  return String(value || '').toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]/g, '');
-}
-function parseCSVRow(line){
-  var out = [], value = '', quoted = false;
-  for(var i = 0; i < line.length; i++){
-    var ch = line.charAt(i);
-    if(ch === '"'){
-      if(quoted && line.charAt(i + 1) === '"'){ value += '"'; i++; }
-      else { quoted = !quoted; }
-    } else if(ch === ',' && !quoted){ out.push(value); value = ''; }
-    else { value += ch; }
-  }
-  out.push(value);
-  return out;
-}
-function addPokemonGenerationAlias(map, value, generation, onlyIfMissing){
-  var key = normalizePokemonKey(value);
-  if(!key){ return; }
-  if(!onlyIfMissing || !Object.prototype.hasOwnProperty.call(map, key)){ map[key] = generation; }
-}
-function loadPokemonGenerationMap(){
-  if(POKEMON_GENERATION_BY_NAME){ return Promise.resolve(POKEMON_GENERATION_BY_NAME); }
-  if(POKEMON_GENERATION_LOAD){ return POKEMON_GENERATION_LOAD; }
-  try{
-    var cached = JSON.parse(localStorage.getItem(POKEMON_GENERATION_CACHE_KEY) || 'null');
-    if(cached && Object.keys(cached).length >= 900){
-      POKEMON_GENERATION_BY_NAME = cached;
-      return Promise.resolve(cached);
-    }
-  }catch(e){}
-  POKEMON_GENERATION_LOAD = Promise.all(ALL_POKEMON_GENERATIONS.map(function(gen){
-    var url = 'https://raw.githubusercontent.com/lgreski/pokemonData/master/gen' + String(gen).padStart(2, '0') + '.csv';
-    return fetch(url).then(function(response){
-      if(!response.ok){ throw new Error('HTTP ' + response.status + ' per la generazione ' + gen); }
-      return response.text();
-    }).then(function(csv){ return {generation:gen, csv:csv}; });
-  })).then(function(files){
-    var map = {};
-    /* I file sono ordinati per generazione. Il nome base conserva la generazione di debutto;
-       l'alias nome-form permette di riconoscere anche eventuali file di forme regionali. */
-    files.forEach(function(file){
-      var rows = file.csv.replace(/^\uFEFF/, '').split(/\r?\n/).filter(function(line){ return line.trim() !== ''; });
-      if(!rows.length){ return; }
-      var headers = parseCSVRow(rows.shift()).map(function(h){ return h.trim().toLowerCase(); });
-      var nameIndex = headers.indexOf('name');
-      var formIndex = headers.indexOf('form');
-      if(nameIndex < 0){ throw new Error('Colonna Name assente nel catalogo Pokémon.'); }
-      rows.forEach(function(line){
-        var cols = parseCSVRow(line);
-        var name = (cols[nameIndex] || '').trim();
-        var form = formIndex >= 0 ? (cols[formIndex] || '').trim() : '';
-        if(!name){ return; }
-        addPokemonGenerationAlias(map, name, file.generation, true);
-        if(form){ addPokemonGenerationAlias(map, name + '-' + form, file.generation, false); }
-      });
-    });
-    if(Object.keys(map).length < 900){ throw new Error('Il catalogo Pokémon ricevuto è incompleto.'); }
-    POKEMON_GENERATION_BY_NAME = map;
-    try{ localStorage.setItem(POKEMON_GENERATION_CACHE_KEY, JSON.stringify(map)); }catch(e){}
-    POKEMON_GENERATION_LOAD = null;
-    return map;
-  }).catch(function(error){
-    POKEMON_GENERATION_LOAD = null;
-    throw error;
-  });
-  return POKEMON_GENERATION_LOAD;
-}
-function loadPokemonDexMap(){
-  if(POKEMON_DEX_BY_NAME){ return Promise.resolve(POKEMON_DEX_BY_NAME); }
-  if(POKEMON_DEX_LOAD){ return POKEMON_DEX_LOAD; }
-  try{
-    var cached = JSON.parse(localStorage.getItem(POKEMON_DEX_CACHE_KEY) || 'null');
-    if(cached && Object.keys(cached).length >= 900){
-      POKEMON_DEX_BY_NAME = cached;
-      return Promise.resolve(cached);
-    }
-  }catch(e){}
-  POKEMON_DEX_LOAD = fetch('https://pokeapi.co/api/v2/pokemon-species?limit=2000')
-    .then(function(response){
-      if(!response.ok){ throw new Error('HTTP ' + response.status + ' nel catalogo Pokédex'); }
-      return response.json();
-    })
-    .then(function(data){
-      var map = {};
-      (data.results || []).forEach(function(entry){
-        var match = /\/(\d+)\/?$/.exec(entry.url || '');
-        if(match){ addPokemonDexAlias(map, entry.name, Number(match[1])); }
-      });
-      if(Object.keys(map).length < 900){ throw new Error('Il catalogo Pokédex ricevuto è incompleto.'); }
-      POKEMON_DEX_BY_NAME = map;
-      try{ localStorage.setItem(POKEMON_DEX_CACHE_KEY, JSON.stringify(map)); }catch(e){}
-      POKEMON_DEX_LOAD = null;
-      return map;
-    })
-    .catch(function(error){ POKEMON_DEX_LOAD = null; throw error; });
-  return POKEMON_DEX_LOAD;
-}
-function addPokemonDexAlias(map, value, number){
-  var key = normalizePokemonKey(value);
-  if(key && !Object.prototype.hasOwnProperty.call(map, key)){ map[key] = number; }
-}
-function pokemonDexNumber(name){
-  if(!POKEMON_DEX_BY_NAME){ return Number.MAX_SAFE_INTEGER; }
-  var stem = String(name || '').replace(/\.[^.]+$/, '').trim();
-  var key = normalizePokemonKey(stem);
-  if(POKEMON_DEX_BY_NAME[key]){ return Number(POKEMON_DEX_BY_NAME[key]); }
-  var parts = stem.split('-');
-  while(parts.length > 1){
-    parts.pop();
-    key = normalizePokemonKey(parts.join('-'));
-    if(POKEMON_DEX_BY_NAME[key]){ return Number(POKEMON_DEX_BY_NAME[key]); }
-  }
-  return Number.MAX_SAFE_INTEGER;
-}
-function sortPokemonByDex(list){
-  return list.slice().sort(function(a, b){
-    var aNo = pokemonDexNumber(a.name), bNo = pokemonDexNumber(b.name);
-    if(aNo !== bNo){ return aNo - bNo; }
-    return a.name.localeCompare(b.name, 'it');
-  });
-}
-function interleaveMixPreservingDex(nonPokemon, pokemon){
-  var other = nonPokemon.slice(), dex = sortPokemonByDex(pokemon), out = [];
-  while(other.length || dex.length){
-    if(!other.length){ out.push(dex.shift()); }
-    else if(!dex.length){ out.push(other.shift()); }
-    else if(Math.random() < (dex.length / (dex.length + other.length))){ out.push(dex.shift()); }
-    else { out.push(other.shift()); }
-  }
-  return out;
-}
-
-function generationForPokemonName(name){
-  if(!POKEMON_GENERATION_BY_NAME){ return 0; }
-  var stem = String(name || '').replace(/\.[^.]+$/, '').trim();
-  var key = normalizePokemonKey(stem);
-  if(POKEMON_GENERATION_BY_NAME[key]){ return POKEMON_GENERATION_BY_NAME[key]; }
-  /* Gestisce suffissi di forma presenti nei nomi dei file (es. -male, -shield, -50). */
-  var parts = stem.split('-');
-  while(parts.length > 1){
-    parts.pop();
-    key = normalizePokemonKey(parts.join('-'));
-    if(POKEMON_GENERATION_BY_NAME[key]){ return POKEMON_GENERATION_BY_NAME[key]; }
-  }
-  return 0;
-}
-function allNonPokemonCharacters(){
-  var list = [];
-  CATEGORIES.forEach(function(cat){
-    if(cat.name === 'Pokémon'){ return; }
-    list = list.concat(buildCharacters(cat).map(function(ch){
-      var copy = Object.assign({}, ch);
-      copy.sourceCategory = cat.name;
-      return copy;
-    }));
-  });
-  return list;
-}
-function allPokemonCharacters(){
-  var cat = null;
-  for(var i = 0; i < CATEGORIES.length; i++){ if(CATEGORIES[i].name === 'Pokémon'){ cat = CATEGORIES[i]; break; } }
-  if(!cat){ return []; }
-  return sortPokemonByDex(buildCharacters(cat).map(function(ch){
-    var copy = Object.assign({}, ch);
-    copy.generation = generationForPokemonName(ch.name);
-    copy.sourceCategory = 'Pokémon';
-    return copy;
-  }));
-}
-function pokemonCharactersForGenerations(generations){
-  var selected = (generations && generations.length ? generations : ALL_POKEMON_GENERATIONS).map(Number);
-  var allSelected = ALL_POKEMON_GENERATIONS.every(function(g){ return selected.indexOf(g) >= 0; });
-  return allPokemonCharacters().filter(function(ch){
-    /* Se tutte le gen sono attive, includi anche eventuali nomi non risolti per non perdere asset.
-       Con una selezione parziale, entrano soltanto Pokémon classificati in una delle gen scelte. */
-    return (ch.generation && selected.indexOf(ch.generation) >= 0) || (allSelected && !ch.generation);
-  });
-}
-function mixMaxCount(){
-  var nonPokemon = allNonPokemonCharacters();
-  var pokemon = allPokemonCharacters();
-  return nonPokemon.length + Math.min(MIX_POKEMON_LIMIT, pokemon.length);
-}
-function buildMixDeck(size){
-  var nonPokemon = shuffle(allNonPokemonCharacters());
-  /* Si estrae casualmente un massimo di sei Pokémon e poi li ordina per numero Pokédex. */
-  var pokemon = sortPokemonByDex(shuffle(allPokemonCharacters()).slice(0, MIX_POKEMON_LIMIT));
-  var total = Math.max(0, Math.min(Number(size) || DEFAULT_DECK_SIZE, nonPokemon.length + pokemon.length));
-  var pokemonCount = Math.min(pokemon.length, total, MIX_POKEMON_LIMIT);
-  var nonPokemonCount = Math.min(nonPokemon.length, total - pokemonCount);
-  return interleaveMixPreservingDex(nonPokemon.slice(0, nonPokemonCount), pokemon.slice(0, pokemonCount));
-}
-function categoryPool(cat, generations){
-  if(!cat){ return []; }
-  if(cat.special === 'mix' || cat.name === 'Mix'){
-    /* La dimensione massima di Mix conta tutti i personaggi non-Pokémon e al massimo 6 Pokémon. */
-    return allNonPokemonCharacters().concat(shuffle(allPokemonCharacters()).slice(0, MIX_POKEMON_LIMIT));
-  }
-  if(cat.name === 'Pokémon'){ return pokemonCharactersForGenerations(generations); }
-  return buildCharacters(cat).map(function(ch){
-    var copy = Object.assign({}, ch);
-    copy.sourceCategory = cat.name;
-    return copy;
-  });
-}
-function makeDeck(cat, config){
-  var size = Math.max(DEFAULT_DECK_SIZE, Number(config && config.deckSize) || DEFAULT_DECK_SIZE);
-  if(cat && (cat.special === 'mix' || cat.name === 'Mix')){ return buildMixDeck(size); }
-  var pool = categoryPool(cat, config && config.pokemonGenerations);
-  if(cat && cat.name === 'Pokémon'){ return sortPokemonByDex(shuffle(pool).slice(0, Math.min(size, pool.length))); }
-  return shuffle(pool).slice(0, Math.min(size, pool.length));
-}
-function normalizeRoomConfig(value){
-  value = value && typeof value === 'object' ? value : {};
-  var gens = Array.isArray(value.pokemonGenerations) ? value.pokemonGenerations.map(Number).filter(function(g){ return ALL_POKEMON_GENERATIONS.indexOf(g) >= 0; }) : ALL_POKEMON_GENERATIONS.slice();
-  if(!gens.length){ gens = [1]; }
-  var penalty = value.wrongGuessPenalty === 'instantLoss' ? 'instantLoss' : 'skip';
-  return {
-    wrongGuessPenalty:penalty,
-    jollyEnabled:value.jollyEnabled !== false,
-    maxPlayers:Number(value.maxPlayers) === 3 ? 3 : 2,
-    allowSpectators:value.allowSpectators !== false,
-    deckSize:Math.max(DEFAULT_DECK_SIZE, Math.floor(Number(value.deckSize) || DEFAULT_DECK_SIZE)),
-    category:String(value.category || catName || ''),
-    pokemonGenerations:gens
-  };
-}
-var CHARACTERS = [];
-var catName = '';
-var useAllChars = false, drawn = false;
-function modeText(){
-  return 'Carte in gioco: ' + CHARACTERS.length + (useAllChars ? ' (tutti i personaggi)' : (drawn ? ' (estratte a caso)' : ''));
-}
-
-var PREFIX = 'indovinachi-';
-/* ===== Configurazione ICE (STUN + TURN) =====
-   Per giocare da rete mobile 4G/5G (CGNAT / NAT simmetrico) o da hotspot serve un server TURN che faccia da relay.
-   Il pool qui sotto viene provato tutto insieme: il browser usa il primo percorso che funziona.
-   1) CONSIGLIATO - Metered (gratis, 20 GB/mese): https://dashboard.metered.ca/signup -> crea un'app,
-      poi copia il nome app (nomeapp.metered.live) e la API key (sicura da mettere nel front-end).
-   2) In alternativa compila CUSTOM_TURN con le credenziali di ExpressTURN, Xirsys, Twilio, ecc.
-   3) I relay pubblici in FALLBACK_TURN sono gratuiti ma NON garantiti: possono smettere di funzionare. */
-var METERED_APP = 'indovina-chi';
-var METERED_KEY = 'a5d9c1fafa80535908cb05f932aa64e5ba5b';
-/* Alternativa senza fetch: in Metered > TURN Credentials > "Add Credential" crea username/password statici e incollali qui. */
-var METERED_USER = '6ca2984a40b7545145738696';
-var METERED_PASS = 'C9oieenvSoY/LI/f';
-/* Per provare senza modificare il file: apri il sito con ?turnapp=NOMEAPP&turnkey=APIKEY (viene ricordato nel browser). */
-(function(){
-  try{
-    var q = new URLSearchParams(location.search);
-    if(q.get('turnapp') && q.get('turnkey')){
-      localStorage.setItem('indovinachi-turn', JSON.stringify({app:q.get('turnapp'), key:q.get('turnkey')}));
-    }
-    var sv = JSON.parse(localStorage.getItem('indovinachi-turn') || 'null');
-    if(sv && !METERED_APP){ METERED_APP = sv.app; METERED_KEY = sv.key; }
-  }catch(e){}
-})();
-var CUSTOM_TURN = [
-  {
-      urls: "stun:stun.relay.metered.ca:80",
+  /* Per aggiungere un gioco basta una nuova voce in questa lista:
+     url: percorso della pagina del gioco, oppure null per mostrare "IN ARRIVO". */
+  var GIOCHI = [
+    {
+      titolo: 'Indovina Chi?',
+      descrizione: 'Fai domande, elimina le carte e scopri il personaggio segreto dei tuoi amici.',
+      tag: '2-3 giocatori · Online',
+      icona: '🕵️',
+      colori: ['#ffd23f', '#ff8a1f'],
+      url: 'indovina-chi/indovina-chi.html'
     },
     {
-      urls: "turn:global.relay.metered.ca:80",
-      username: "6ca2984a40b7545145738696",
-      credential: "C9oieenvSoY/LI/f",
+      titolo: 'Jeopardy Labs',
+      descrizione: 'Crea il tuo tabellone di quiz con categorie e punteggi personalizzati e sfida la squadra.',
+      tag: 'Quiz a squadre',
+      icona: '💡',
+      colori: ['#4aa3ff', '#4b3fe0'],
+      url: null
     },
     {
-      urls: "turn:global.relay.metered.ca:80?transport=tcp",
-      username: "6ca2984a40b7545145738696",
-      credential: "C9oieenvSoY/LI/f",
-    },
-    {
-      urls: "turn:global.relay.metered.ca:443",
-      username: "6ca2984a40b7545145738696",
-      credential: "C9oieenvSoY/LI/f",
-    },
-    {
-      urls: "turns:global.relay.metered.ca:443?transport=tcp",
-      username: "6ca2984a40b7545145738696",
-      credential: "C9oieenvSoY/LI/f",
+      titolo: 'Erm, Actually!',
+      descrizione: 'Smaschera le affermazioni sbagliate sul tuo fandom: chi lo nota per primo vince.',
+      tag: 'Ispirato a La Sedia a Due Gambe',
+      icona: '🤓',
+      colori: ['#ff6fb5', '#9b4dff'],
+      url: null
     }
-];
-var STUN_SERVERS = [
-  { urls: 'stun:stun.l.google.com:19302' },
-  { urls: 'stun:stun1.l.google.com:19302' },
-  { urls: 'stun:stun2.l.google.com:19302' },
-  { urls: 'stun:stun.relay.metered.ca:80' },
-  { urls: 'stun:global.stun.twilio.com:3478' }
-];
-/* Relay pubblici di riserva (non garantiti). Le porte 443 (anche TLS/TCP) superano i firewall degli operatori mobili. */
-var FALLBACK_TURN = [
-  { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-  { urls: 'turn:openrelay.metered.ca:80?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
-  { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
-  { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
-  { urls: ['turn:freestun.net:3478', 'turns:freestun.net:5349'], username: 'free', credential: 'free' }
-];
-var iceCache = null;
-
-/* Modalità relay: scatta dopo un fallimento della connessione diretta e resta attiva per la sessione del browser. */
-var relayForced = false;
-try{ relayForced = sessionStorage.getItem('indovinachi-relay') === '1'; }catch(e){}
-function relayTest(){ return /[?&]relay=1/.test(location.search); }
-
-function dbg(){ console.log.apply(console, ['[IndovinaChi]'].concat([].slice.call(arguments))); }
-function dbgw(){ console.warn.apply(console, ['[IndovinaChi]'].concat([].slice.call(arguments))); }
-
-function describeServers(turn){
-  var urls = [];
-  turn.forEach(function(s){ urls = urls.concat(s.urls); });
-  return urls;
-}
-function buildOpts(turn){
-  var cfg = { iceServers: STUN_SERVERS.concat(turn), iceCandidatePoolSize: 2 };
-  if(relayTest()){
-    cfg.iceTransportPolicy = 'relay';
-    dbgw('Modalità test ?relay=1: la connessione passerà SOLO dal server TURN.');
-  } else if(relayForced){
-    cfg.iceTransportPolicy = 'relay';
-    dbgw('Modalità RELAY attiva: la connessione passerà solo dai server TURN.');
-  }
-  return { debug: 2, config: cfg };
-}
-function staticMetered(){
-  if(!METERED_USER || !METERED_PASS){ return []; }
-  return [
-    { urls: 'turn:global.relay.metered.ca:80', username: METERED_USER, credential: METERED_PASS },
-    { urls: 'turn:global.relay.metered.ca:80?transport=tcp', username: METERED_USER, credential: METERED_PASS },
-    { urls: 'turn:global.relay.metered.ca:443', username: METERED_USER, credential: METERED_PASS },
-    { urls: 'turns:global.relay.metered.ca:443?transport=tcp', username: METERED_USER, credential: METERED_PASS }
   ];
-}
-/* Unisce senza duplicati (stesso url+username) mantenendo l'ordine. */
-function mergeServers(){
-  var out = [], seen = {};
-  [].slice.call(arguments).forEach(function(list){
-    (list || []).forEach(function(sv){
-      var u = [].concat(sv.urls).join('|') + '#' + (sv.username || '');
-      if(!seen[u]){ seen[u] = 1; out.push(sv); }
-    });
-  });
-  return out;
-}
-function getPeerOpts(cb){
-  if(iceCache){ cb(buildOpts(iceCache)); return; }
-  var mine = mergeServers(staticMetered(), CUSTOM_TURN);
-  var hasKeys = !!(METERED_APP && METERED_KEY);
-  /* I relay pubblici vanno in timeout da rete mobile e rallentano la raccolta ICE: li uso solo se non ho credenziali tue. */
-  var base = (mine.length || hasKeys) ? mine : FALLBACK_TURN;
-  var done = false, t = null;
-  function finish(list, msg){
-    if(done){ return; }
-    done = true;
-    clearTimeout(t);
-    if(msg){ dbgw(msg); }
-    iceCache = list;
-    var urls = describeServers(list);
-    dbg('Pool ICE: ' + STUN_SERVERS.length + ' server STUN + ' + urls.length + ' indirizzi TURN:', urls.join(', '));
-    cb(buildOpts(list));
-  }
-  if(!hasKeys){
-    finish(base, mine.length ? 'Uso i TURN con credenziali statiche (METERED_USER/CUSTOM_TURN).'
-      : 'Nessuna credenziale TURN configurata (METERED_APP/METERED_KEY, METERED_USER/METERED_PASS o CUSTOM_TURN): uso i relay pubblici, che da rete mobile spesso non funzionano.');
-    return;
-  }
-  t = setTimeout(function(){ finish(base.length ? base : FALLBACK_TURN, 'Timeout (5s) nel recupero delle credenziali Metered.'); }, 5000);
-  fetch('https://' + METERED_APP + '.metered.live/api/v1/turn/credentials?apiKey=' + encodeURIComponent(METERED_KEY))
-    .then(function(r){ if(!r.ok){ throw new Error('HTTP ' + r.status); } return r.json(); })
-    .then(function(list){
-      if(!Array.isArray(list) || !list.length){ throw new Error('risposta vuota'); }
-      dbg('Credenziali TURN Metered caricate (' + list.length + ' server).');
-      /* Aggiungo sempre anche turns:443/TCP, l'unico canale che passa i firewall mobili. */
-      var extra = list.some(function(x){ return /turns:.*:443/.test([].concat(x.urls).join(' ')); }) ? [] :
-        (function(){ var c = list.filter(function(x){ return x.username; })[0]; return c ? [{ urls: 'turns:global.relay.metered.ca:443?transport=tcp', username: c.username, credential: c.credential }] : []; })();
-      finish(mergeServers(list, extra, mine));
-    })
-    .catch(function(e){ finish(base.length ? base : FALLBACK_TURN, 'Credenziali Metered non disponibili (' + e.message + '): uso STUN e i TURN alternativi.'); });
-}
 
-/* Diagnostica WebRTC/PeerJS in console */
-function logRoute(pc, label){
-  if(!pc.getStats){ return; }
-  pc.getStats().then(function(stats){
-    var byId = {}, selId = null, pair = null;
-    stats.forEach(function(r){
-      byId[r.id] = r;
-      if(r.type === 'transport' && r.selectedCandidatePairId){ selId = r.selectedCandidatePairId; }
-    });
-    if(selId){ pair = byId[selId]; }
-    else { stats.forEach(function(r){ if(r.type === 'candidate-pair' && r.nominated && r.state === 'succeeded'){ pair = r; } }); }
-    if(pair){
-      var l = byId[pair.localCandidateId], rm = byId[pair.remoteCandidateId];
-      var lt = l && l.candidateType, rt = rm && rm.candidateType;
-      var kind = (lt === 'relay' || rt === 'relay') ? 'RELAY (server TURN)' : (lt === 'host' && rt === 'host') ? 'DIRETTO in rete locale/hotspot' : 'DIRETTO P2P (STUN)';
-      dbg(label + ': percorso ICE scelto -> ' + kind + ' | locale=' + lt + (l && l.protocol ? '/' + l.protocol : '') + (l && l.relayProtocol ? ' (relay via ' + l.relayProtocol + ')' : '') + (l && l.url ? ' server=' + l.url : '') + ' | remoto=' + rt);
-    }
-  }).catch(function(){});
-}
-function candType(c){ var m = /typ (\w+)/.exec(c.candidate || ''); return m ? m[1] : '?'; }
-function watchIce(conn, label, onFail){
-  var pc = conn.peerConnection;
-  if(!pc){ dbgw(label + ': peerConnection non disponibile per la diagnostica.'); return; }
-  var t0 = Date.now(), counts = {host:0, srflx:0, relay:0, prflx:0}, fired = false;
-  function secs(){ return ((Date.now() - t0) / 1000).toFixed(1) + 's'; }
-  function fail(why){
-    if(fired){ return; }
-    fired = true;
-    dbgw(label + ': ' + why);
-    if(onFail){ onFail(why); }
-  }
-  pc.addEventListener('icecandidate', function(e){
-    if(!e.candidate){
-      dbg(label + ': candidati raccolti -> host=' + counts.host + ' srflx=' + counts.srflx + ' relay=' + counts.relay + ' (' + secs() + ')');
-      if(!counts.relay){ dbgw(label + ': NESSUN candidato relay: server TURN irraggiungibili o credenziali non valide. Da rete mobile la connessione potrebbe fallire.'); }
-      return;
-    }
-    var ty = candType(e.candidate);
-    counts[ty] = (counts[ty] || 0) + 1;
-    dbg(label + ': candidato ' + ty + ' ' + (e.candidate.protocol || '') + (e.candidate.url || e.url ? ' via ' + (e.candidate.url || e.url) : ''));
-  });
-  pc.addEventListener('iceconnectionstatechange', function(){
-    var st = pc.iceConnectionState;
-    dbg(label + ': ICE connection = ' + st + ' (' + secs() + ')');
-    if(st === 'connected' || st === 'completed'){ logRoute(pc, label); }
-    if(st === 'failed'){ fail('negoziazione ICE fallita (NAT restrittivo/CGNAT?).'); }
-  });
-  pc.addEventListener('icegatheringstatechange', function(){ dbg(label + ': ICE gathering = ' + pc.iceGatheringState + ' (' + secs() + ')'); });
-  pc.addEventListener('connectionstatechange', function(){
-    dbg(label + ': connessione = ' + pc.connectionState);
-    if(pc.connectionState === 'failed'){ fail('connessione WebRTC fallita.'); }
-  });
-  pc.addEventListener('icecandidateerror', function(e){
-    dbgw(label + ': errore candidato ICE', e.errorCode || '', e.errorText || '', e.url || '');
-  });
-  conn.on('error', function(err){ dbgw(label + ': errore canale dati', err); fail('errore del canale dati.'); });
-}
-function tryReconnectSignal(p, k){
-  if(p.destroyed || !p.disconnected || leaving){ return; }
-  dbg('Riconnessione al server di segnalazione, tentativo', k + 1);
-  try{ p.reconnect(); }catch(e){}
-  setTimeout(function(){
-    if(!p.destroyed && p.disconnected && k < 30){ tryReconnectSignal(p, k + 1); }
-  }, 3000 + Math.min(k, 5) * 1000);
-}
-function watchPeer(p){
-  var told = false;
-  p.on('open', function(id){ told = false; dbg('Connesso al server di segnalazione PeerJS, id =', id); });
-  p.on('disconnected', function(){
-    dbgw('Disconnesso dal server di segnalazione PeerJS.');
-    if(entered && isHost && !told && !leaving && !p.destroyed){ told = true; log('Riconnessione in corso...', 'sys'); }
-    tryReconnectSignal(p, 0);
-  });
-  p.on('close', function(){ dbg('Peer chiuso.'); });
-}
-var ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var FRECCIA = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-var peer = null, isHost = false, myN = 0, myName = '', roomCode = '';
-var conns = [], hostConn = null, roster = {};
-var secret = null, locked = false, guessMode = false, entered = false, joinTimer = null;
-var eliminated = {};
-var isSpectator = false, spectatorTarget = 0, spectatorSnapshot = null, spectatorNoticeShown = false;
+  function crea(tag, classe, testo){
+    var e = document.createElement(tag);
+    if(classe){ e.className = classe; }
+    if(testo){ e.textContent = testo; }
+    return e;
+  }
 
-/* Stato di partita, sessione e riconnessione */
-var SESSION_KEY = 'indovinachi-session', SESSION_TTL = 3 * 3600 * 1000;
-var GRACE_MS = 120000, HB_MS = 8000, STALE_MS = 24000;
-var gid = 0, phase = 'lobby', turnN = 0, lastResult = null;
-var tokens = {}, myToken = '', curCat = null, graceTimers = {};
-var reconnecting = false, retryTimer = null, retryCount = 0, attemptSeq = 0;
-var leaving = false, closedByHost = false, resumeData = null, outbox = [];
-var lastRx = 0, hbTimer = null, saveTimer = null;
-var RELAY = {chat:1, quick:1, ready:1, unready:1, guess:1, result:1, pass:1};
-
-function $(id){ return document.getElementById(id); }
-
-/* ---------- Utilità UI ---------- */
-var PCOLORS = ['#5cc8ff', '#ff7eb6', '#b69cff'];
-function colorOf(n){ return PCOLORS[((Number(n) || 1) - 1) % PCOLORS.length]; }
-function seatByName(nm){
-  var k = Object.keys(roster);
-  for(var i = 0; i < k.length; i++){ if(roster[k[i]].name === nm){ return Number(k[i]); } }
-  return (nm === myName && myN) ? myN : 0;
-}
-function nameSpan(n, label){
-  var s = document.createElement('span');
-  s.className = 'pn';
-  s.textContent = label;
-  if(n){ s.style.setProperty('--pc', colorOf(n)); }
-  return s;
-}
-function appendRich(parent, text){
-  var names = Object.keys(roster).map(function(k){ return roster[k].name; });
-  if(myName){ names.push(myName); }
-  names = names.filter(function(x, i){ return x && names.indexOf(x) === i; })
-    .sort(function(a, b){ return b.length - a.length; })
-    .map(function(x){ return x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); });
-  if(!names.length){ parent.appendChild(document.createTextNode(text)); return; }
-  var re = new RegExp('(^|[^\\p{L}\\p{N}])(' + names.join('|') + ')(?![\\p{L}\\p{N}])', 'gu');
-  var last = 0, m;
-  while((m = re.exec(text))){
-    var start = m.index + m[1].length;
-    if(start > last){ parent.appendChild(document.createTextNode(text.slice(last, start))); }
-    parent.appendChild(nameSpan(seatByName(m[2]), m[2]));
-    last = start + m[2].length;
-  }
-  if(last < text.length){ parent.appendChild(document.createTextNode(text.slice(last))); }
-}
-function log(text, cls, tail, who){
-  var d = document.createElement('div');
-  d.className = 'line ' + (cls || '');
-  var ts = document.createElement('span');
-  ts.className = 'ts';
-  ts.textContent = '[' + new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'}) + '] ';
-  d.appendChild(ts);
-  var body = d;
-  if(cls === 'chat' && who){
-    if(who === myN){ d.classList.add('me'); }
-    d.style.setProperty('--pc', colorOf(who));
-    d.appendChild(nameSpan(who, pname(who)));
-    var sep = document.createElement('span');
-    sep.className = 'sep';
-    sep.textContent = ': ';
-    d.appendChild(sep);
-    body = document.createElement('span');
-    body.className = 'msg';
-    body.textContent = text;
-    d.appendChild(body);
-  } else {
-    appendRich(d, text);
-  }
-  if(tail){
-    var sp = document.createElement('span');
-    sp.className = tail.cls;
-    sp.textContent = tail.text;
-    body.appendChild(sp);
-  }
-  $('log').appendChild(d);
-  $('log').scrollTop = $('log').scrollHeight;
-}
-function setupMsg(t){ $('setupMsg').textContent = t || ''; }
-function pname(n){
-  var p = roster[n];
-  return p ? p.name : 'Giocatore ' + n;
-}
-function makeFace(ch){
-  var f = document.createElement('div');
-  f.className = 'face';
-  var sources = [ch.file, ch.fb].filter(Boolean);
-  var idx = 0;
-  function showEmoji(){
-    f.textContent = '';
-    var e = document.createElement('span');
-    e.className = 'emo';
-    e.textContent = ch.emoji || '🃏';
-    f.appendChild(e);
-  }
-  if(!sources.length){ showEmoji(); return f; }
-  var im = document.createElement('img');
-  im.alt = ch.name;
-  im.referrerPolicy = 'no-referrer';
-  im.onerror = function(){
-    idx++;
-    if(idx < sources.length){ im.src = sources[idx]; }
-    else { showEmoji(); }
-  };
-  im.src = sources[0];
-  f.appendChild(im);
-  return f;
-}
-function randCode(){
-  var s = '';
-  for(var i = 0; i < 5; i++){ s += ALPHABET.charAt(Math.floor(Math.random() * ALPHABET.length)); }
-  return s;
-}
-function nameVal(){ return ($('nameIn').value.trim() || 'Giocatore').slice(0, 20); }
-
-/* ---------- Tabellone ---------- */
-/* ---------- Audio (Web Audio API) e coriandoli ---------- */
-var AC = window.AudioContext || window.webkitAudioContext, actx = null, soundOn = true;
-try{ if(localStorage.getItem('indovinachi-sound') === 'off'){ soundOn = false; } }catch(e){}
-function audioCtx(){
-  if(!soundOn || !AC){ return null; }
-  if(!actx){ try{ actx = new AC(); }catch(e){ return null; } }
-  if(actx.state === 'suspended' && actx.resume){ actx.resume(); }
-  return actx;
-}
-function tone(freq, start, dur, type, vol, slideTo){
-  var c = audioCtx();
-  if(!c){ return; }
-  var t = c.currentTime + start, o = c.createOscillator(), g = c.createGain();
-  o.type = type || 'sine';
-  o.frequency.setValueAtTime(freq, t);
-  if(slideTo){ o.frequency.exponentialRampToValueAtTime(slideTo, t + dur); }
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(vol || 0.15, t + 0.01);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  o.connect(g);
-  g.connect(c.destination);
-  o.start(t);
-  o.stop(t + dur + 0.02);
-}
-var sfx = {
-  flip: function(){ tone(620, 0, 0.09, 'sine', 0.2, 180); tone(1200, 0, 0.03, 'square', 0.04, 400); },
-  msg: function(){ tone(660, 0, 0.07, 'sine', 0.12); tone(880, 0.07, 0.09, 'sine', 0.1); },
-  quick: function(kind){
-    if(kind === 'yes'){ tone(523, 0, 0.1, 'triangle', 0.16); tone(784, 0.09, 0.16, 'triangle', 0.16); }
-    else if(kind === 'no'){ tone(330, 0, 0.12, 'sawtooth', 0.07); tone(220, 0.1, 0.2, 'sawtooth', 0.07); }
-    else { tone(600, 0, 0.08, 'square', 0.05, 900); tone(900, 0.09, 0.08, 'square', 0.05, 600); tone(700, 0.18, 0.12, 'square', 0.05, 1000); }
-  },
-  turn: function(){ tone(784, 0, 0.08, 'triangle', 0.14); tone(1175, 0.08, 0.14, 'triangle', 0.12); },
-  win: function(){
-    [523.25, 659.25, 783.99, 1046.5].forEach(function(f, i){ tone(f, i * 0.12, i === 3 ? 0.5 : 0.14, 'triangle', 0.18); });
-    tone(1318.5, 0.5, 0.4, 'triangle', 0.12);
-  }
-};
-function celebrate(){
-  if(typeof confetti !== 'function'){ return; }
-  var colors = ['#ffd700', '#ff4d6d', '#4de1d2', '#7be495', '#ffffff'];
-  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-    confetti({particleCount:60, spread:70, origin:{y:0.6}, colors:colors});
-    return;
-  }
-  var end = Date.now() + 2500;
-  (function frame(){
-    confetti({particleCount:4, angle:60, spread:60, origin:{x:0, y:0.7}, colors:colors});
-    confetti({particleCount:4, angle:120, spread:60, origin:{x:1, y:0.7}, colors:colors});
-    confetti({particleCount:3, angle:270, spread:80, startVelocity:25, gravity:0.9, origin:{x:Math.random(), y:0}, colors:colors});
-    if(Date.now() < end){ requestAnimationFrame(frame); }
-  })();
-}
-var QUICK = {
-  yes:   {label:'SÌ', cls:'ans-yes'},
-  no:    {label:'NO', cls:'ans-no'},
-  jolly: {label:'JOLLY', cls:'ans-jolly'}
-};
-
-function buildBoard(){
-  var b = $('board');
-  b.textContent = '';
-  CHARACTERS.forEach(function(ch, i){
-    var c = document.createElement('div');
-    c.className = 'card';
-    c.tabIndex = 0;
-    c.setAttribute('role', 'button');
-    c.dataset.i = i;
-    var inner = document.createElement('div');
-    inner.className = 'card-inner';
-    var front = document.createElement('div');
-    front.className = 'card-front';
-    front.appendChild(makeFace(ch));
-    var n = document.createElement('div');
-    n.className = 'nm';
-    n.textContent = ch.name;
-    front.appendChild(n);
-    var back = document.createElement('div');
-    back.className = 'card-back';
-    back.setAttribute('aria-hidden', 'true');
-    back.textContent = '?';
-    inner.appendChild(front);
-    inner.appendChild(back);
-    c.appendChild(inner);
-    c.addEventListener('click', function(){ onCard(i); });
-    c.addEventListener('keydown', function(e){
-      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); onCard(i); }
-    });
-    b.appendChild(c);
-  });
-}
-function fitBoard(){
-  var b = $('board');
-  var n = b.children.length;
-  if(!n || $('game').classList.contains('hidden')){ return; }
-  var cs = getComputedStyle(b);
-  var gap = parseFloat(cs.columnGap) || 10;
-  if(window.matchMedia('(min-width:901px)').matches){
-    var W = b.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-    var H = b.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-    var best = null;
-    for(var c = 1; c <= n; c++){
-      var r = Math.ceil(n / c);
-      var size = Math.min((W - gap * (c - 1)) / c, ((H - gap * (r - 1)) / r) / 1.2);
-      if(!best || size > best.size){ best = {c:c, r:r, size:size}; }
-    }
-    var MINSIZE = 56;
-    if(best.size >= MINSIZE){
-      var cell = Math.floor(best.size);
-      b.style.gridTemplateColumns = 'repeat(' + best.c + ', ' + cell + 'px)';
-      b.style.gridTemplateRows = 'repeat(' + best.r + ', ' + Math.floor(cell * 1.2) + 'px)';
-      b.style.gridAutoRows = '';
-      b.style.justifyContent = 'center';
-      b.style.alignContent = 'center';
-      b.style.overflowY = 'hidden';
+  function creaCard(g, i){
+    var attivo = !!g.url;
+    var li = document.createElement('li');
+    var card = document.createElement(attivo ? 'a' : 'div');
+    card.className = 'card ' + (attivo ? 'attivo' : 'presto');
+    card.style.setProperty('--a', g.colori[0]);
+    card.style.setProperty('--b', g.colori[1]);
+    card.style.setProperty('--i', i);
+    if(attivo){
+      card.href = g.url;
     } else {
-      var cols = Math.max(1, Math.floor((W + gap) / (MINSIZE + gap)));
-      b.style.gridTemplateColumns = 'repeat(' + cols + ', minmax(0, 1fr))';
-      b.style.gridTemplateRows = 'none';
-      b.style.gridAutoRows = Math.round(MINSIZE * 1.25) + 'px';
-      b.style.justifyContent = 'center';
-      b.style.alignContent = 'start';
-      b.style.overflowY = 'auto';
-    }
-  } else {
-    b.style.gridTemplateColumns = '';
-    b.style.gridTemplateRows = '';
-    b.style.gridAutoRows = '';
-    b.style.justifyContent = '';
-    b.style.alignContent = '';
-    b.style.overflowY = '';
-  }
-  b.style.setProperty('--cw', Math.round(b.children[0].offsetWidth) + 'px');
-}
-var fitQueued = false;
-function scheduleFit(){
-  if(fitQueued){ return; }
-  fitQueued = true;
-  requestAnimationFrame(function(){ fitQueued = false; fitBoard(); });
-}
-window.addEventListener('resize', scheduleFit);
-if(window.ResizeObserver){ new ResizeObserver(scheduleFit).observe($('board')); }
-function cardEl(i){ return $('board').children[i]; }
-
-function onCard(i){
-  if(isSpectator){ return; }
-  if(!locked){
-    secret = i;
-    updateSecret();
-    return;
-  }
-  if(guessMode){ doGuess(i); return; }
-  var el = cardEl(i);
-  if(eliminated[i]){ delete eliminated[i]; el.classList.remove('out'); }
-  else { eliminated[i] = true; el.classList.add('out'); }
-  sfx.flip();
-  publishBoardState();
-  saveSoon();
-}
-var secretHidden = false;
-function refreshSecretName(){
-  var t = 'Nessuna scelta';
-  if(secret !== null){ t = secretHidden ? '*****' : CHARACTERS[secret].name; }
-  $('secretName').textContent = t;
-}
-function refreshSecretMask(){
-  $('secretBox').classList.toggle('masked', secretHidden);
-  $('hideSecretBtn').textContent = secretHidden ? 'Mostra carta segreta' : 'Nascondi carta segreta';
-  $('hideSecretBtn').classList.toggle('hidden', !locked || isSpectator);
-  $('hideSecretBtn').disabled = !locked || isSpectator;
-  refreshSecretName();
-  saveSoon();
-  if(secret !== null && locked){
-    var el = cardEl(secret);
-    if(el){
-      if(secretHidden){
-        el.classList.remove('mine');
-      } else {
-        el.classList.add('mine');
-      }
-    }
-  }
-}
-function updateSecret(){
-  var box = $('secretFace');
-  var all = $('board').children;
-  for(var k = 0; k < all.length; k++){ all[k].classList.remove('pick', 'mine'); }
-  if(secret === null){
-    box.textContent = '';
-    var q = document.createElement('span');
-    q.className = 'emo';
-    q.textContent = '?';
-    box.appendChild(q);
-    refreshSecretName();
-    updateControls();
-    return;
-  }
-  var ch = CHARACTERS[secret];
-  var nf = makeFace(ch);
-  box.replaceWith(nf);
-  nf.id = 'secretFace';
-  refreshSecretName();
-  if(cardEl(secret)){ cardEl(secret).classList.add(locked ? 'mine' : 'pick'); }
-  updateControls();
-}
-
-/* ---------- Rete ---------- */
-function broadcast(msg){
-  conns.forEach(function(c){ if(c.open){ c.send(msg); } });
-}
-function post(msg){
-  if(isSpectator && msg.t !== 'chat'){ return; }
-  msg.from = myN;
-  if(isHost){ broadcast(msg); }
-  else if(hostConn && hostConn.open){ hostConn.send(msg); }
-  else if(outbox.length < 50){ outbox.push(msg); }
-  handle(msg);
-}
-function flushOutbox(){
-  while(outbox.length && hostConn && hostConn.open){ hostConn.send(outbox.shift()); }
-}
-function hostSys(text){
-  log(text, 'sys');
-  broadcast({t:'sys', text:text});
-}
-function publicRoster(){
-  var out = {};
-  Object.keys(roster).forEach(function(k){
-    var p = roster[k] || {};
-    var eliminatedCount = Array.isArray(p.eliminated) ? p.eliminated.length : (Number(p.eliminatedCount) || 0);
-    out[k] = {name:p.name || ('Giocatore ' + k), ready:!!p.ready, offline:!!p.offline,
-      spectator:!!p.spectator, eliminatedCount:eliminatedCount};
-  });
-  return out;
-}
-function sendSpectatorSnapshots(){
-  if(!isHost){ return; }
-  var players = Object.keys(roster).map(Number).filter(function(n){ return roster[n] && !roster[n].spectator; }).sort(function(a,b){ return a-b; }).map(function(n){
-    var p = roster[n] || {};
-    return {n:n, name:p.name || pname(n), ready:!!p.ready, offline:!!p.offline,
-      eliminated:Array.isArray(p.eliminated) ? p.eliminated.slice() : [],
-      secretIndex:(p.ready && Number.isInteger(p.secretIndex)) ? p.secretIndex : null};
-  });
-  var snapshot = {t:'spectatorSnapshot', chars:CHARACTERS, players:players, roster:publicRoster(), phase:phase, turn:turnN, gid:gid};
-  conns.forEach(function(c){
-    if(c.open && c.n && roster[c.n] && roster[c.n].spectator){
-      try{ c.send(snapshot); }catch(e){}
-    }
-  });
-}
-function pushRoster(){
-  renderRoster();
-  broadcast({t:'roster', roster:publicRoster()});
-  sendSpectatorSnapshots();
-}
-
-function createRoom(cat, config){
-  setupMsg('');
-  roomConfig = normalizeRoomConfig(config);
-  roomConfig.category = cat.name;
-  roomConfig.pokemonGenerations = (config && config.pokemonGenerations || selectedPokemonGenerations).slice();
-  var fullCount = cat.name === 'Mix' ? mixMaxCount() : categoryPool(cat, roomConfig.pokemonGenerations).length;
-  roomConfig.deckSize = Math.max(DEFAULT_DECK_SIZE, Math.min(Number(roomConfig.deckSize) || DEFAULT_DECK_SIZE, fullCount));
-  CHARACTERS = makeDeck(cat, roomConfig);
-  if(CHARACTERS.length < DEFAULT_DECK_SIZE){
-    setupMsg('La selezione contiene meno di 24 personaggi disponibili. Scegli un’altra categoria o più generazioni.');
-    return;
-  }
-  useAllChars = roomConfig.deckSize >= fullCount;
-  drawn = !useAllChars;
-  roomConfig.deckSize = CHARACTERS.length;
-  catName = cat.name;
-  curCat = cat;
-  gid = 1; phase = 'lobby'; turnN = 0; lastResult = null; tokens = {}; roster = {};
-  leaving = false; closedByHost = false;
-  myName = nameVal();
-  isHost = true;
-  myN = 1;
-  isSpectator = false;
-  tryCreate(0);
-}
-function tryCreate(attempt){
-  getPeerOpts(function(opts){ startHost(attempt, opts, null); });
-}
-function findCat(name){
-  if(name === 'Mix'){ return MIX_CATEGORY; }
-  for(var i = 0; i < CATEGORIES.length; i++){ if(CATEGORIES[i].name === name){ return CATEGORIES[i]; } }
-  return null;
-}
-var SIGNAL_ERRORS = ['network', 'server-error', 'socket-error', 'socket-closed', 'disconnected'];
-function startHost(attempt, opts, fixed){
-  var code = fixed || randCode();
-  var p = new Peer(PREFIX + code, opts);
-  var opened = false;
-  peer = p;
-  watchPeer(p);
-  p.on('open', function(){
-    if(opened){ if(entered){ log('Connessione ripristinata', 'sys'); } return; }
-    opened = true;
-    roomCode = code;
-    if(fixed){ finishHostResume(); return; }
-    roster[1] = {name:myName, ready:false, spectator:false, eliminated:[], secretIndex:null};
-    enterGame();
-    log('Stanza creata. Categoria: ' + catName + '. Condividi il codice con gli altri giocatori.', 'sys');
-    log(modeText(), 'sys');
-    log(myName + ' connesso', 'sys');
-  });
-  p.on('connection', onIncoming);
-  p.on('error', function(e){
-    dbgw('Errore peer (host):', e.type, e);
-    if(e.type === 'unavailable-id'){
-      if(fixed && attempt < 15){
-        try{ p.destroy(); }catch(x){}
-        setTimeout(function(){ startHost(attempt + 1, opts, fixed); }, 4000);
-        return;
-      }
-      if(!fixed && attempt < 4){ p.destroy(); tryCreate(attempt + 1); return; }
-    }
-    if(entered){
-      if(SIGNAL_ERRORS.indexOf(e.type) < 0){ log('Errore di rete: ' + e.type, 'err'); }
-    } else {
-      if(fixed){ clearSession(); }
-      setupMsg('Errore di rete: ' + e.type + '. Controlla la connessione e riprova.');
-    }
-  });
-}
-function resumeHost(sess){
-  isHost = true; myN = 1; myName = sess.name; roomCode = sess.code;
-  CHARACTERS = sess.chars || []; catName = sess.cat || ''; useAllChars = !!sess.all; drawn = !!sess.drawn;
-  roomConfig = normalizeRoomConfig(sess.roomConfig || {category:catName, deckSize:CHARACTERS.length, wrongGuessPenalty:'skip', jollyEnabled:true, maxPlayers:2, allowSpectators:true});
-  gid = sess.gid || 1; phase = sess.phase || 'lobby'; turnN = sess.turn || 0; lastResult = sess.res || null;
-  roster = sess.roster || {}; tokens = sess.tokens || {}; curCat = findCat(catName); roomConfig.category = catName;
-  Object.keys(roster).forEach(function(k){
-    var p = roster[k]; p.spectator = !!p.spectator;
-    if(!Array.isArray(p.eliminated)){ p.eliminated = []; }
-    if(typeof p.secretIndex !== 'number'){ p.secretIndex = null; }
-  });
-  isSpectator = false;
-  resumeData = sess;
-  setupMsg('Ripristino della stanza in corso...');
-  getPeerOpts(function(opts){ startHost(0, opts, sess.code); });
-}
-function finishHostResume(){
-  var sess = resumeData;
-  resumeData = null;
-  if(!CHARACTERS.length || !roster[1]){ clearSession(); setupMsg('Impossibile ripristinare la stanza.'); return; }
-  Object.keys(roster).forEach(function(k){ if(Number(k) !== 1){ markOffline(Number(k), true); } });
-  enterGame();
-  restoreLocal(sess);
-  if(roster[1]){
-    roster[1].eliminated = Object.keys(eliminated).map(Number);
-    roster[1].secretIndex = locked && secret !== null ? secret : null;
-  }
-  pushRoster();
-  log('Stanza ripristinata. Attendo la riconnessione degli altri giocatori...', 'sys');
-  if(phase === 'over' && lastResult){ showEnd(lastResult); }
-}
-
-function connBySeat(n){
-  for(var i = 0; i < conns.length; i++){ if(conns[i].n === n){ return conns[i]; } }
-  return null;
-}
-function activeIds(){
-  return Object.keys(roster).map(Number).filter(function(n){ return roster[n] && !roster[n].offline && !roster[n].spectator; }).sort(function(a, b){ return a - b; });
-}
-function nextOf(from){
-  var ids = activeIds().filter(function(n){ return roster[n].ready; });
-  if(!ids.length){ return 0; }
-  for(var i = 0; i < ids.length; i++){ if(ids[i] > from){ return ids[i]; } }
-  return ids[0];
-}
-function advanceTurn(from){
-  if(!isHost){ return; }
-  turnN = nextOf(from);
-  var msg = {t:'turn', n:turnN, from:1};
-  broadcast(msg);
-  handle(msg);
-}
-function maybeStart(){
-  if(!isHost || phase !== 'lobby'){ return; }
-  var ids = activeIds();
-  if(ids.length < 2){ return; }
-  for(var i = 0; i < ids.length; i++){ if(!roster[ids[i]].ready){ return; } }
-  var msg = {t:'start', turn:ids[Math.floor(Math.random() * ids.length)], roomConfig:roomConfig, from:1};
-  broadcast(msg);
-  handle(msg);
-}
-function markOffline(n, quiet){
-  if(!roster[n]){ return; }
-  roster[n].offline = true;
-  clearTimeout(graceTimers[n]);
-  graceTimers[n] = setTimeout(function(){ dropSeat(n, 'è uscito dalla stanza'); }, GRACE_MS);
-  if(!quiet){
-    hostSys(roster[n].name + ' si è disconnesso. Attendo la riconnessione...');
-    if(phase === 'playing' && turnN === n){ advanceTurn(n); }
-  }
-  pushRoster();
-}
-function dropSeat(n, text){
-  var p = roster[n];
-  if(!p){ return; }
-  clearTimeout(graceTimers[n]);
-  delete graceTimers[n];
-  var c = connBySeat(n);
-  if(c){
-    c.n = 0;
-    conns.splice(conns.indexOf(c), 1);
-    try{ c.close(); }catch(e){}
-  }
-  var nm = p.name;
-  delete roster[n];
-  delete tokens[n];
-  hostSys(nm + ' ' + text);
-  if(phase === 'playing' && turnN === n){ advanceTurn(n); }
-  pushRoster();
-  maybeStart();
-}
-function onIncoming(conn){
-  dbg('Connessione in ingresso da', conn.peer);
-  watchIce(conn, 'host', function(){ dbgw('host: un giocatore non è riuscito a collegarsi direttamente; proverà tramite relay.'); });
-  conn.on('data', function(d){ conn.lastRx = Date.now(); onHostData(conn, d); });
-  conn.on('close', function(){
-    var i = conns.indexOf(conn);
-    if(i < 0){ return; }
-    conns.splice(i, 1);
-    if(conn.n && roster[conn.n]){ markOffline(conn.n, false); }
-  });
-}
-function welcomeMsg(n, rejoined){
-  return {t:'welcome', n:n, role:roster[n].spectator ? 'spectator' : 'player', code:roomCode,
-    chars:CHARACTERS, category:catName, all:useAllChars, drawn:drawn, roomConfig:roomConfig,
-    name:roster[n].name, token:tokens[n], roster:publicRoster(), gid:gid, phase:phase, turn:turnN,
-    res:lastResult, rejoined:!!rejoined};
-}
-function onHostData(conn, d){
-  if(!d || typeof d !== 'object'){ return; }
-  if(d.t === 'hb'){ return; }
-  if(d.t === 'hello'){
-    var seat = Number(d.n);
-    if(d.rejoin && seat > 1 && roster[seat] && tokens[seat] && d.token === tokens[seat]){
-      var old = connBySeat(seat);
-      if(old && old !== conn){
-        old.n = 0;
-        conns.splice(conns.indexOf(old), 1);
-        try{ old.close(); }catch(e){}
-      }
-      clearTimeout(graceTimers[seat]);
-      delete graceTimers[seat];
-      conn.n = seat;
-      conn.lastRx = Date.now();
-      conns.push(conn);
-      roster[seat].offline = false;
-      conn.send(welcomeMsg(seat, true));
-      hostSys(roster[seat].name + ' è di nuovo online');
-      pushRoster();
-      return;
+      card.setAttribute('aria-disabled', 'true');
+      card.setAttribute('aria-label', g.titolo + ', in arrivo');
     }
 
-    var rosterCount = Object.keys(roster).length;
-    var n = 0;
-    if(rosterCount < 5){
-      var availableActive = [2,3].filter(function(candidate){
-        return candidate <= roomConfig.maxPlayers && !roster[candidate];
+    var icona = crea('div', 'icona');
+    icona.setAttribute('aria-hidden', 'true');
+    icona.appendChild(crea('span', '', g.icona));
+    card.appendChild(icona);
+    card.appendChild(crea('h2', '', g.titolo));
+    card.appendChild(crea('span', 'tag', g.tag));
+    card.appendChild(crea('p', '', g.descrizione));
+
+    var gioca = crea('span', 'gioca', attivo ? 'GIOCA ' : 'PRESTO');
+    if(attivo){ gioca.insertAdjacentHTML('beforeend', FRECCIA); }
+    card.appendChild(gioca);
+
+    if(!attivo){
+      var nastro = crea('div', 'nastro', 'IN ARRIVO');
+      nastro.setAttribute('aria-hidden', 'true');
+      card.appendChild(nastro);
+    }
+
+    if(attivo && window.matchMedia('(hover:hover) and (pointer:fine)').matches){
+      card.addEventListener('pointermove', function(e){
+        var r = card.getBoundingClientRect();
+        var x = (e.clientX - r.left) / r.width - .5;
+        var y = (e.clientY - r.top) / r.height - .5;
+        card.style.setProperty('--ry', (x * 9).toFixed(2) + 'deg');
+        card.style.setProperty('--rx', (-y * 9).toFixed(2) + 'deg');
       });
-      if(activeIds().length < roomConfig.maxPlayers && availableActive.length){
-        n = availableActive[0];
-      } else if(roomConfig.allowSpectators){
-        var spectatorSeats = [4,5,6].filter(function(candidate){ return !roster[candidate]; });
-        if(spectatorSeats.length){ n = spectatorSeats[0]; }
-      }
-    }
-    if(!n){
-      var reason = rosterCount >= 5
-        ? 'La stanza ha raggiunto il limite di 5 utenti complessivi.'
-        : 'Gli slot dei giocatori attivi sono occupati e gli spettatori sono disabilitati o non ci sono più slot disponibili.';
-      conn.send({t:'full', reason:reason});
-      setTimeout(function(){ try{ conn.close(); }catch(e){} }, 500);
-      return;
-    }
-
-    conn.n = n;
-    conn.lastRx = Date.now();
-    conns.push(conn);
-    var nm = String(d.name || 'Giocatore').slice(0, 20);
-    var taken = Object.keys(roster).some(function(k){ return String(roster[k].name || '').toLowerCase() === nm.toLowerCase(); });
-    if(taken){ nm = nm.slice(0, 16) + ' ' + n; }
-    var spectator = n >= 4;
-    roster[n] = {name:nm, ready:false, offline:false, spectator:spectator, eliminated:[], secretIndex:null};
-    tokens[n] = Math.random().toString(36).slice(2) + Date.now().toString(36);
-    conn.send(welcomeMsg(n, false));
-    hostSys(spectator ? (roster[n].name + ' è entrato come spettatore') : (roster[n].name + ' connesso'));
-    pushRoster();
-    saveSoon();
-    return;
-  }
-
-  if(!conn.n || !roster[conn.n]){ return; }
-  if(d.t === 'leave'){ dropSeat(conn.n, 'è uscito dalla stanza'); return; }
-  var sender = roster[conn.n];
-
-  /* Gli indici degli scarti non vengono mai inoltrati ai giocatori attivi. */
-  if(d.t === 'boardState'){
-    if(sender.spectator){ return; }
-    var indices = Array.isArray(d.eliminated) ? d.eliminated : [];
-    var seen = {};
-    sender.eliminated = indices.map(Number).filter(function(i){
-      if(!Number.isInteger(i) || i < 0 || i >= CHARACTERS.length || seen[i]){ return false; }
-      seen[i] = true; return true;
-    });
-    pushRoster();
-    saveSoon();
-    return;
-  }
-
-  if(d.t === 'ready'){
-    if(sender.spectator){ return; }
-    if(Number.isInteger(d.secret) && d.secret >= 0 && d.secret < CHARACTERS.length){ sender.secretIndex = d.secret; }
-    var readyRelay = Object.assign({}, d);
-    delete readyRelay.secret;
-    readyRelay.from = conn.n;
-    handle(readyRelay);
-    conns.forEach(function(c){ if(c !== conn && c.open){ c.send(readyRelay); } });
-    pushRoster();
-    return;
-  }
-
-  /* Gli spettatori possono usare la chat, ma non inviare comandi di gioco. */
-  if(sender.spectator){
-    if(d.t === 'chat' && typeof d.text === 'string'){
-      var spectatorChat = {t:'chat', text:d.text.slice(0,200), from:conn.n};
-      handle(spectatorChat);
-      conns.forEach(function(c){ if(c !== conn && c.open){ c.send(spectatorChat); } });
-    }
-    return;
-  }
-  if(d.t === 'quick' && d.kind === 'jolly' && !roomConfig.jollyEnabled){ return; }
-  if(!RELAY[d.t]){ return; }
-  d = Object.assign({}, d);
-  d.from = conn.n;
-  handle(d);
-  conns.forEach(function(c){ if(c !== conn && c.open){ c.send(d); } });
-}
-function joinRoom(){
-  setupMsg('');
-  var code = $('codeIn').value.trim().toUpperCase();
-  if(!code){ setupMsg('Inserisci il codice della stanza.'); return; }
-  myName = nameVal();
-  isHost = false;
-  isSpectator = false;
-  spectatorSnapshot = null; spectatorTarget = 0;
-  roomCode = code;
-  myN = 0; myToken = ''; gid = 0; resumeData = null;
-  leaving = false; closedByHost = false; reconnecting = false;
-  setupMsg('Connessione in corso...');
-  getPeerOpts(function(opts){ startGuest(code, opts, 'fresh'); });
-}
-function resumeGuest(sess){
-  isHost = false; isSpectator = Number(sess.n) >= 4; spectatorSnapshot = null; spectatorTarget = 0; myName = sess.name; roomCode = sess.code; myN = sess.n || 0; myToken = sess.token || '';
-  gid = sess.gid || 0; catName = sess.cat || '';
-  resumeData = sess;
-  setupMsg('Ripresa della partita in corso...');
-  startReconnect(true);
-}
-function startGuest(code, opts, mode){
-  var id = ++attemptSeq, failed = false, opened = false, linked = false;
-  function fail(msg){
-    if(failed || id !== attemptSeq){ return; }
-    failed = true;
-    clearTimeout(joinTimer);
-    if(mode === 'fresh'){ setupMsg(msg); } else { scheduleRetry(); }
-  }
-  /* Connessione diretta non riuscita: riprova forzando il passaggio dal server TURN (una sola volta). */
-  function escalate(why){
-    if(failed || linked || id !== attemptSeq || relayForced || relayTest()){ return false; }
-    relayForced = true;
-    try{ sessionStorage.setItem('indovinachi-relay', '1'); }catch(e){}
-    dbgw('Passo alla modalità relay (motivo: ' + why + ').');
-    var msg = 'Connessione diretta non disponibile, passaggio al server di relay...';
-    log(msg, 'sys');
-    if(!entered){ setupMsg(msg); }
-    clearTimeout(joinTimer);
-    getPeerOpts(function(o){
-      if(id !== attemptSeq || leaving){ return; }
-      if(mode === 'fresh' ? entered : !reconnecting){ return; }
-      startGuest(code, o, mode);
-    });
-    return true;
-  }
-  var RELAY_FAIL = 'Connessione non riuscita nemmeno tramite il server di relay. Prova a cambiare rete o riprova tra poco (dettagli nella console del browser).';
-  hostConn = null;
-  if(peer && !peer.destroyed){ try{ peer.destroy(); }catch(e){} }
-  var p = new Peer(undefined, opts);
-  peer = p;
-  watchPeer(p);
-  p.on('open', function(){
-    if(opened || id !== attemptSeq){ return; }
-    opened = true;
-    dbg('Provo a connettermi alla stanza', code, mode === 'rejoin' ? '(riconnessione)' : '');
-    var c = p.connect(PREFIX + code, {reliable:true});
-    hostConn = c;
-    watchIce(c, 'guest' + (relayForced || relayTest() ? '[relay]' : ''), function(why){ if(!escalate(why)){ fail(relayForced ? RELAY_FAIL : 'Connessione non riuscita (' + why + ')'); } });
-    c.on('open', function(){
-      linked = true;
-      lastRx = Date.now();
-      c.send({t:'hello', name:myName, rejoin:mode === 'rejoin', n:myN, token:myToken});
-    });
-    c.on('data', function(d){
-      if(c !== hostConn){ return; }
-      lastRx = Date.now();
-      handle(d);
-    });
-    c.on('close', function(){
-      if(c !== hostConn){ return; }
-      if(entered && !reconnecting){ onHostLost(); }
-      else if(mode === 'rejoin'){ fail('Connessione chiusa.'); }
-    });
-    clearTimeout(joinTimer);
-    joinTimer = setTimeout(function(){
-      dbgw('Timeout: il canale dati con l\'host non si è aperto. Controlla gli stati ICE sopra.');
-      if(escalate('timeout')){ return; }
-      fail(relayForced ? RELAY_FAIL : 'Stanza non raggiungibile. Controlla il codice o la rete (dettagli nella console del browser).');
-    }, relayForced ? 25000 : 12000);
-  });
-  p.on('error', function(e){
-    dbgw('Errore peer (guest):', e.type, e);
-    if(id !== attemptSeq){ return; }
-    if(!linked && ['webrtc', 'negotiation-failed', 'connection-failed'].indexOf(e.type) >= 0 && escalate(e.type)){ return; }
-    var m = (e.type === 'peer-unavailable') ? 'Stanza non trovata. Controlla il codice.' : 'Errore di rete: ' + e.type;
-    if(mode === 'fresh' && entered){
-      if(SIGNAL_ERRORS.indexOf(e.type) < 0){ log(m, 'err'); }
-    } else { fail(m); }
-  });
-}
-
-/* ---------- Riconnessione automatica (guest) ---------- */
-function onHostLost(){
-  if(!entered || leaving || closedByHost || isHost){ return; }
-  startReconnect(false);
-}
-function attemptRejoin(){
-  if(!reconnecting){ return; }
-  getPeerOpts(function(opts){ if(reconnecting){ startGuest(roomCode, opts, 'rejoin'); } });
-}
-function startReconnect(immediate){
-  if(reconnecting || leaving || closedByHost){ return; }
-  reconnecting = true;
-  retryCount = 0;
-  if(entered){ log('Riconnessione in corso...', 'sys'); }
-  clearTimeout(retryTimer);
-  retryTimer = setTimeout(attemptRejoin, immediate ? 0 : 500);
-}
-function scheduleRetry(){
-  if(!reconnecting){ return; }
-  retryCount++;
-  if(retryCount > (entered ? 30 : 8)){ giveUpReconnect(); return; }
-  clearTimeout(retryTimer);
-  retryTimer = setTimeout(attemptRejoin, Math.min(1500 + retryCount * 1000, 8000));
-}
-function giveUpReconnect(){
-  reconnecting = false;
-  clearTimeout(retryTimer);
-  if(entered){ log('Impossibile ripristinare la connessione. Ricarica la pagina per riprovare.', 'err'); }
-  else { clearSession(); resumeData = null; setupMsg('Impossibile riprendere la partita: la stanza non è più disponibile.'); }
-}
-function linkCheck(){
-  if(!entered || leaving || closedByHost){ return; }
-  var now = Date.now();
-  if(isHost){
-    conns.slice().forEach(function(c){
-      if(c.open && c.lastRx && now - c.lastRx > STALE_MS){
-        dbgw('Giocatore silenzioso: chiudo la connessione.');
-        try{ c.close(); }catch(e){}
-      }
-    });
-  } else if(!reconnecting){
-    if(!hostConn || !hostConn.open || now - lastRx > STALE_MS){
-      try{ if(hostConn){ hostConn.close(); } }catch(e){}
-      startReconnect(false);
-    }
-  }
-}
-function startHeartbeat(){
-  if(hbTimer){ return; }
-  hbTimer = setInterval(function(){
-    if(leaving){ return; }
-    if(isHost){ broadcast({t:'hb'}); }
-    else if(hostConn && hostConn.open){ try{ hostConn.send({t:'hb'}); }catch(e){} }
-    linkCheck();
-  }, HB_MS);
-}
-
-/* ---------- Gestione messaggi ---------- */
-function handle(d){
-  switch(d.t){
-    case 'welcome':
-      clearTimeout(joinTimer);
-      var hadEntered = entered, rejoin = !!d.rejoined, wasRecon = reconnecting;
-      var keep = rejoin && d.gid === gid;
-      myN = d.n;
-      isSpectator = d.role === 'spectator' || (!!(d.roster && d.roster[d.n] && d.roster[d.n].spectator));
-      if(d.roster){ roster = d.roster; }
-      document.body.classList.toggle('is-spectator', isSpectator);
-      if(d.name){ myName = d.name; }
-      if(d.token){ myToken = d.token; }
-      if(d.chars && d.chars.length){ CHARACTERS = d.chars; }
-      if(d.category){ catName = d.category; }
-      useAllChars = !!d.all;
-      drawn = !!d.drawn;
-      roomConfig = normalizeRoomConfig(d.roomConfig || {category:d.category, deckSize:(d.chars || []).length});
-      roomConfig.category = d.category || roomConfig.category;
-      roomCode = d.code || roomCode;
-      gid = d.gid || 1;
-      phase = d.phase || 'lobby';
-      turnN = d.turn || 0;
-      lastResult = d.res || null;
-      reconnecting = false;
-      retryCount = 0;
-      clearTimeout(retryTimer);
-      lastRx = Date.now();
-      if(!hadEntered){
-        enterGame();
-        if(keep && resumeData){ restoreLocal(resumeData); }
-      } else if(!keep){
-        outbox = [];
-        buildBoard();
-        resetLocal();
-        scheduleFit();
-      }
-      resumeData = null;
-      if(rejoin || wasRecon){ log('Connessione ripristinata', 'sys'); }
-      else {
-        log('Connesso alla stanza come ' + myName + '. Categoria: ' + catName, 'sys');
-        log(modeText(), 'sys');
-      }
-      flushOutbox();
-      renderTurn();
-      refreshHint();
-      refreshJollyButton();
-      updateSpectatorModeUI();
-      if(isSpectator && !rejoin && !spectatorNoticeShown){ showSpectatorNotice(); }
-      if(phase === 'over' && lastResult){ showEnd(lastResult); }
-      break;
-    case 'full':
-      setupMsg(d.reason || 'Stanza piena: raggiunto il limite di utenti o di giocatori attivi.');
-      if(reconnecting && !entered){ reconnecting = false; clearTimeout(retryTimer); clearSession(); }
-      break;
-    case 'bye':
-      closedByHost = true;
-      reconnecting = false;
-      clearTimeout(retryTimer);
-      clearSession();
-      log('L\'host ha chiuso la stanza. Ricarica la pagina per crearne una nuova o entrare in un\'altra.', 'err');
-      break;
-    case 'hb':
-      break;
-    case 'roster':
-      roster = d.roster || {};
-      renderRoster();
-      updateControls();
-      break;
-    case 'spectatorSnapshot':
-      if(isSpectator){
-        spectatorSnapshot = d;
-        if(d.roster){ roster = d.roster; renderRoster(); }
-        renderSpectatorView();
-      }
-      break;
-    case 'sys':
-      log(d.text, 'sys');
-      break;
-    case 'chat':
-      log(d.text, 'chat', null, d.from);
-      sfx.msg();
-      break;
-    case 'quick':
-      var q = QUICK[d.kind];
-      if(!q){ break; }
-      log('', 'chat', {text:q.label, cls:q.cls}, d.from);
-      sfx.quick(d.kind);
-      break;
-    case 'ready':
-      if(roster[d.from]){
-        roster[d.from].ready = true;
-        if(isHost && d.from === myN && secret !== null){ roster[d.from].secretIndex = secret; }
-      }
-      renderRoster();
-      updateControls();
-      log(pname(d.from) + ' ha scelto la carta segreta ed è pronto.', 'sys');
-      if(isHost){ maybeStart(); }
-      break;
-    case 'unready':
-      if(roster[d.from]){ roster[d.from].ready = false; }
-      if(phase !== 'lobby'){ phase = 'lobby'; turnN = 0; lastResult = null; exitGuess(); closeEnd(); }
-      renderTurn();
-      refreshHint();
-      log(pname(d.from) + ' ha ripristinato la partita.', 'sys');
-      break;
-    case 'start':
-      if(d.roomConfig){ roomConfig = normalizeRoomConfig(d.roomConfig); }
-      refreshJollyButton();
-      phase = 'playing';
-      turnN = d.turn || 0;
-      lastResult = null;
-      renderTurn();
-      refreshHint();
-      log('Tutti i giocatori sono pronti: inizia ' + pname(turnN) + '. Iniziate a fare domande!', 'win');
-      if(turnN === myN){ sfx.turn(); }
-      break;
-    case 'turn':
-      turnN = d.n || 0;
-      renderTurn();
-      if(turnN){
-        log(turnN === myN ? 'È il tuo turno.' : 'Turno di ' + pname(turnN) + '.', 'sys');
-        if(turnN === myN){ sfx.turn(); }
-      }
-      break;
-    case 'pass':
-      if(isHost && phase === 'playing' && d.from === turnN){ advanceTurn(d.from); }
-      break;
-    case 'guess':
-      if(d.to === myN && secret !== null && phase === 'playing'){
-        post({t:'result', guesser:d.from, target:myN, card:d.card, ok:(secret === d.card), answer:secret});
-      }
-      break;
-    case 'result':
-      if(phase !== 'playing'){ break; }
-      var cn = CHARACTERS[d.card] ? CHARACTERS[d.card].name : '?';
-      lastResult = {guesser:d.guesser, target:d.target, card:d.card, ok:!!d.ok, answer:d.answer};
-      exitGuess();
-      if(!d.ok && roomConfig.wrongGuessPenalty === 'skip'){
-        log(pname(d.guesser) + ' ha sbagliato: la carta di ' + pname(d.target) + ' non è ' + cn + '. Penalità: salta il turno.', 'err');
-        renderTurn();
-        refreshHint();
-        if(isHost){ advanceTurn(d.guesser); }
-        break;
-      }
-      phase = 'over';
-      renderTurn();
-      refreshHint();
-      if(d.ok){
-        log(pname(d.guesser) + ' ha INDOVINATO! La carta di ' + pname(d.target) + ' era ' + cn + '.', 'win');
-        celebrate();
-        sfx.win();
-      }
-      else { log(pname(d.guesser) + ' ha sbagliato: la carta di ' + pname(d.target) + ' non è ' + cn + '.', 'err'); }
-      showEnd(lastResult);
-      break;
-    case 'rematch':
-      if(d.roomConfig){ roomConfig = normalizeRoomConfig(d.roomConfig); }
-      if(d.category){ catName = d.category; roomConfig.category = d.category; curCat = findCat(d.category); }
-      if(typeof d.all === 'boolean'){ useAllChars = d.all; }
-      if(typeof d.drawn === 'boolean'){ drawn = d.drawn; }
-      CHARACTERS = d.chars;
-      refreshJollyButton();
-      gid = d.gid;
-      phase = 'lobby';
-      turnN = 0;
-      lastResult = null;
-      Object.keys(roster).forEach(function(k){
-        roster[k].ready = false; roster[k].secretIndex = null; roster[k].eliminated = []; roster[k].eliminatedCount = 0;
+      card.addEventListener('pointerleave', function(){
+        card.style.setProperty('--rx', '0deg');
+        card.style.setProperty('--ry', '0deg');
       });
-      closeEnd();
-      exitGuess();
-      buildBoard();
-      resetLocal();
-      renderTurn();
-      scheduleFit();
-      log('Nuova partita: le carte sono state rimescolate. Scegliete la carta segreta.', 'sys');
-      break;
-  }
-  if(isHost && ['ready','unready','start','turn','result','rematch'].indexOf(d.t) >= 0){ sendSpectatorSnapshots(); }
-  saveSoon();
-}
-
-/* ---------- Azioni ---------- */
-function confirmSecret(){
-  if(isSpectator || secret === null || locked){ return; }
-  locked = true;
-  if(isHost && roster[myN]){ roster[myN].secretIndex = secret; }
-  updateSecret();
-  refreshSecretMask();
-  refreshHint();
-  if(isHost){ post({t:'ready'}); sendSpectatorSnapshots(); }
-  else { post({t:'ready', secret:secret}); }
-}
-function exitGuess(){ if(guessMode){ toggleGuess(); } }
-function toggleGuess(){
-  guessMode = !guessMode;
-  $('board').classList.toggle('guessing', guessMode);
-  $('guessBtn').textContent = guessMode ? 'Annulla tentativo' : 'Tenta di indovinare';
-  updateTargetUI();
-  markTarget();
-  refreshHint();
-}
-function opponents(){
-  return Object.keys(roster).map(Number).filter(function(n){
-    return n !== myN && roster[n].ready && !roster[n].offline && !roster[n].spectator;
-  });
-}
-function updateTargetUI(){
-  var sel = $('target'), multi = guessMode && opponents().length > 1;
-  sel.classList.toggle('hidden', !multi);
-  sel.classList.toggle('target-active', multi);
-}
-function markTarget(){
-  var t = (guessMode && opponents().length > 1) ? Number($('target').value) : 0;
-  var chips = $('roster').children;
-  for(var i = 0; i < chips.length; i++){ chips[i].classList.toggle('target', Number(chips[i].dataset.n) === t); }
-}
-function doGuess(i){
-  var opp = opponents();
-  if(!opp.length){ log('Non ci sono avversari pronti da indovinare.', 'err'); return; }
-  var target = opp.length === 1 ? opp[0] : Number($('target').value);
-  if(opp.indexOf(target) < 0){ log('Scegli un avversario valido nel menu evidenziato.', 'err'); return; }
-  if(!window.confirm('Pensi che la carta di ' + pname(target) + ' sia ' + CHARACTERS[i].name + '?')){ return; }
-  log('Hai tentato ' + CHARACTERS[i].name + ' per ' + pname(target) + '...', 'sys');
-  post({t:'guess', to:target, card:i});
-  toggleGuess();
-}
-function resetLocal(){
-  eliminated = {};
-  var all = $('board').children;
-  for(var k = 0; k < all.length; k++){ all[k].classList.remove('out'); }
-  exitGuess();
-  locked = false;
-  secret = null;
-  secretHidden = false;
-  updateSecret();
-  refreshSecretMask();
-  refreshHint();
-}
-function publishBoardState(){
-  if(isSpectator){ return; }
-  var indices = Object.keys(eliminated).map(Number).filter(function(i){ return Number.isInteger(i) && i >= 0 && i < CHARACTERS.length; });
-  if(roster[myN]){
-    if(isHost){ roster[myN].eliminated = indices.slice(); }
-    else { roster[myN].eliminatedCount = indices.length; }
-  }
-  renderRoster();
-  if(isHost){ pushRoster(); saveSoon(); }
-  else if(hostConn && hostConn.open){
-    try{ hostConn.send({t:'boardState', eliminated:indices}); }catch(e){}
-  }
-}
-function resetBoard(){
-  if(isSpectator){ return; }
-  eliminated = {};
-  var all = $('board').children;
-  for(var k = 0; k < all.length; k++){ all[k].classList.remove('out'); }
-  publishBoardState();
-  refreshHint();
-  log('Tabellone ripristinato. La carta segreta e lo stato della partita sono rimasti invariati.', 'sys');
-  saveSoon();
-}
-function refreshHint(){
-  var t;
-  if(!locked){ t = 'Clicca una carta per sceglierla come segreta, poi conferma.'; }
-  else if(phase === 'lobby'){ t = 'Carta confermata. In attesa che tutti i giocatori confermino la propria.'; }
-  else if(phase === 'over'){ t = 'Partita finita.'; }
-  else if(guessMode){
-    t = opponents().length > 1
-      ? 'Scegli l\'avversario nel menu evidenziato, poi clicca la carta che pensi sia la sua.'
-      : 'Modalità tentativo: clicca la carta che pensi sia quella dell\'avversario.';
-  }
-  else { t = 'Clicca le carte per eliminarle (di nuovo per ripristinarle). Usa la chat per le domande.'; }
-  $('hint').textContent = t;
-}
-function updateControls(){
-  var playing = phase === 'playing' && !isSpectator;
-  $('confirmBtn').disabled = isSpectator || locked || secret === null;
-  $('guessBtn').disabled = !(locked && playing && opponents().length > 0);
-  $('passBtn').classList.toggle('hidden', !playing);
-  $('passBtn').disabled = !(playing && turnN === myN);
-  $('rematchBtn').classList.toggle('hidden', !(isHost && phase === 'over'));
-  $('turnCtl').classList.toggle('hidden', phase === 'lobby');
-  saveSoon();
-}
-function renderTurn(){
-  var b = $('turnBadge'), mine = phase === 'playing' && turnN === myN, t = '';
-  if(phase === 'playing'){ t = mine ? 'Tuo turno' : 'Turno di ' + pname(turnN); }
-  else if(phase === 'over'){ t = 'Partita finita'; }
-  b.textContent = t;
-  b.classList.toggle('mine', mine);
-  renderRoster();
-  updateControls();
-}
-function renderRoster(){
-  var opp = opponents();
-  var sel = $('target'), prev = sel.value;
-  sel.textContent = '';
-  opp.forEach(function(n){
-    var o = document.createElement('option');
-    o.value = n;
-    o.textContent = 'Contro: ' + pname(n);
-    sel.appendChild(o);
-  });
-  if(prev && sel.querySelector('option[value="' + prev + '"]')){ sel.value = prev; }
-  updateTargetUI();
-  var r = $('roster');
-  r.textContent = '';
-  var tgt = (guessMode && opp.length > 1) ? Number(sel.value) : 0;
-  Object.keys(roster).sort(function(a,b){ return Number(a)-Number(b); }).forEach(function(k){
-    var n = Number(k), p = roster[k];
-    var c = document.createElement('button');
-    c.type = 'button';
-    c.className = 'chip roster-chip' + (p.ready ? ' ready' : '') + (p.offline ? ' offline' : '') +
-      (phase === 'playing' && n === turnN ? ' active' : '') + (n === tgt ? ' target' : '') + (p.spectator ? ' spectator' : '');
-    c.dataset.n = n;
-    var label = p.name;
-    if(n === myN){ label += p.spectator ? ' (tu, spettatore)' : (n === 1 ? ' (tu, host)' : ' (tu)'); }
-    else if(n === 1){ label += ' (host)'; }
-    else if(p.spectator){ label += ' (spettatore)'; }
-    if(p.ready && !p.spectator){ label += ' ✓'; }
-    if(p.offline){ label += ' (offline)'; }
-    var nameSpan = document.createElement('span');
-    nameSpan.className = 'roster-name';
-    nameSpan.textContent = label;
-    c.appendChild(nameSpan);
-    var count = document.createElement('span');
-    count.className = 'discard-count';
-    var scarti = Array.isArray(p.eliminated) ? p.eliminated.length : (Number(p.eliminatedCount) || 0);
-    count.textContent = 'Scarti: ' + (p.spectator ? '—' : scarti);
-    c.appendChild(count);
-    if(p.offline){ c.title = 'Giocatore offline: visualizzazione dell’ultimo stato sincronizzato'; }
-    else { c.title = p.spectator ? 'Spettatore' : 'Partecipante'; }
-    if(isSpectator && !p.spectator){
-      c.title = 'Clicca per ispezionare il tabellone e la carta segreta' + (p.offline ? ' (ultimo stato sincronizzato)' : '');
-      c.addEventListener('click', function(){ setSpectatorTarget(n); });
     }
-    r.appendChild(c);
-  });
-}
-function setSpectatorTarget(n){
-  if(!isSpectator){ return; }
-  spectatorTarget = Number(n) || 0;
-  $('spectatorView').classList.remove('hidden');
-  renderSpectatorView();
-}
-function renderSpectatorView(){
-  if(!isSpectator){ return; }
-  var panel = $('spectatorView');
-  if(panel.classList.contains('hidden')){ return; }
-  var snap = spectatorSnapshot;
-  $('spectatorBoard').textContent = '';
-  if(!snap || !Array.isArray(snap.players)){
-    $('spectatorViewTitle').textContent = 'Visuale spettatore';
-    $('spectatorViewStatus').textContent = 'In attesa dei dati del tabellone dall’Host…';
-    $('spectatorSecretName').textContent = 'Carta segreta non ancora disponibile';
-    $('spectatorSecretHelp').textContent = 'Attendi la sincronizzazione della stanza.';
-    $('spectatorSecretFace').textContent = '…';
-    return;
+    li.appendChild(card);
+    return li;
   }
-  var player = snap.players.filter(function(p){ return p.n === spectatorTarget; })[0];
-  if(!player){
-    $('spectatorViewTitle').textContent = 'Visuale spettatore';
-    $('spectatorViewStatus').textContent = 'Clicca sul nome di un giocatore attivo nell’elenco per aprire la sua visuale.';
-    $('spectatorSecretName').textContent = 'Nessun giocatore selezionato';
-    $('spectatorSecretHelp').textContent = 'La carta segreta sarà visibile quando il giocatore l’avrà confermata.';
-    $('spectatorSecretFace').textContent = '?';
-    return;
-  }
-  var chars = Array.isArray(snap.chars) ? snap.chars : CHARACTERS;
-  var out = {};
-  (player.eliminated || []).forEach(function(i){ out[Number(i)] = true; });
-  $('spectatorViewTitle').textContent = player.name + ' — tabellone';
-  $('spectatorViewStatus').textContent = (player.offline ? 'Giocatore offline. ' : '') +
-    'Scarti: ' + Object.keys(out).length + ' · Fase: ' + (snap.phase === 'playing' ? 'partita in corso' : (snap.phase === 'over' ? 'partita terminata' : 'attesa')) +
-    (snap.turn ? ' · Turno di ' + pname(snap.turn) : '');
-  var secretBox = $('spectatorSecretFace');
-  secretBox.textContent = '';
-  if(player.ready && Number.isInteger(player.secretIndex) && chars[player.secretIndex]){
-    secretBox.appendChild(makeFace(chars[player.secretIndex]));
-    $('spectatorSecretName').textContent = chars[player.secretIndex].name;
-    $('spectatorSecretHelp').textContent = 'Carta segreta confermata dal giocatore.';
-  } else {
-    var q = document.createElement('span'); q.className = 'emo'; q.textContent = '?'; secretBox.appendChild(q);
-    $('spectatorSecretName').textContent = 'Carta segreta non ancora confermata';
-    $('spectatorSecretHelp').textContent = 'La carta apparirà qui quando il giocatore la conferma.';
-  }
-  chars.forEach(function(ch, i){
-    var card = document.createElement('div');
-    card.className = 'card' + (out[i] ? ' out' : '') + (player.secretIndex === i && player.ready ? ' spectator-secret-card' : '');
-    var inner = document.createElement('div'); inner.className = 'card-inner';
-    var front = document.createElement('div'); front.className = 'card-front';
-    front.appendChild(makeFace(ch));
-    var name = document.createElement('div'); name.className = 'nm'; name.textContent = ch.name; front.appendChild(name);
-    var back = document.createElement('div'); back.className = 'card-back'; back.setAttribute('aria-hidden','true'); back.textContent = '?';
-    inner.appendChild(front); inner.appendChild(back); card.appendChild(inner);
-    $('spectatorBoard').appendChild(card);
-  });
-}
-function updateSpectatorModeUI(){
-  document.body.classList.toggle('is-spectator', isSpectator);
-  $('spectatorInfo').classList.toggle('hidden', !isSpectator);
-  if(isSpectator){
-    $('confirmBtn').disabled = true;
-    $('guessBtn').disabled = true;
-    $('passBtn').classList.add('hidden');
-    $('rematchBtn').classList.add('hidden');
-  } else {
-    $('spectatorView').classList.add('hidden');
-  }
-  refreshSecretMask();
-  refreshJollyButton();
-  updateControls();
-}
-function showSpectatorNotice(){
-  spectatorNoticeShown = true;
-  $('spectatorNoticeModal').classList.remove('hidden');
-  $('spectatorNoticeOk').focus();
-}
-function closeSpectatorNotice(){ $('spectatorNoticeModal').classList.add('hidden'); }
 
-/* ---------- Fine partita e rivincita ---------- */
-function showEnd(res){
-  var me = res.guesser === myN, who = pname(res.guesser);
-  $('endTitle').textContent = res.ok
-    ? (me ? 'Hai indovinato!' : who + ' ha indovinato!')
-    : (me ? 'Hai sbagliato!' : who + ' ha sbagliato!');
-  var ch = CHARACTERS[res.answer] || (res.ok ? CHARACTERS[res.card] : null);
-  var owner = res.target === myN ? 'La tua carta' : 'La carta di ' + pname(res.target);
-  var text = ch ? owner + ' era ' + ch.name + '.' : (res.ok ? 'Tentativo riuscito.' : 'Tentativo non riuscito.');
-  if(!res.ok && CHARACTERS[res.card]){ text += ' Il tentativo era ' + CHARACTERS[res.card].name + '.'; }
-  $('endText').textContent = text;
-  var card = $('endCard');
-  card.textContent = '';
-  if(ch){
-    card.appendChild(makeFace(ch));
-    var nm = document.createElement('div');
-    nm.className = 'nm';
-    nm.textContent = ch.name;
-    card.appendChild(nm);
-  }
-  $('endRematch').classList.toggle('hidden', !isHost);
-  $('endWait').classList.toggle('hidden', isHost);
-  $('endWait').textContent = 'In attesa che ' + pname(1) + ' avvii una nuova partita...';
-  $('endModal').classList.remove('hidden');
-  (isHost ? $('endRematch') : $('endModal').querySelector('.modal-x')).focus();
-}
-function closeEnd(){ $('endModal').classList.add('hidden'); }
-function startRematch(){
-  if(!isHost || phase !== 'over'){ return; }
-  var cat = curCat || findCat(catName);
-  function buildAndSend(){
-    var chars = cat ? makeDeck(cat, roomConfig) : shuffle(CHARACTERS);
-    if(chars.length < DEFAULT_DECK_SIZE){ log('Impossibile avviare la rivincita: il mazzo contiene meno di 24 personaggi.', 'err'); return; }
-    roomConfig.deckSize = chars.length;
-    useAllChars = cat ? roomConfig.deckSize >= (cat.name === 'Mix' ? mixMaxCount() : categoryPool(cat, roomConfig.pokemonGenerations).length) : false;
-    drawn = !useAllChars;
-    var msg = {t:'rematch', chars:chars, roomConfig:roomConfig, category:cat ? cat.name : catName,
-      all:useAllChars, drawn:drawn, gid:gid + 1, from:1};
-    broadcast(msg);
-    handle(msg);
-    pushRoster();
-  }
-  if(cat && (cat.name === 'Pokémon' || cat.name === 'Mix') && (!POKEMON_DEX_BY_NAME || (cat.name === 'Pokémon' && !POKEMON_GENERATION_BY_NAME))){
-    log('Caricamento dei dati Pokémon per la rivincita...', 'sys');
-    var loads = [loadPokemonDexMap()];
-    if(cat.name === 'Pokémon'){ loads.push(loadPokemonGenerationMap()); }
-    Promise.all(loads).then(buildAndSend).catch(function(){ log('Non riesco a caricare i dati Pokémon necessari. Riprova con una connessione disponibile.', 'err'); });
-    return;
-  }
-  buildAndSend();
-}
+  var griglia = document.getElementById('griglia');
+  griglia.textContent = '';
+  GIOCHI.forEach(function(g, i){ griglia.appendChild(creaCard(g, i)); });
 
-/* ---------- Sessione (sessionStorage) ---------- */
-function saveNow(){
-  saveTimer = null;
-  if(!entered || !roomCode || leaving){ return; }
-  var st = {v:1, ts:Date.now(), code:roomCode, name:myName, host:isHost, n:myN, token:myToken, cat:catName,
-    all:useAllChars, drawn:drawn, roomConfig:roomConfig, gid:gid, phase:phase, turn:turnN, res:lastResult, secret:secret, locked:locked,
-    hidden:secretHidden, elim:Object.keys(eliminated).map(Number)};
-  if(isHost){ st.chars = CHARACTERS; st.roster = roster; st.tokens = tokens; }
-  try{ sessionStorage.setItem(SESSION_KEY, JSON.stringify(st)); }catch(e){}
-}
-function saveSoon(){ if(!saveTimer){ saveTimer = setTimeout(saveNow, 150); } }
-function loadSession(){
-  try{
-    var s = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
-    if(s && s.v === 1 && s.code && s.name && Date.now() - s.ts < SESSION_TTL){ return s; }
-  }catch(e){}
-  return null;
-}
-function clearSession(){ try{ sessionStorage.removeItem(SESSION_KEY); }catch(e){} }
-function restoreLocal(s){
-  if(!s){ return; }
-  secret = (typeof s.secret === 'number' && CHARACTERS[s.secret]) ? s.secret : null;
-  locked = !!s.locked && secret !== null;
-  secretHidden = !!s.hidden;
-  eliminated = {};
-  (s.elim || []).forEach(function(i){
-    var el = cardEl(i);
-    if(el){ eliminated[i] = true; el.classList.add('out'); }
+  var logo = document.getElementById('logo');
+  var COLORI_LOGO = ['#ffd23f', '#ff6fb5', '#4aa3ff', '#7be495', '#ff8a1f'];
+  var testoLogo = logo.textContent;
+  logo.textContent = '';
+  testoLogo.split('').forEach(function(c, i){
+    var s = crea('span', c === ' ' ? 'spazio' : '', c === ' ' ? ' ' : c);
+    s.setAttribute('aria-hidden', 'true');
+    s.style.setProperty('--c', COLORI_LOGO[i % COLORI_LOGO.length]);
+    s.style.setProperty('--i', i);
+    logo.appendChild(s);
   });
-  updateSecret();
-  refreshSecretMask();
-  refreshHint();
-}
-function leaveRoom(){
-  if(!window.confirm('Vuoi uscire dalla stanza?')){ return; }
-  leaving = true;
-  clearSession();
-  try{
-    if(isHost){ broadcast({t:'bye'}); }
-    else if(hostConn && hostConn.open){ hostConn.send({t:'leave'}); }
-  }catch(e){}
-  setTimeout(function(){
-    try{ if(peer){ peer.destroy(); } }catch(e){}
-    location.reload();
-  }, 250);
-}
 
-function refreshJollyButton(){
-  var buttons = document.querySelectorAll('#quickReplies .btn-jolly');
-  Array.prototype.forEach.call(buttons, function(button){
-    button.classList.toggle('hidden', !roomConfig.jollyEnabled || isSpectator);
-    button.disabled = !roomConfig.jollyEnabled || isSpectator;
-    button.setAttribute('aria-hidden', roomConfig.jollyEnabled && !isSpectator ? 'false' : 'true');
-  });
-}
-function enterGame(){
-  entered = true;
-  setupMsg('');
-  refreshJollyButton();
-  document.body.classList.toggle('is-spectator', isSpectator);
-  $('setup').classList.add('hidden');
-  $('game').classList.remove('hidden');
-  document.body.classList.add('in-game');
-  refreshCode();
-  buildBoard();
-  renderTurn();
-  refreshHint();
-  fitBoard();
-  scheduleFit();
-  startHeartbeat();
-  updateSpectatorModeUI();
-  if(isSpectator){ renderSpectatorView(); }
-  else if(isHost && roster[myN]){ roster[myN].eliminated = Object.keys(eliminated).map(Number); }
-  saveSoon();
-}
-
-/* ---------- Selezione categoria e impostazioni Host ---------- */
-function selectedGenerationIds(){
-  return Array.prototype.map.call(document.querySelectorAll('#genGrid input[type="checkbox"]:checked'), function(el){ return Number(el.value); });
-}
-function syncGenerationInputs(){
-  Array.prototype.forEach.call(document.querySelectorAll('#genGrid input[type="checkbox"]'), function(el){
-    el.checked = selectedPokemonGenerations.indexOf(Number(el.value)) >= 0;
-  });
-  var allSelected = ALL_POKEMON_GENERATIONS.every(function(g){ return selectedPokemonGenerations.indexOf(g) >= 0; });
-  $('toggleAllGens').textContent = allSelected ? 'Deseleziona tutte' : 'Seleziona tutte';
-  $('genSelectionCount').textContent = selectedPokemonGenerations.length + ' generazioni selezionate';
-}
-function categoryMax(cat){
-  if(!cat){ return 0; }
-  if(cat.name === 'Mix'){ return mixMaxCount(); }
-  if(cat.name === 'Pokémon'){ return pokemonCharactersForGenerations(selectedPokemonGenerations).length; }
-  return buildCharacters(cat).length;
-}
-function updateDeckDisplay(){
-  var input = $('deckSizeRange');
-  var min = DEFAULT_DECK_SIZE;
-  var max = Number(input.max) || min;
-  var value = Math.max(min, Math.min(Number(input.value) || min, max));
-  input.value = String(value);
-  selectedDeckSize = value;
-  $('deckSizeValue').textContent = value >= max ? 'Tutti (' + value + ')' : String(value);
-  $('deckSizeMinus').disabled = value <= min;
-  $('deckSizePlus').disabled = value >= max;
-  $('deckSizeHelp').textContent = 'Disponibili: ' + max + ' personaggi. Al valore massimo verranno inclusi tutti quelli disponibili' + (selectedCategory && selectedCategory.name === 'Mix' ? ' (massimo 6 Pokémon).' : '.');
-}
-function refreshSelectionControls(){
-  var cat = selectedCategory;
-  var isPokemon = !!cat && cat.name === 'Pokémon';
-  var needsPokemonData = !!cat && (isPokemon || cat.name === 'Mix');
-  var dataReady = !!POKEMON_DEX_BY_NAME && (!isPokemon || !!POKEMON_GENERATION_BY_NAME);
-  $('pokemonGenerations').classList.toggle('hidden', !isPokemon);
-  $('deckSliderSection').classList.toggle('hidden', !cat || (needsPokemonData && !dataReady));
-  $('catCreate').disabled = !cat;
-  if(!cat){ return; }
-  if(needsPokemonData && !dataReady){
-    $('catCreate').disabled = true;
-    $('catSetupMsg').textContent = 'Caricamento del Pokédex e della classificazione per generazioni…';
-    return;
+  var bg = document.getElementById('bg');
+  var TIPI = ['cerchio', 'quadro', 'stella', 'triangolo'];
+  var PALETTE = ['#ffd23f', '#ff6fb5', '#4aa3ff', '#7be495', '#ffffff', '#ff8a1f'];
+  var quante = window.innerWidth < 640 ? 10 : 18;
+  function casuale(a, b){ return a + Math.random() * (b - a); }
+  for(var k = 0; k < quante; k++){
+    var f = crea('span', 'forma ' + TIPI[k % TIPI.length]);
+    f.style.setProperty('--x', casuale(-2, 98).toFixed(1) + '%');
+    f.style.setProperty('--s', casuale(22, 74).toFixed(0) + 'px');
+    f.style.setProperty('--c', PALETTE[k % PALETTE.length]);
+    f.style.setProperty('--o', casuale(.16, .38).toFixed(2));
+    f.style.setProperty('--d', casuale(16, 34).toFixed(1) + 's');
+    f.style.setProperty('--w', (-casuale(0, 30)).toFixed(1) + 's');
+    f.style.setProperty('--dx', casuale(-90, 90).toFixed(0) + 'px');
+    f.style.setProperty('--r', casuale(-360, 360).toFixed(0) + 'deg');
+    bg.appendChild(f);
   }
-  var max = categoryMax(cat);
-  $('deckSizeRange').min = String(DEFAULT_DECK_SIZE);
-  $('deckSizeRange').max = String(Math.max(DEFAULT_DECK_SIZE, max));
-  $('deckSizeRange').step = '1';
-  if(max < DEFAULT_DECK_SIZE){
-    $('deckSizeRange').value = String(DEFAULT_DECK_SIZE);
-    $('catCreate').disabled = true;
-    $('catSetupMsg').textContent = 'Questa selezione contiene solo ' + max + ' personaggi. Seleziona più generazioni o un’altra categoria (minimo 24).';
-  } else {
-    $('deckSizeRange').value = String(Math.max(DEFAULT_DECK_SIZE, Math.min(selectedDeckSize, max)));
-    $('catCreate').disabled = false;
-    $('catSetupMsg').textContent = '';
-  }
-  updateDeckDisplay();
-}
-function selectCategory(cat, button){
-  selectedCategory = cat;
-  Array.prototype.forEach.call(document.querySelectorAll('#catGrid .cat-box'), function(box){
-    box.classList.toggle('selected', box === button);
-    box.setAttribute('aria-pressed', box === button ? 'true' : 'false');
-  });
-  selectedDeckSize = DEFAULT_DECK_SIZE;
-  $('deckSizeRange').value = String(DEFAULT_DECK_SIZE);
-  $('catSetupMsg').textContent = '';
-  if(cat.name === 'Pokémon' || cat.name === 'Mix'){
-    var tasks = [loadPokemonDexMap()];
-    if(cat.name === 'Pokémon'){ tasks.push(loadPokemonGenerationMap()); }
-    $('pokemonGenerations').classList.toggle('hidden', cat.name !== 'Pokémon');
-    $('deckSliderSection').classList.add('hidden');
-    $('catCreate').disabled = true;
-    $('catSetupMsg').textContent = 'Caricamento del Pokédex e delle generazioni Pokémon…';
-    Promise.all(tasks).then(function(){
-      if(selectedCategory !== cat){ return; }
-      refreshSelectionControls();
-      $('catSetupMsg').textContent = '';
-      /* Rigenera l'anteprima Mix usando l'ordine Pokédex corretto. */
-      if(cat.name === 'Mix'){
-        var mixButton = Array.prototype.filter.call($('catGrid').children, function(el){ return el.querySelector('.cat-title') && el.querySelector('.cat-title').textContent === 'Mix'; })[0];
-        if(mixButton){ var replacement = categoryPreviewButton(MIX_CATEGORY); replacement.classList.add('selected'); replacement.setAttribute('aria-pressed','true'); mixButton.replaceWith(replacement); }
-      }
-    }).catch(function(error){
-      if(selectedCategory !== cat){ return; }
-      $('catSetupMsg').textContent = 'Non riesco a caricare i dati necessari per ordinare il Pokédex. Verifica la connessione e riprova. (' + (error && error.message ? error.message : 'errore di rete') + ')';
-      $('catCreate').disabled = true;
-      $('deckSliderSection').classList.add('hidden');
-    });
-    return;
-  }
-  refreshSelectionControls();
-}
-function categoryPreviewButton(cat){
-  var chars;
-  if(cat.name === 'Mix'){
-    /* Ogni apertura ricrea casualmente il set d'anteprima della card Mix. */
-    chars = buildMixDeck(Math.min(DEFAULT_DECK_SIZE, mixMaxCount()));
-  } else { chars = buildCharacters(cat); }
-  var b = document.createElement('button');
-  b.type = 'button';
-  b.className = 'cat-box';
-  b.setAttribute('aria-pressed', 'false');
-  var t = document.createElement('div');
-  t.className = 'cat-title';
-  t.textContent = cat.name;
-  b.appendChild(t);
-  var pv = document.createElement('div');
-  pv.className = 'cat-prev';
-  var picks = shuffle(chars).slice(0, 3);
-  for(var i = 0; i < 3; i++){
-    if(picks[i]){ pv.appendChild(makeFace(picks[i])); }
-    else { var empty = document.createElement('div'); empty.className = 'cat-more'; empty.textContent = '🃏'; pv.appendChild(empty); }
-  }
-  var more = document.createElement('div');
-  more.className = 'cat-more';
-  more.textContent = chars.length > 3 ? '+' + (chars.length - 3) : '+';
-  pv.appendChild(more);
-  b.appendChild(pv);
-  b.addEventListener('click', function(){ selectCategory(cat, b); });
-  return b;
-}
-function openCategories(){
-  setupMsg('');
-  $('catSetupMsg').textContent = '';
-  if(!CATEGORIES.length){ setupMsg('Nessuna categoria disponibile.'); return; }
-  selectedCategory = null;
-  selectedDeckSize = DEFAULT_DECK_SIZE;
-  selectedPokemonGenerations = ALL_POKEMON_GENERATIONS.slice();
-  syncGenerationInputs();
-  $('deckSizeRange').value = String(DEFAULT_DECK_SIZE);
-  document.querySelector('input[name="wrongGuessPenalty"][value="skip"]').checked = true;
-  $('jollyEnabled').checked = true;
-  document.querySelector('input[name="maxActivePlayers"][value="2"]').checked = true;
-  $('allowSpectators').checked = true;
-  $('pokemonGenerations').classList.add('hidden');
-  $('deckSliderSection').classList.add('hidden');
-  $('catCreate').disabled = true;
-  var grid = $('catGrid');
-  grid.textContent = '';
-  CATEGORIES.forEach(function(cat){ grid.appendChild(categoryPreviewButton(cat)); });
-  grid.appendChild(categoryPreviewButton(MIX_CATEGORY));
-  $('catModal').classList.remove('hidden');
-  if(grid.firstChild){ grid.firstChild.focus(); }
-}
-function closeCategories(refocus){
-  $('catModal').classList.add('hidden');
-  if(refocus){ $('createBtn').focus(); }
-}
-$('catCancel').addEventListener('click', function(){ closeCategories(true); });
-$('catModal').addEventListener('click', function(e){ if(e.target === $('catModal')){ closeCategories(true); } });
-$('catCreate').addEventListener('click', function(){
-  if(!selectedCategory || $('catCreate').disabled){ return; }
-  var gens = selectedGenerationIds();
-  if(!gens.length){ $('catSetupMsg').textContent = 'Seleziona almeno una generazione Pokémon.'; return; }
-  var config = {
-    wrongGuessPenalty:document.querySelector('input[name="wrongGuessPenalty"]:checked').value,
-    jollyEnabled:$('jollyEnabled').checked,
-    maxPlayers:Number(document.querySelector('input[name="maxActivePlayers"]:checked').value) || 2,
-    allowSpectators:$('allowSpectators').checked,
-    deckSize:selectedDeckSize,
-    category:selectedCategory.name,
-    pokemonGenerations:gens
-  };
-  closeCategories(false);
-  createRoom(selectedCategory, config);
-});
-$('deckSizeRange').addEventListener('input', updateDeckDisplay);
-$('deckSizeMinus').addEventListener('click', function(){
-  $('deckSizeRange').value = String(Math.max(Number($('deckSizeRange').min), Number($('deckSizeRange').value) - 1));
-  updateDeckDisplay();
-});
-$('deckSizePlus').addEventListener('click', function(){
-  $('deckSizeRange').value = String(Math.min(Number($('deckSizeRange').max), Number($('deckSizeRange').value) + 1));
-  updateDeckDisplay();
-});
-$('genGrid').addEventListener('change', function(e){
-  if(!e.target || e.target.type !== 'checkbox'){ return; }
-  var checked = selectedGenerationIds();
-  if(!checked.length){
-    e.target.checked = true;
-    $('genSetupHelp').textContent = 'Deve rimanere attiva almeno una generazione.';
-    checked = selectedGenerationIds();
-  } else { $('genSetupHelp').textContent = 'Puoi combinare liberamente più generazioni. Deve rimanerne selezionata almeno una.'; }
-  selectedPokemonGenerations = checked;
-  syncGenerationInputs();
-  refreshSelectionControls();
-});
-$('toggleAllGens').addEventListener('click', function(){
-  var allSelected = ALL_POKEMON_GENERATIONS.every(function(g){ return selectedPokemonGenerations.indexOf(g) >= 0; });
-  selectedPokemonGenerations = allSelected ? [1] : ALL_POKEMON_GENERATIONS.slice();
-  syncGenerationInputs();
-  $('genSetupHelp').textContent = allSelected ? 'È rimasta attiva Gen 1: almeno una generazione deve essere selezionata.' : 'Tutte le generazioni sono selezionate.';
-  refreshSelectionControls();
-});
-var lastLink = null;
-function openInfo(id, link){
-  lastLink = link;
-  $(id).classList.remove('hidden');
-  $(id).querySelector('.modal-x').focus();
-}
-function closeInfo(id){
-  $(id).classList.add('hidden');
-  if(lastLink){ lastLink.focus(); }
-}
-['rules', 'credits'].forEach(function(k){
-  var modal = $(k + 'Modal'), link = $(k + 'Link');
-  link.addEventListener('click', function(e){ e.preventDefault(); openInfo(k + 'Modal', link); });
-  modal.querySelector('.modal-x').addEventListener('click', function(){ closeInfo(k + 'Modal'); });
-  modal.addEventListener('click', function(e){ if(e.target === modal){ closeInfo(k + 'Modal'); } });
-});
-document.addEventListener('keydown', function(e){
-  if(e.key !== 'Escape'){ return; }
-  if(!$('catModal').classList.contains('hidden')){ closeCategories(true); }
-  ['rulesModal', 'creditsModal'].forEach(function(id){
-    if(!$(id).classList.contains('hidden')){ closeInfo(id); }
-  });
-  if(!$('endModal').classList.contains('hidden')){ closeEnd(); }
-  if(!$('spectatorNoticeModal').classList.contains('hidden')){ closeSpectatorNotice(); }
-});
-
-/* ---------- Eventi ---------- */
-$('createBtn').addEventListener('click', openCategories);
-$('joinBtn').addEventListener('click', joinRoom);
-$('codeIn').addEventListener('keydown', function(e){ if(e.key === 'Enter'){ joinRoom(); } });
-$('confirmBtn').addEventListener('click', confirmSecret);
-$('guessBtn').addEventListener('click', toggleGuess);
-$('resetBtn').addEventListener('click', resetBoard);
-$('hideSecretBtn').addEventListener('click', function(){ if(!locked || isSpectator){ return; } secretHidden = !secretHidden; refreshSecretMask(); });
-$('spectatorNoticeClose').addEventListener('click', closeSpectatorNotice);
-$('spectatorNoticeOk').addEventListener('click', closeSpectatorNotice);
-$('spectatorViewClose').addEventListener('click', function(){ $('spectatorView').classList.add('hidden'); spectatorTarget = 0; });
-var codeHidden = false;
-function refreshCode(){
-  $('roomCode').textContent = codeHidden ? new Array(roomCode.length + 1).join('*') : roomCode;
-  $('hideBtn').textContent = codeHidden ? 'Mostra codice' : 'Nascondi codice';
-}
-function copyCode(){
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(roomCode).then(
-      function(){ log('Codice stanza copiato.', 'sys'); },
-      function(){ log('Copia non riuscita.', 'err'); });
-  } else { log('Copia non supportata da questo browser.', 'err'); }
-}
-$('roomCode').addEventListener('click', copyCode);
-$('roomCode').addEventListener('keydown', function(e){
-  if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); copyCode(); }
-});
-$('hideBtn').addEventListener('click', function(){ codeHidden = !codeHidden; refreshCode(); });
-(function(){
-  var h = $('title'), t = h.textContent, k = 0;
-  var cols = ['#ff4d4d','#ff9f1a','#ffd700','#4cd137','#00d2d3','#3d7bff','#a55eea','#ff6bd6'];
-  h.setAttribute('aria-label', t);
-  h.textContent = '';
-  for(var i = 0; i < t.length; i++){
-    var sp = document.createElement('span');
-    sp.setAttribute('aria-hidden', 'true');
-    sp.textContent = t.charAt(i);
-    if(t.charAt(i) !== ' '){ sp.style.color = cols[k++ % cols.length]; }
-    h.appendChild(sp);
-  }
-})();
-Array.prototype.forEach.call(document.querySelectorAll('#quickReplies .btn-quick'), function(btn){
-  btn.addEventListener('click', function(){ post({t:'quick', kind:btn.getAttribute('data-kind')}); });
-});
-function refreshSound(){
-  var b = $('soundBtn');
-  b.textContent = soundOn ? '🔊' : '🔇';
-  b.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
-  b.setAttribute('aria-label', soundOn ? 'Audio attivo' : 'Audio disattivato');
-}
-$('soundBtn').addEventListener('click', function(){
-  soundOn = !soundOn;
-  try{ localStorage.setItem('indovinachi-sound', soundOn ? 'on' : 'off'); }catch(e){}
-  refreshSound();
-  if(soundOn){ sfx.msg(); }
-});
-refreshSound();
-document.addEventListener('pointerdown', function(){ audioCtx(); }, {once:true});
-$('chatForm').addEventListener('submit', function(e){
-  e.preventDefault();
-  var v = $('chatIn').value.trim();
-  if(!v){ return; }
-  $('chatIn').value = '';
-  post({t:'chat', text:v});
-});
-$('passBtn').addEventListener('click', function(){ post({t:'pass'}); });
-$('rematchBtn').addEventListener('click', startRematch);
-$('endRematch').addEventListener('click', startRematch);
-$('target').addEventListener('change', markTarget);
-$('leaveBtn').addEventListener('click', leaveRoom);
-$('endModal').querySelector('.modal-x').addEventListener('click', closeEnd);
-$('endModal').addEventListener('click', function(e){ if(e.target === $('endModal')){ closeEnd(); } });
-document.addEventListener('visibilitychange', function(){
-  if(document.visibilityState === 'visible'){ setTimeout(linkCheck, 3000); }
-});
-window.addEventListener('online', function(){
-  if(reconnecting){ clearTimeout(retryTimer); retryTimer = setTimeout(attemptRejoin, 200); }
-  else { setTimeout(linkCheck, 1500); }
-});
-(function boot(){
-  var s = loadSession();
-  if(!s){ return; }
-  $('nameIn').value = s.name || '';
-  if(s.host){ resumeHost(s); } else { resumeGuest(s); }
-})();
 })();
 </script>
 </body>

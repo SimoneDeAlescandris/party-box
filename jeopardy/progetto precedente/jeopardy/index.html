@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JeopardyLabs Italia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container">
+        <div class="header-left">
+          <a href="index.html" class="logo-link">
+            <i class="fa fa-question" id="logo" title="JeopardyLabs Italia" aria-hidden="true"></i>
+            <span class="site-title">JeopardyLabs Italia</span>
+          </a>
+        </div>
+        <nav class="header-right">
+          <ul class="nav-links">
+            <li><a href="crea.html">Crea</a></li>
+            <li><a href="trova.html">Trova</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container">
+          <div class="hero-text">
+            <h1>Crea il tuo quiz in stile Jeopardy!</h1>
+            <p>Veloce, facile e totalmente gratuito. Non è richiesta alcuna email!</p>
+            <a href="crea.html" class="btn">Inizia Subito</a>
+          </div>
+          <!-- TODO: "Antemprima Gioco Jeopardy" principale (non img) e lo stile degli "Altri esempi" -->
+          <div class="hero-image">
+            <!-- TODO: ricordami di mettere il titolo in ogni quiz ben visibile, anche dopo aver iniziato il quiz e scelto i team, questo incluso -->
+            <!-- TODO: togliere la scelta dei team da questo quiz, solo questo in modo che l'utente venga subito buttato nella partita -->
+            <iframe src="./todo/harambe-new.html" style="width:100%" height="400" alt="Anteprima Gioco Jeopardy"></iframe>
+            <!-- TODO: Fare in modo che se non è disponibile il quiz in iframe metto come ALT: alt="Anteprima Gioco Jeopardy" -->
+            <img src="preview-game.png" alt="Anteprima Gioco Jeopardy">
+            <p>Altri esempi: <a href="https://jeopardylabs.com/play/weather">Weather</a>, <a href="https://jeopardylabs.com/play/capitals-of-the-world">World Capitals</a>, <a href="https://jeopardylabs.com/play/geometry152">Geometry</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="features">
+        <div class="container">
+          <div class="feature">
+              <h2>Trova Quiz Esistenti</h2>
+              <p>Accedi a migliaia di quiz creati da altri utenti su qualsiasi argomento.</p>
+              <a href="trova.html" class="btn">Esplora Giochi</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="tags">
+        <div class="container">
+          <h2>Argomenti più popolari</h2>
+          <div class="tag-cloud">
+            <a href="#" class="btn">Scuola Media</a>
+            <a href="#" class="btn">Geografia</a>
+            <a href="#" class="btn">Storia</a>
+            <a href="#" class="btn">Anime</a>
+            <a href="#" class="btn">Cinema</a>
+            <a href="#" class="btn">Videogiochi</a>
+            <a href="#" class="btn">Sport</a>
+            <a href="#" class="btn">Curiosità</a>
+            <a href="#" class="btn">Scienze</a>
+            <a href="#" class="btn">Letteratura</a>
+          </div>
+        </div>
+      </section>
+      
+      <section class="about">
+        <div class="container">
+          <h2>Chi siamo</h2>
+          <p>
+            JeopardyLabs Italia nasce come progetto <strong>no-profit</strong> per la community, offrendo un'alternativa moderna e completamente in italiano alla versione originale americana.<br>
+            Questa iniziativa è libera da scopi commerciali: il sito è sviluppato unicamente per passatempo e didattica.
+          </p>
+          <hr>
+          <p>
+            Questo progetto non è affiliato in alcun modo con <a href="https://www.jeopardy.com/" target="_blank" rel="noopener">Jeopardy!<sup>&reg;</sup></a>, Sony Pictures Digital Inc. o <a href="https://jeopardylabs.com/" target="_blank" rel="noopener">JeopardyLabs</a>.
+          </p>
+        </div>
+      </section>
+
+      <section class="faqs">
+        <div class="container">
+          <h2>Domande frequenti</h2>
+
+          <!-- Sezione GIOCO -->
+          <div class="faq-group">
+            <h3>Gioco</h3>
+            <details>
+              <summary>Come si gioca?</summary>
+              <p>Come preferisci: crea il tuo quiz, mostralo su uno schermo (persino di un proiettore) e clicca sulle caselle per mostrare domande e risposte. Stabilite un ordine fra i giocatori; ognuno può scegliersi le domande a cui risponde e in caso di risposta corretta gli si assagnano i relativi punti.</p>
+            </details>
+            <details>
+              <summary>Posso giocare in video-riunione?</summary>
+              <p>Certo! Usa Discord, Meet, Zoom o simili, condividi lo schermo e il quiz può iniziare.</p>
+            </details>
+            <details>
+              <summary>Posso modificare i nomi delle squadre e i punteggi?</summary>
+              <p>Sì, basta cliccare sul testo del nome o sul punteggio e digitarne uno nuovo: le caselle sono campi editabili.</p>
+            </details>
+            <details>
+              <summary>Posso giocare offline?</summary>
+              <p>Sì: dopo aver creato il quiz, clicca "Scarica" e salva il file dove meglio credi. Aprilo con Chrome (o altro browser): non serve internet, ma non verranno caricati risorse esterne (video, immagini, audio).</p>
+              <p>Tuttavia, su iPad/iPhone non è possibile nativamente a causa del loro modello di sicurezza...</p>
+            </details>
+            <details>
+              <summary>Sono presenti "Double Jeopardy", "Final Jeopardy" and "Daily Doubles"?</summary>
+              <p>JeopardyLabs Italia è un gioco <strong>simile a Jeopardy</strong>, non è Jeopardy&trade;.</p>
+              <p>Pertanto, per un'esperienza simile al "Double Jeopardy", puoi aggiungere righe extra al tuo gioco (e regolare i punti di conseguenza) o creare una nuova partita con il doppio dei punti. Per una domanda finale, ti consiglio di consegnare ai giocatori le carte su cui scrivere le loro puntate (dato che le puntate dovrebbero essere segrete). Aggiungi una colonna extra al tuo gioco chiamata "Final Jeopardy", con una sola domanda. Per le "Daily Doubles" puoi specificare nel testo della domanda quando questa varrà doppio oppure creare una colonna con questa tipologia di domande.</p>
+            </details>
+            <details>
+              <summary>Perché non sono presenti effetti sonori?</summary>
+              <p>Lo show televisivo gli usa con parsimonia, mentre qui è attualmente in via di sviluppo come opzione (ma al momento non presente).</p>
+              <!-- TODO: magari sono cose che posso impletare io in futuro, tipo i suoi se clicchi qualcosa o altri giochi di questo tipo. -->
+            </details>
+            <details>
+              <summary>Ho trovato un errore in una domanda/risposta.</summary>
+              <p>Solo il possessore della password di quel quiz è in grado di correggere questo errore dunque se non lo conosci ti conviene usare un quiz differente o segnarti manualmente la domanda/risposta errata (e la sua correzione).</p>
+            </details>
+            <details>
+                <summary>Come posso nascondere le scritte "Modifica"/"Scarica"/"Stampa"?</summary>
+                <p>Non puoi, ma non disperare: nessun altro può editare il tuo quiz senza prima autenticarsi. Il motivo per cui puoi modificare il tuo quiz senza inserire una password è che JeopardyLabs Italia sa che sei il proprietario del quiz. Chiunque può clonare il tuo quiz, però.</p>
+            </details>
+            <details>
+                <summary>Posso inviare l'URL del gioco ai miei studenti in modo che possano giocare da soli?</summary>
+                <p>Certamente. Ma giocare a JeopardyLabs Italia da soli non è molto divertente. Sono praticamente solo flashcards.</p>
+            </details>
+            <!-- <details>
+                <summary>How do I prevent audio/video/YouTube embeds from playing automatically?</summary>
+                <p>JeopardyLabs automatically plays media if it can (this is limited to &lt;audio&gt;/&lt;video&gt; elements, and YouTube embeds). If you don't like this behavior press <kbd>ALT a</kbd> on your keyboard to toggle autoplay.</p>
+            </details> -->
+
+            <details>
+                <summary>Quali sono le scorciatoie da tastiera?</summary>
+                <ul>
+                  <li>Usa <kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd> per muoverti sul tabellone da gioco.</li>
+                  <li>Usa <kbd>ENTER</kbd> o <kbd>SPACE</kbd> per aprire la domanda selezionata.</li>
+                  <li>Usa <kbd>SPACE</kbd> per rivelare la risposta.</li>
+                  <li>Usa <kbd>ESC</kbd> per chiudere la domanda.</li>
+                  <li>Digitare i numeri (<kbd>1</kbd> to <kbd>9</kbd>) per selezionare una squadra (1 è la prima squadra, 2 la seconda, e così via). Usa <kbd>↑</kbd> <kbd>↓</kbd> per aumentare o diminuire i punti. Premi <kbd>ESC</kbd> per deselezionare la squadra.</li>
+                  <!-- <li>Usa <kbd>ALT a</kbd> per attivare/disattivare la riproduzione automatica dei video.</li> -->
+                </ul>
+            </details>
+          </div>
+
+          <!-- Sezione CREAZIONE -->
+          <div class="faq-group">
+            <h3>Creazione</h3>
+            <details>
+              <summary>Come inserisco audio o video?</summary>
+              <p>La funzione non è AL MOMENTO disponibile.</p>
+              <!-- TODO: potrei mettere in futuro la possibilità di creare un account attraverso cui fornire sotto una quota di pagamento univoca (licenza life-time) che permette di poter inserire immagini, video (durata non superiore a 15s) o audio (15s). Perdere la chiave equivale a perdere la licenza, ecc. ecc.  -->
+              <!-- Nel sito dice: Incolla nel tuo editor il codice embed che ti fornisce YouTube, SoundCloud o piattaforme simili (clicca l'icona “&lt;/&gt;” e inserisci il codice). -->
+              <!-- <p>Assuming your sound clip is hosted elsewhere (SoundCloud or YouTube for example), you can use the third party embed code they give you.</p>
+              <p>In your Jeopardy question, click the &lt;/&gt; icon, and then paste in the code. Then click the &lt;/&gt; icon again.</p>
+              <p>JeopardyLabs does not have sound effects.</p> -->
+            </details>
+            <!-- <details>
+              <summary>Perché il video non si carica?</summary>
+              <p>Il video potrebbe non consentire l'embed, o essere privato. Prova con un altro link o caricalo su piattaforma pubblica.</p>
+            </details> -->
+            <!-- <details>
+              <summary>How do I embed a video from my computer or phone?</summary>
+              <p>JeopardyLabs cannot afford to store, transcode and serve video files (remember, a membership is only $20/lifetime, and the site is ad-free for everyone). Unfortunately, you need to upload the video to a video hosting platform like YouTube. If you have Google Drive, OneDrive, or Dropbox, they may provide embed code for your video. If so, you can click the &lt;/&gt; icon in the JeopardyLabs editor to paste in the code.</p>
+              <p>I  monitor the prices of storage, CPU, and bandwidth and plan to support video uploads when it becomes economically viable.</p>
+            </details> -->
+            <!-- <details>
+              <summary>Posso personalizzare colori e font?</summary>
+              <p>Nativamente no, ma se sai un po' di HTML/CSS scarica il tuo quiz, apri il file offline e modifica gli stili. Non offriamo supporto tecnico.</p>
+            </details> -->
+            <!-- <details>
+              <summary>How do I control the font size?</summary>
+              <p>JeopardyLabs automatically figures out the biggest font that can be used for your question/answer (so it fills the screen). But if for some reason, you need precise control, you'll have to use HTML. Click the &lt;/&gt; symbol in the question/answer editor, and enter the code: <code></code></p><code><xmp><p><span style="font-size: 12px;">This is my text in size 12 font</span></p></xmp></code> I don't provide technical support for HTML/CSS coding.<p></p>
+            </details> -->
+            <!-- <details>
+              <summary>I can't seem to change the points!</summary>
+              <p>JeopardyLabs won't save the points you enter unless the row has a question/answer in it.</p>
+            </details> -->
+            <!-- <details>
+              <summary>How do I delete a row/column?</summary>
+              <p>Put your mouse over the row/column, and click the trash can icon. Keep in mind, <strong>JeopardyLabs always shows a 5x5 grid in edit mode</strong>. If you leave an entire row/column empty, it will be removed when you play (so don't worry about it).</p>
+            </details> -->
+            <!-- <details>
+              <summary>How do I move a cell?</summary>
+              <p>Hover over the cell with your mouse, and click-and-drag the move icon. <strong>You can only move a cell into an empty space on the board.</strong> The cell will revert back to where it was if there are no empty cells.</p>
+            </details> -->
+            <!-- <details>
+              <summary>I built a game, and can't find it anymore!</summary>
+              <p>After you save your game, you are told to bookmark the page so you can get back to it. If you didn't follow the instructions, you can try to find it using the <a href="/browse">browse</a> page. Good luck.</p>
+              <p>If you close the edit page without saving (and ignored the warning about unsaved changes), your content was lost and you'll have to redo it.</p>
+            </details> -->
+            <!-- <details>
+              <summary>I paid with Bancontact/BLIK/Eps/Giropay/iDEAL/Mercado Pago/MyBank/Przelewy24/SEPA-Lastschrift/Sofort and my account was not setup, but I still got charged!</summary>
+              <p>When you checkout with one of PayPal's partners, the money is transferred to PayPal while the transaction is pending. If you exit the checkout process before it finishes, the charge will be refunded back to you automatically by PayPal. It can take 24 hours, or, in some cases, 180 days. I have no control over this.</p>
+              <p>If you were not logged into JeopardyLabs automatically, you did not finish the checkout process. You can safely start it again.</p>
+            </details> -->
+            <!-- <dt>I can't see any questions or answers when I play the game.</dt>
+            <dd><p>I still have no idea why this happens to some people. If you have any clues, please let me know. It seems to happen only in Chrome, and must be caused by an extension you have installed. Try using a different browser, or open an incognito window. Feel free to email me about the problem. Please include the link you see here: <a href="https://aboutmybrowser.com">https://aboutmybrowser.com</a></p></dd> -->
+          </div>
+
+          <!-- Sezione ALTRO -->
+          <div class="faq-group">
+            <h3>Altro</h3>
+            <details>
+              <summary>Non ho trovato risposta!</summary>
+              <p>Scrivici pure a <a href="mailto:todo@todo.it">todo@todo.it</a>, ma assicurati di non ripetere domande già trattate qui.</p>
+              <!-- TODO: nel caso metterci una vera email tipo support@jeopardylabsitalia.it -->
+            </details>
+            <details>
+              <summary>Come elimino un mio quiz dal sito?</summary>
+              <p>Accedendo nella sezione per modificare il quiz fra le opzioni disponibile c'è questa possibilità. Non è possibile rimuovere i quiz di altri utenti e non rispondiamo alle mail per queste richieste.</p>
+              <p>Non è al momento disponibile altra modalità per eliminare un quiz.</p>
+              <!-- TODO: Creare una pagina tipo questa https://jeopardylabs.com/remove/ per eliminare i quiz. Posso chiedere una cifra simbolica per pagare sennò rimando alla password con cui si accede ad una sorta di account personale in cui sono presenti i quiz creati e c'è la possibilità di crearne altri (pagina crea.html). Se mettessi comunque la possibilità di eliminare quiz sotto pagamento dovresti aggiornare comunque la sezione dei rimborsi sul sito poiché nonostante specificherò che il pagamento non è rimborsabile starò offrendo servizi a pagamento... -->
+            </details>
+          </div>
+        </div>
+      </section>
+    </main>
+    
+    <footer class="site-footer">
+      <div class="container footer-container footer-links">
+        <a href="crea.html">Crea</a>
+        <a href="trova.html">Trova</a>
+        <a href="note-legali.html">Note Legali</a>
+      </div>
+      <!-- <div class="footer-icons">
+        <a href="#" class="icon-link" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="icon-link" title="Twitter"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="icon-link" title="GitHub"><i class="fab fa-github"></i></a>
+      </div> -->
+    </footer>
+  </body>
+</html>

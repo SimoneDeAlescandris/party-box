@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JeopardyLabs Italia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="stile-crea.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container">
+        <div class="header-left">
+          <a href="index.html" class="logo-link">
+            <i class="fa fa-question" id="logo" title="JeopardyLabs Italia" aria-hidden="true"></i>
+            <span class="site-title">JeopardyLabs Italia</span>
+          </a>
+        </div>
+        <nav class="header-right">
+          <ul class="nav-links">
+            <li><a href="crea.html">Crea</a></li>
+            <li><a href="trova.html">Trova</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="create-main">
+      <section class="auth-wrapper">
+        <div class="form-panel panel-signin">
+          <form id="access-form" action="">
+            <h2>Accedi ai tuoi quiz</h2>
+            <p class="caption">Usa un username e una password per gestire i tuoi quiz. Ti serviranno per tornare a modificarli in futuro. Non è richiesta alcuna email!</p>
+            
+            <div class="input-group">
+              <input type="text" id="quiz-id" name="quiz-id" required>
+              <label for="quiz-id">Username</label>
+            </div>
+            <small id="error-quiz-id" class="error-msg"></small>
+            
+            <div class="input-group">
+              <input type="password" id="quiz-password" name="quiz-password" required>
+              <label for="quiz-password">Password</label>
+              <button type="button" id="toggle-password" class="toggle-pwd" title="Mostra/Nascondi password"><i class="fa-solid fa-eye-slash" id="eyeIcon"></i></button>
+            </div>
+            <small id="error-quiz-id" class="error-msg"></small>
+
+            <div class="remember">
+              <!-- TODO -->
+              <label><input type="checkbox"/>Ricordami</label>
+            </div>
+
+            <button type="submit" class="btn">Inizia a creare</button>
+            <p class="toggle-link">Non hai un account? <a href="#" class="switch-signup">Registrati</a></p>
+          </form>
+        </div>
+        <div class="form-panel panel-signup">
+          <form id="register-form" action="">
+            <h2>Registrati</h2>
+
+            <div class="input-group">
+              <input type="text" id="new-id" required/>
+              <label for="new-id">Username</label>
+            </div>
+            <small id="error-quiz-id" class="error-msg"></small>
+
+            <div class="input-group">
+              <input type="password" id="new-password" required/>
+              <label for="new-password">Password</label>
+              <button type="button" id="toggle-password-signup" class="toggle-pwd" title="Mostra/Nascondi password"><i class="fa-solid fa-eye-slash" id="eyeIcon"></i></button>
+            </div>
+            <small id="error-quiz-id2" class="error-msg"></small>
+            
+            <div class="remember">
+              <input type="checkbox" required/>
+              <label>Accetto i <a href="note-legali.html" target="_blank" rel="noopener noreferrer">Termini di utilizzo &amp; la Politica sulla privacy</a>.</label>
+            </div>
+
+            <button type="submit" class="btn">Registrati</button>
+            <p class="toggle-link">Hai già un account? <a href="#" class="switch-signin">Accedi</a></p>
+          </form>
+        </div>
+        <!-- TODO: login automatico via cookie, se presente -->
+        <!-- TODO: sezione membership lifetime per funzioni avanzate -->
+      </section>
+    </main>
+    
+    <footer class="site-footer">
+      <div class="container footer-container footer-links">
+        <a href="crea.html">Crea</a>
+        <a href="trova.html">Trova</a>
+        <a href="note-legali.html">Note Legali</a>
+      </div>
+      <!-- <div class="footer-icons">
+        <a href="#" class="icon-link" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="icon-link" title="Twitter"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="icon-link" title="GitHub"><i class="fab fa-github"></i></a>
+      </div> -->
+    </footer>
+  </body>
+  <script src="crea.js"></script>
+</html>

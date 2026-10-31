@@ -1,0 +1,9 @@
+{
+  "admin": {
+    "password": "admin",
+    "quizzes": [
+      { "id": "hist101", "title": "Storia d'Italia" },
+      { "id": "geo202",  "title": "Geografia Mondiale" }
+    ]
+  }
+}

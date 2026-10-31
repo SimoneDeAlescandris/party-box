@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HARAMBE | JeopardyLabs Italia</title>
+    <style>
+      /* Import variabili e reset generali */
+      @import "../styles.css";
+      
+      :root {
+        --giallo: #FFD700;
+        --nero: #222222;
+        --bianco: #f5f7fa;
+        --grigio-scuro: #2c3e50;
+        --grigio-chiaro: #ecf0f1;
+        --verde-plus: #2da94e;
+        --rosso-minus: #ff0000;
+
+        --font-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      *, *::before, *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        font-size: 100%;
+      }
+
+      /* 1. Impostiamo body/container a colonna che occupa l'intera viewport */
+      body {
+        font-family: var(--font-base);
+        background: var(--bianco);
+        color: var(--nero);
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        overflow: hidden;
+        margin: 0;
+        background-color: var(--grigio-scuro);
+      }
+
+      h1.quiz-title {
+        padding: 1rem;
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: bold;
+        background: var(--nero);
+        color: var(--giallo);
+        flex-shrink: 0;
+      }
+
+      /* 3. Griglia che riempie tutto lo spazio rimanente */
+      .quiz-grid-container {
+        flex: 1 1 auto;      /* riempie verticalmente lo spazio */
+        overflow: auto;      /* scroll solo all’interno della griglia */
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        grid-auto-rows: 1fr; /* ciascuna row prende spazio uguale */
+        gap: 0.5rem;
+        padding: 0.5rem;
+      }
+
+      .cell {
+        background: var(--nero);
+        color: var(--giallo);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.3s;
+      }
+      .cell:hover {
+        background: var(--grigio-scuro);
+      }
+
+      /* Mobile: riduce gap e font su schermi piccoli */
+      @media (max-width: 600px) {
+        .quiz-grid-container {
+          gap: 0.25rem;
+        }
+        .cell {
+          font-size: 1rem;
+        }
+      }
+
+      .teams-container {
+        flex: 0 0 auto;       /* non cresce, non si contrae */
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        margin-top: 1rem 0;
+        flex-wrap: wrap;
+        padding: 1rem;
+      }
+      .team {
+        background: var(--grigio-chiaro);
+        border-radius: 8px;
+        padding: 1rem 1.5rem;;
+        text-align: center;
+        min-width: 140px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+      }
+      .team:hover {
+        transform: scale(1.1);
+      }
+      .team .name {
+        font-weight: bold;
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;;
+        color: var(--nero);
+      }
+      .team .points {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        color: var(--nero);
+      }
+
+      .team .controls {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .team .controls button {
+        border: none;
+        border-radius: 4px;
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--nero);
+        background-color: var(--giallo);
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      /* .plus {
+        color: var(--verde-plus);
+      }
+      .minus {
+        color: var(--rosso-minus);
+      } */
+
+      .team .controls button:hover {
+        background: var(--giallo-altro, #e5c100);
+      }
+      .team.active {
+        border: 2px solid var(--giallo);
+      }
+      .team button {
+        background: none; border: none;
+        font-size: 1.2rem; cursor: pointer;
+        margin: 0 0.25rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="quiz-title">HARAMBE</h1>
+    
+    <div class="quiz-grid-container">
+      <!-- Righe: 5 valori 100–500 -->
+      <!-- Colonne: 5 categorie -->
+      <!-- Inserisci qui le categorie come header se vuoi, oppure solo le caselle: -->
+      <!-- Categorie -->
+      <section class="quiz-categories" aria-label="Categorie del quiz">
+        <ul class="categories-list">
+          <li role="columnheader" class="category-item">Attack On Titan</li>
+          <li role="columnheader" class="category-item">Descrizioni Pokémon</li>
+          <li role="columnheader" class="category-item">MARVEL</li>
+          <li role="columnheader" class="category-item">Indovinelli</li>
+          <li role="columnheader" class="category-item">Geografia</li>
+        </ul>
+      </section>
+      
+      <!-- Ad ogni cella puoi aggiungere data-value o data-cat per JS futuro -->
+      <div class="cell">100</div>
+      <div class="cell">200</div>
+      <div class="cell">300</div>
+      <div class="cell">400</div>
+      <div class="cell">500</div>
+
+      <div class="cell">100</div>
+      <div class="cell">200</div>
+      <div class="cell">300</div>
+      <div class="cell">400</div>
+      <div class="cell">500</div>
+
+      <div class="cell">100</div>
+      <div class="cell">200</div>
+      <div class="cell">300</div>
+      <div class="cell">400</div>
+      <div class="cell">500</div>
+
+      <div class="cell">100</div>
+      <div class="cell">200</div>
+      <div class="cell">300</div>
+      <div class="cell">400</div>
+      <div class="cell">500</div>
+
+      <div class="cell">100</div>
+      <div class="cell">200</div>
+      <div class="cell">300</div>
+      <div class="cell">400</div>
+      <div class="cell">500</div>
+    </div>
+
+    <div id="teams" class="teams-container">
+      <!-- Team template (duplica per ogni squadra) -->
+      <div class="team" data-index="0">
+        <div class="name">Team 1</div>
+        <div class="points">0</div>
+        <div class="controls">
+          <button class="plus" aria-label="Aggiungi punti">+</button>
+          <button class="minus" aria-label="Togli punti">-</button>
+        </div>
+      </div>
+
+      <div class="team" data-index="0">
+        <div class="name">Team 2</div>
+        <div class="points">0</div>
+        <div class="controls">
+          <button class="plus" aria-label="Aggiungi punti">+</button>
+          <button class="minus" aria-label="Togli punti">-</button>
+        </div>
+      </div>
+
+      <!-- TODO: Aggiungi altri .team se necessario. JS me lo permette? -->
+    </div>
+
+    <script>
+      document.querySelectorAll("#teams .team").forEach(teamEl=>{
+        const ptsEl = teamEl.querySelector(".points");
+        
+        // Aggiunge 100 punti
+        teamEl.querySelector(".plus").addEventListener("click", ()=>{
+          // per semplicità aggiungo 100 fisso. TODO: aggiungere punti in base alla cella cliccata: da 100 a 500 in base alla cella.
+          ptsEl.textContent = +ptsEl.textContent + 100;
+        });
+
+        // Rimuove 100 punti
+        teamEl.querySelector(".minus").addEventListener("click", ()=>{
+          ptsEl.textContent = +ptsEl.textContent - 100;
+        });
+      });
+    </script>
+  </body>
+</html>

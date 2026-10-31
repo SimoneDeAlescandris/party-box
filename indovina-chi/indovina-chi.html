@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Indovina Chi?</title>
-<meta name="description" content="Indovina Chi? Online per 2 o 3 giocatori. Crea una stanza e gioca con gli amici direttamente dal browser.">
+<title>PartyBox - Indovina Chi?</title>
+<meta name="description" content="La versione di Indovina Chi? all'interno di PartyBox: gioca online con gli amici direttamente dal browser.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -334,14 +334,103 @@ body.is-spectator #spectatorInfo{display:block!important}
   .spectator-board{grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:6px}
   .spectator-board .card{min-height:94px}
 }
+/* ===== PartyBox: animazioni e link di ritorno ===== */
+:root{--bounce:cubic-bezier(.34,1.56,.64,1)}
+@keyframes entra{from{opacity:0;transform:translateY(30px) scale(.9)}}
+@keyframes cardIn{from{opacity:0;transform:translateY(24px) scale(.7) rotate(-6deg)}}
+@keyframes dropIn{from{opacity:0;transform:translateY(-36px) scale(.8)}}
+@keyframes rimbalza{0%,60%,100%{transform:translateY(0) rotate(0)}30%{transform:translateY(-.14em) rotate(-4deg)}45%{transform:translateY(0) rotate(3deg)}}
+@keyframes respira{0%,100%{box-shadow:0 4px 0 var(--goldd),0 0 0 0 rgba(255,215,0,0)}50%{box-shadow:0 4px 0 var(--goldd),0 0 0 9px rgba(255,215,0,.22)}}
+@keyframes alone{from{transform:translate(0,0) scale(1)}to{transform:translate(12vmax,8vmax) scale(1.2)}}
+@keyframes sale{0%{transform:translate3d(0,0,0) rotate(0)}50%{transform:translate3d(var(--dx),-70vh,0) rotate(calc(var(--r) / 2))}100%{transform:translate3d(calc(var(--dx) * -.5),-130vh,0) rotate(var(--r))}}
+@keyframes subIn{from{opacity:0;transform:translateY(-14px) rotate(-8deg) scale(.6)}}
+@keyframes fade{from{opacity:0}}
+@keyframes modalPop{from{opacity:0;transform:translateY(34vh) scale(.82) rotate(-3deg)}}
+@keyframes msgIn{from{opacity:0;transform:translateY(12px) scale(.85)}}
+@keyframes pulseTeal{0%,100%{box-shadow:0 0 0 3px rgba(77,225,210,.2)}50%{box-shadow:0 0 0 6px rgba(77,225,210,.5)}}
 
+#bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+#bg::before,#bg::after{content:"";position:absolute;width:70vmax;height:70vmax;border-radius:50%;filter:blur(70px);opacity:.14;animation:alone 24s ease-in-out infinite alternate}
+#bg::before{background:radial-gradient(circle,#ffd700,transparent 65%);top:-30vmax;left:-25vmax}
+#bg::after{background:radial-gradient(circle,#4de1d2,transparent 65%);bottom:-35vmax;right:-30vmax;animation-delay:-12s}
+.forma{position:absolute;left:var(--x);top:110%;width:var(--s);height:var(--s);background:var(--c);opacity:var(--o);border:3px solid rgba(255,255,255,.3);animation:sale var(--d) linear var(--w) infinite;will-change:transform}
+.forma.cerchio{border-radius:50%}
+.forma.quadro{border-radius:22%}
+.forma.stella{border:0;clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+.forma.triangolo{border:0;clip-path:polygon(50% 6%,96% 92%,4% 92%)}
+body.in-game .forma{display:none}
+
+.back-hub{position:fixed;top:max(14px,env(safe-area-inset-top));left:14px;z-index:6;display:grid;place-items:center;width:50px;height:50px;
+  color:var(--ink);background:var(--gold);border:3px solid #000;border-radius:16px;box-shadow:0 5px 0 #000;text-decoration:none;
+  transition:transform .25s var(--bounce),box-shadow .15s;animation:dropIn .6s var(--bounce) .5s backwards;-webkit-tap-highlight-color:transparent}
+.back-hub svg{transition:transform .25s var(--bounce)}
+.back-hub:hover{transform:translateY(-3px) rotate(-6deg) scale(1.08);box-shadow:0 8px 0 #000}
+.back-hub:hover svg{transform:translateX(-4px)}
+.back-hub:active{transform:translateY(3px) scale(.95);box-shadow:0 2px 0 #000}
+.back-hub:focus-visible{outline:3px solid var(--accent2);outline-offset:3px}
+body.in-game .back-hub{display:none}
+
+.brand{display:flex;flex-direction:column;align-items:center;gap:10px}
+body.in-game .brand{flex-direction:row}
+header h1 span{display:inline-block;animation:rimbalza 2.8s ease-in-out infinite;animation-delay:calc(var(--i,0) * .12s)}
+body.in-game header h1 span{animation:none}
+.subtitle{margin:0;padding:3px 18px;font-size:clamp(.95rem,2.6vw,1.2rem);font-weight:700;color:var(--ink);background:var(--gold);border:3px solid #000;border-radius:999px;box-shadow:0 4px 0 #000;transform:rotate(-2deg);animation:subIn .8s var(--bounce) .5s backwards}
+body.in-game .subtitle{display:none}
+body:not(.in-game) header img{animation:dropIn .8s var(--bounce) .1s backwards}
+body:not(.in-game) .brand h1{animation:dropIn .8s var(--bounce) backwards}
+
+body:not(.in-game) #setup > :not(footer){animation:entra .6s var(--bounce) backwards}
+body:not(.in-game) #setup > :nth-child(1){animation-delay:.3s}
+body:not(.in-game) #setup > :nth-child(2){animation-delay:.38s}
+body:not(.in-game) #setup > :nth-child(3){animation-delay:.46s}
+body:not(.in-game) #setup > #createBtn{animation:entra .6s var(--bounce) .38s backwards,respira 2.8s ease-in-out 1.4s infinite}
+body:not(.in-game) footer{animation:fade 1s ease-out .8s backwards}
+
+button{transition:transform .22s var(--bounce),box-shadow .15s,background .2s}
+@media (hover:hover){button:hover:not(:disabled){transform:translateY(-3px) scale(1.04)}}
+button:active:not(:disabled){transform:translateY(3px) scale(.97);box-shadow:0 1px 0 var(--goldd)}
+.modal-x:hover:not(:disabled){transform:rotate(90deg) scale(1.12)}
+
+.card{animation:cardIn .55s var(--bounce) backwards;animation-delay:calc(var(--n,0) * 28ms)}
+.card-inner{transition:transform .65s var(--bounce)}
+@media (hover:hover){.card:not(.out):hover .card-inner{transform:translateY(-5px) scale(1.05)}}
+.card.pick .card-front{animation:pulseTeal 1.4s ease-in-out infinite}
+.chip{transition:border-color .2s,background .2s,transform .25s var(--bounce)}
+.chip.active{animation:pulseGold 1.6s ease-in-out infinite}
+
+.modal{animation:fade .25s ease-out}
+.modal-box{border-radius:22px;animation:modalPop .55s var(--bounce)}
+.cat-box{animation:cardIn .5s var(--bounce) backwards;transition:transform .25s var(--bounce),border-color .15s,box-shadow .2s}
+.cat-box:hover,.cat-box:focus-visible{transform:translateY(-6px) rotate(-1.5deg) scale(1.03);box-shadow:0 10px 0 #000}
+.cat-box:nth-child(2){animation-delay:.07s}
+.cat-box:nth-child(3){animation-delay:.14s}
+.cat-box:nth-child(4){animation-delay:.21s}
+.cat-box:nth-child(5){animation-delay:.28s}
+.cat-box:nth-child(6){animation-delay:.35s}
+.end-box h2{animation:cardIn .6s var(--bounce) .1s backwards}
+.end-card{animation:cardIn .7s var(--bounce) .25s backwards}
+
+.line{animation:msgIn .4s var(--bounce) backwards;transform-origin:0 100%}
+.line.me{transform-origin:100% 100%}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+  .forma{display:none}
+}
 </style>
 </head>
 <body>
 
+<div id="bg" aria-hidden="true"></div>
+<a class="back-hub" href="../index.html" aria-label="Torna a PartyBox" title="Torna a PartyBox">
+  <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M19 12H6M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</a>
 <header>
-  <img src="logo.png" alt="Logo Indovina Chi?" onerror="this.style.display='none'">
-  <h1 id="title">Indovina Chi?</h1>
+  <img src="logo.png" alt="Logo PartyBox" onerror="this.style.display='none'">
+  <div class="brand">
+    <h1 class="logo" id="logo" aria-label="PartyBox">PartyBox</h1>
+    <p class="subtitle">Indovina Chi?</p>
+  </div>
 </header>
 
 <main>
@@ -1369,6 +1458,7 @@ function buildBoard(){
     c.tabIndex = 0;
     c.setAttribute('role', 'button');
     c.dataset.i = i;
+    c.style.setProperty('--n', Math.min(i, 40));
     var inner = document.createElement('div');
     inner.className = 'card-inner';
     var front = document.createElement('div');
@@ -2793,7 +2883,7 @@ $('roomCode').addEventListener('keydown', function(e){
 });
 $('hideBtn').addEventListener('click', function(){ codeHidden = !codeHidden; refreshCode(); });
 (function(){
-  var h = $('title'), t = h.textContent, k = 0;
+  var h = $('logo'), t = h.textContent, k = 0;
   var cols = ['#ff4d4d','#ff9f1a','#ffd700','#4cd137','#00d2d3','#3d7bff','#a55eea','#ff6bd6'];
   h.setAttribute('aria-label', t);
   h.textContent = '';
@@ -2801,8 +2891,28 @@ $('hideBtn').addEventListener('click', function(){ codeHidden = !codeHidden; ref
     var sp = document.createElement('span');
     sp.setAttribute('aria-hidden', 'true');
     sp.textContent = t.charAt(i);
+    sp.style.setProperty('--i', i);
     if(t.charAt(i) !== ' '){ sp.style.color = cols[k++ % cols.length]; }
     h.appendChild(sp);
+  }
+})();
+(function(){
+  var bg = $('bg'), tipi = ['cerchio', 'quadro', 'stella', 'triangolo'];
+  var pal = ['#ffd700', '#4de1d2', '#ffffff', '#ff6bd6'];
+  var quante = window.innerWidth < 640 ? 8 : 14;
+  function rnd(a, b){ return a + Math.random() * (b - a); }
+  for(var k = 0; k < quante; k++){
+    var f = document.createElement('span');
+    f.className = 'forma ' + tipi[k % tipi.length];
+    f.style.setProperty('--x', rnd(-2, 98).toFixed(1) + '%');
+    f.style.setProperty('--s', rnd(20, 64).toFixed(0) + 'px');
+    f.style.setProperty('--c', pal[k % pal.length]);
+    f.style.setProperty('--o', rnd(.07, .18).toFixed(2));
+    f.style.setProperty('--d', rnd(18, 36).toFixed(1) + 's');
+    f.style.setProperty('--w', (-rnd(0, 30)).toFixed(1) + 's');
+    f.style.setProperty('--dx', rnd(-90, 90).toFixed(0) + 'px');
+    f.style.setProperty('--r', rnd(-360, 360).toFixed(0) + 'deg');
+    bg.appendChild(f);
   }
 })();
 Array.prototype.forEach.call(document.querySelectorAll('#quickReplies .btn-quick'), function(btn){

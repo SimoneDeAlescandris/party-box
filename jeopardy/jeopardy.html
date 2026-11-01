@@ -386,7 +386,7 @@ button.chip:hover{transform:translateY(-2px) scale(1.05)}
       </details>
       <details>
         <summary>Come funzionano turni e punteggi?</summary>
-        <p>L'host fa da conduttore: vede le risposte, le mostra a tutti e assegna o toglie i punti. Chi ha il turno sceglie la casella e l'host la apre. Chi risponde bene prende i punti e tiene il turno, altrimenti si passa al giocatore successivo. Le caselle già risposte restano visibili a tutti, semi-trasparenti, e solo l'host può riaprirle per riguardarle. Se qualcuno perde la connessione, rientra da solo senza reinserire il codice.</p>
+        <p>L'host fa da conduttore: vede le risposte, le mostra a tutti e assegna o toglie i punti. Chi ha il turno sceglie la casella e l'host la apre. Chi risponde bene prende i punti, ma alla chiusura della domanda il turno passa sempre al giocatore successivo, qualunque sia l'esito. Le caselle già risposte restano visibili a tutti, semi-trasparenti, e solo l'host può riaprirle per riguardarle. Se qualcuno perde la connessione, rientra da solo senza reinserire il codice.</p>
       </details>
       <details>
         <summary>Scorciatoie da tastiera</summary>
@@ -1104,7 +1104,7 @@ button.chip:hover{transform:translateY(-2px) scale(1.05)}
     selTeam = 0;
     mod(function(){
       st.done[o.c + ':' + o.r] = 1;
-      st.turn = o.win ? o.win : (gia ? st.turn : prossimo(st.turn));
+      st.turn = gia ? st.turn : prossimo(st.turn);
       st.open = null;
       if(!restanti()){ st.phase = 'over'; }
     });

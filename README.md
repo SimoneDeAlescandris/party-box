@@ -42,7 +42,7 @@ Il progetto non richiede un server backend dedicato. La creazione delle stanze e
 
 ---
 
-## 🚀 Esecuzione Locale
+## Esecuzione Locale
 
 Per testare o sviluppare il progetto in locale sulla tua macchina:
 

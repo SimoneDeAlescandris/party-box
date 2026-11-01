@@ -553,19 +553,45 @@ button.chip:hover{transform:translateY(-2px) scale(1.05)}
   var ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
   /* ---------- Configurazione ICE (stessa di Indovina Chi?) ---------- */
-  var METERED_APP = '', METERED_KEY = '', METERED_USER = '', METERED_PASS = '';
-  var CUSTOM_TURN = [];
+  var METERED_APP = 'indovina-chi', METERED_KEY = 'a5d9c1fafa80535908cb05f932aa64e5ba5b', METERED_USER = '6ca2984a40b7545145738696', METERED_PASS = 'C9oieenvSoY/LI/f';
+  var CUSTOM_TURN = [
+    {
+      urls: "stun:stun.relay.metered.ca:80",
+    },
+    {
+      urls: "turn:global.relay.metered.ca:80",
+      username: "6ca2984a40b7545145738696",
+      credential: "C9oieenvSoY/LI/f",
+    },
+    {
+      urls: "turn:global.relay.metered.ca:80?transport=tcp",
+      username: "6ca2984a40b7545145738696",
+      credential: "C9oieenvSoY/LI/f",
+    },
+    {
+      urls: "turn:global.relay.metered.ca:443",
+      username: "6ca2984a40b7545145738696",
+      credential: "C9oieenvSoY/LI/f",
+    },
+    {
+      urls: "turns:global.relay.metered.ca:443?transport=tcp",
+      username: "6ca2984a40b7545145738696",
+      credential: "C9oieenvSoY/LI/f",
+    }
+  ];
   var STUN_SERVERS = [
-    {urls:'stun:stun.l.google.com:19302'}, {urls:'stun:stun1.l.google.com:19302'},
-    {urls:'stun:stun2.l.google.com:19302'}, {urls:'stun:stun.relay.metered.ca:80'},
-    {urls:'stun:global.stun.twilio.com:3478'}
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun.relay.metered.ca:80' },
+    { urls: 'stun:global.stun.twilio.com:3478' }
   ];
   var FALLBACK_TURN = [
-    {urls:'turn:openrelay.metered.ca:80', username:'openrelayproject', credential:'openrelayproject'},
-    {urls:'turn:openrelay.metered.ca:80?transport=tcp', username:'openrelayproject', credential:'openrelayproject'},
-    {urls:'turn:openrelay.metered.ca:443', username:'openrelayproject', credential:'openrelayproject'},
-    {urls:'turns:openrelay.metered.ca:443?transport=tcp', username:'openrelayproject', credential:'openrelayproject'},
-    {urls:['turn:freestun.net:3478', 'turns:freestun.net:5349'], username:'free', credential:'free'}
+    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:80?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: ['turn:freestun.net:3478', 'turns:freestun.net:5349'], username: 'free', credential: 'free' }
   ];
   var iceCache = null, relayForced = false;
   try{

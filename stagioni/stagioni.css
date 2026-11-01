@@ -1,0 +1,103 @@
+/* ==========================================================================
+  PartyBox - Effetti stagionali (solo decorazione, nessuna risorsa esterna)
+  Uso:  <link rel="stylesheet" href="/stagioni/stagioni.css">
+        <script src="/stagioni/stagioni.js" defer></script>
+        <body data-seasonal-page="home">
+  Tutto vive dentro #pbs-layer: pointer-events:none, solo transform/opacity.
+   w========================================================================== */
+
+#pbs-layer{
+  --pbs-dens:1;
+  position:fixed;inset:0;z-index:5;overflow:hidden;pointer-events:none;
+  contain:strict;user-select:none;-webkit-user-select:none;
+}
+#pbs-layer *{pointer-events:none !important;box-sizing:border-box}
+#pbs-layer[hidden]{display:none}
+
+/* ---- Tinta ai bordi (un velo leggero per ogni variante) ---- */
+.pbs-tinta{position:absolute;inset:0;opacity:0;animation:pbs-in 2.4s ease-out .2s forwards}
+@keyframes pbs-in{to{opacity:1}}
+
+/* ---- Particelle ---- */
+.pbs-p{position:absolute;left:var(--x);top:0;color:var(--c,#fff);font-size:var(--s,24px);line-height:1;opacity:0;
+  will-change:transform,opacity;font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji","Segoe UI Symbol",sans-serif}
+.pbs-p.cade{top:-10vh;animation:pbs-cade var(--d) linear var(--w) infinite}
+.pbs-p.sale{top:112vh;animation:pbs-sale var(--d) linear var(--w) infinite}
+.pbs-p.lampeggia{top:var(--y);animation:pbs-lampi var(--d) ease-in-out var(--w) infinite}
+@keyframes pbs-cade{
+  0%{opacity:0;transform:translate3d(0,0,0) rotate(0)}
+  8%{opacity:var(--o,.8)}
+  50%{transform:translate3d(var(--dx),60vh,0) rotate(calc(var(--r) / 2))}
+  92%{opacity:var(--o,.8)}
+  100%{opacity:0;transform:translate3d(calc(var(--dx) * -.6),125vh,0) rotate(var(--r))}}
+@keyframes pbs-sale{
+  0%{opacity:0;transform:translate3d(0,0,0) rotate(0) scale(.7)}
+  10%{opacity:var(--o,.8)}
+  50%{transform:translate3d(var(--dx),-62vh,0) rotate(calc(var(--r) / 2)) scale(1)}
+  90%{opacity:var(--o,.8)}
+  100%{opacity:0;transform:translate3d(calc(var(--dx) * -.6),-125vh,0) rotate(var(--r)) scale(1.1)}}
+@keyframes pbs-lampi{0%,100%{opacity:0;transform:scale(.4) rotate(0)}50%{opacity:var(--o,.9);transform:scale(1) rotate(var(--r))}}
+
+/* ---- Decorazioni fisse ---- */
+.pbs-deco{position:absolute}
+
+/* luci natalizie in alto */
+.pbs-luci{top:-6px;left:-2%;width:104%;height:46px;display:flex;justify-content:space-around;align-items:flex-start;
+  animation:pbs-cala .9s cubic-bezier(.34,1.56,.64,1) .4s backwards}
+.pbs-luci::before{content:"";position:absolute;left:0;right:0;top:-14px;height:34px;border-bottom:3px solid rgba(20,20,20,.7);border-radius:0 0 50% 50% / 0 0 100% 100%}
+.pbs-luci i{position:relative;display:block;width:12px;height:18px;margin-top:12px;background:var(--c);border-radius:50% 50% 55% 55%;
+  box-shadow:0 0 12px 4px var(--c);animation:pbs-luce 1.8s ease-in-out var(--w) infinite}
+.pbs-luci i:nth-child(odd){margin-top:20px}
+.pbs-luci i::before{content:"";position:absolute;left:3px;top:-6px;width:6px;height:7px;background:#2b2b2b;border-radius:2px}
+@keyframes pbs-luce{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.88)}}
+@keyframes pbs-cala{from{transform:translateY(-70px)}}
+
+/* ragnatela d'angolo */
+.pbs-web{top:0;width:min(34vw,230px);height:min(34vw,230px);opacity:.5;
+  background:
+    repeating-radial-gradient(circle at 0 0,transparent 0 22px,rgba(255,255,255,.55) 22px 23.5px),
+    repeating-conic-gradient(from 90deg at 0 0,rgba(255,255,255,.6) 0 1.2deg,transparent 1.2deg 18deg);
+  -webkit-mask:radial-gradient(circle at 0 0,#000 62%,transparent 71%);mask:radial-gradient(circle at 0 0,#000 62%,transparent 71%)}
+.pbs-web.sx{left:0}
+.pbs-web.dx{right:0;transform:scaleX(-1)}
+
+/* ragno che penzola */
+.pbs-ragno{top:0;left:var(--x);width:2px;height:var(--h);background:rgba(255,255,255,.55);transform-origin:top center;animation:pbs-penzola 5s ease-in-out var(--w) infinite}
+.pbs-ragno::after{content:"\1F577";position:absolute;left:50%;bottom:-18px;transform:translateX(-50%);font-size:26px;line-height:1}
+@keyframes pbs-penzola{0%,100%{transform:rotate(-5deg) scaleY(.8)}50%{transform:rotate(5deg) scaleY(1.12)}}
+
+/* nebbia */
+.pbs-nebbia{left:-30%;bottom:-18vh;width:160%;height:46vh;opacity:.5;filter:blur(40px);
+  background:radial-gradient(ellipse at 30% 60%,var(--c1) 0,transparent 60%),radial-gradient(ellipse at 75% 70%,var(--c2) 0,transparent 55%);
+  animation:pbs-nebbia 22s ease-in-out infinite alternate}
+@keyframes pbs-nebbia{from{transform:translateX(-6%)}to{transform:translateX(6%) scale(1.05)}}
+
+/* luna */
+.pbs-luna{top:11vh;right:9vw;width:min(15vw,96px);height:min(15vw,96px);border-radius:50%;background:transparent;
+  box-shadow:inset -18px -6px 0 0 #fff2c4,0 0 40px 6px rgba(255,242,196,.35);opacity:.55;animation:pbs-in 3s ease-out .3s backwards}
+
+/* ---- Tinte per variante ---- */
+.pbs-v-zucche .pbs-tinta{background:radial-gradient(ellipse at 50% 120%,rgba(255,120,20,.28),transparent 60%),radial-gradient(ellipse at 50% -20%,rgba(120,40,0,.25),transparent 55%)}
+.pbs-v-notte .pbs-tinta{background:radial-gradient(ellipse at 50% 50%,transparent 45%,rgba(60,20,110,.42) 100%)}
+.pbs-v-notte .pbs-tinta{animation:pbs-in 2.4s ease-out .2s forwards,pbs-tremola 7s ease-in-out 3s infinite}
+@keyframes pbs-tremola{0%,100%{opacity:1}46%{opacity:1}48%{opacity:.55}50%{opacity:1}53%{opacity:.7}55%{opacity:1}}
+.pbs-v-ragnatele .pbs-tinta{background:radial-gradient(ellipse at 50% 50%,transparent 50%,rgba(20,0,30,.42) 100%)}
+.pbs-v-neve .pbs-tinta{background:radial-gradient(ellipse at 50% 120%,rgba(200,230,255,.22),transparent 55%)}
+.pbs-v-luci .pbs-tinta{background:radial-gradient(ellipse at 50% -10%,rgba(255,200,90,.2),transparent 55%)}
+.pbs-v-stelle .pbs-tinta{background:radial-gradient(ellipse at 50% 50%,transparent 50%,rgba(10,20,70,.35) 100%)}
+.pbs-v-cuori .pbs-tinta{background:radial-gradient(ellipse at 50% 120%,rgba(255,80,130,.25),transparent 60%)}
+.pbs-v-petali .pbs-tinta{background:radial-gradient(ellipse at 50% -20%,rgba(255,170,190,.22),transparent 60%)}
+.pbs-v-scintille .pbs-tinta{background:radial-gradient(ellipse at 50% 50%,transparent 45%,rgba(120,10,60,.35) 100%)}
+
+/* ---- Pagine con meno effetti ---- */
+#pbs-layer.pbs-lite .pbs-deco{opacity:.4}
+#pbs-layer.pbs-lite .pbs-tinta{opacity:.5 !important;animation:none}
+
+/* ---- Accessibilita: niente movimento ---- */
+@media (prefers-reduced-motion:reduce){
+  #pbs-layer *,#pbs-layer *::before,#pbs-layer *::after{animation:none !important}
+  .pbs-p{display:none}
+  .pbs-tinta{opacity:1}
+  .pbs-ragno{display:none}
+}
+@media print{#pbs-layer{display:none}}

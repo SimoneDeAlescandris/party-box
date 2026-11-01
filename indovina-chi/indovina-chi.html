@@ -7,6 +7,7 @@
 <meta name="description" content="La versione di Indovina Chi? all'interno di PartyBox: gioca online con gli amici direttamente dal browser.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/stagioni/stagioni.css">
 <style>
 :root{
   --bg:#0f1115; --bg2:#161920; --panel:#1b1f29; --panel2:#262b38; --line:#000;
@@ -419,7 +420,7 @@ button:active:not(:disabled){transform:translateY(3px) scale(.97);box-shadow:0 1
 }
 </style>
 </head>
-<body>
+<body data-seasonal-page="home">
 
 <div id="bg" aria-hidden="true"></div>
 <a class="back-hub" href="../index.html" aria-label="Torna a PartyBox" title="Torna a PartyBox">
@@ -698,6 +699,7 @@ button:active:not(:disabled){transform:translateY(3px) scale(.97);box-shadow:0 1
   </div>
 </div>
 
+<script src="/stagioni/stagioni.js" defer></script>
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script>

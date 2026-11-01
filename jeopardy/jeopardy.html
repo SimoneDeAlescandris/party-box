@@ -262,7 +262,9 @@ body.host-mode .score{cursor:pointer}
 .gcell.puoi:active{transform:translateY(3px) scale(.96)}
 .gcell.sel{outline:5px solid #fff;outline-offset:2px;animation:cursore 1.2s ease-in-out infinite}
 @keyframes cursore{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
-.gcell.fatta{color:transparent;text-shadow:none;background:#18212b;border-color:#0c1015;box-shadow:none;opacity:.4;cursor:default;transform:translateY(4px)}
+.gcell.fatta{position:relative;opacity:.45;filter:saturate(.55);box-shadow:0 2px 0 #000;transform:translateY(3px)}
+.gcell.fatta::after{content:"\2713";position:absolute;top:3px;right:8px;font-size:.45em;color:#7be08f;text-shadow:1px 1px 0 #000}
+@media (hover:hover){.gcell.puoi.fatta:hover{opacity:.85;filter:none;transform:translateY(-1px) scale(1.03)}}
 .gcell.vuota{color:transparent;text-shadow:none;background:transparent;border-style:dashed;border-color:rgba(255,255,255,.2);box-shadow:none}
 #gHint{margin:0;font-weight:600;font-size:1rem;color:#dce4ec}
 
@@ -384,14 +386,14 @@ button.chip:hover{transform:translateY(-2px) scale(1.05)}
       </details>
       <details>
         <summary>Come funzionano turni e punteggi?</summary>
-        <p>L'host fa da conduttore: vede le risposte, le mostra a tutti e assegna o toglie i punti. Chi ha il turno sceglie la casella; chi risponde bene prende i punti e tiene il turno, altrimenti si passa al giocatore successivo. Se qualcuno perde la connessione, rientra da solo senza reinserire il codice.</p>
+        <p>L'host fa da conduttore: vede le risposte, le mostra a tutti e assegna o toglie i punti. Chi ha il turno sceglie la casella e l'host la apre. Chi risponde bene prende i punti e tiene il turno, altrimenti si passa al giocatore successivo. Le caselle già risposte restano visibili a tutti, semi-trasparenti, e solo l'host può riaprirle per riguardarle. Se qualcuno perde la connessione, rientra da solo senza reinserire il codice.</p>
       </details>
       <details>
         <summary>Scorciatoie da tastiera</summary>
-        <p class="sez">Sul tabellone</p>
+        <p class="sez">Sul tabellone (host)</p>
         <ul class="tasti">
           <li><kbd>&larr;</kbd><kbd>&uarr;</kbd><kbd>&rarr;</kbd><kbd>&darr;</kbd> spostano il cursore sulle caselle</li>
-          <li><kbd>Invio</kbd> o <kbd>Spazio</kbd> aprono la domanda selezionata</li>
+          <li><kbd>Invio</kbd> o <kbd>Spazio</kbd> aprono la domanda selezionata (host)</li>
         </ul>
         <p class="sez">Con una domanda aperta (conduttore)</p>
         <ul class="tasti">
@@ -512,6 +514,7 @@ button.chip:hover{transform:translateY(-2px) scale(1.05)}
     <button class="btn grande alt" id="qReveal" type="button">Mostra risposta <kbd>Spazio</kbd></button>
     <button class="btn grande verde" id="qOk" type="button" data-nosfx="1">&#10004; Corretta</button>
     <button class="btn grande rosso" id="qKo" type="button" data-nosfx="1">&#10008; Sbagliata</button>
+    <button class="btn grande alt" id="qBack" type="button" title="Rimetti la casella in gioco senza assegnarla">Annulla</button>
     <button class="btn grande scuro" id="qClose" type="button">Chiudi <kbd>Esc</kbd></button>
   </div>
 </div>
@@ -527,6 +530,7 @@ button.chip:hover{transform:translateY(-2px) scale(1.05)}
       <button class="btn alt" id="endExit" type="button">Esci</button>
     </div>
     <p id="endWait" class="nota" style="color:var(--muted)">Aspetta che l'host decida cosa fare.</p>
+    <button class="btn alt hidden" id="endExit2" type="button">Esci</button>
   </div>
 </div>
 
@@ -1043,7 +1047,7 @@ button.chip:hover{transform:translateY(-2px) scale(1.05)}
     saveSession();
   }
   function azApri(c, r){
-    if(!st || st.phase !== 'playing' || st.open || !giocabile(c, r) || st.done[c + ':' + r]){ return; }
+    if(!isHost || !st || st.phase !== 'playing' || st.open || !giocabile(c, r)){ return; }
     selTeam = attivi().indexOf(st.turn) >= 0 ? st.turn : 0;
     mod(function(){ st.open = {c:c, r:r, rev:false, win:0, wr:[]}; });
   }
@@ -1070,13 +1074,20 @@ button.chip:hover{transform:translateY(-2px) scale(1.05)}
   function azChiudi(){
     var o = st && st.open;
     if(!o){ return; }
+    var gia = !!st.done[o.c + ':' + o.r];
     selTeam = 0;
     mod(function(){
       st.done[o.c + ':' + o.r] = 1;
-      st.turn = o.win ? o.win : prossimo(st.turn);
+      st.turn = o.win ? o.win : (gia ? st.turn : prossimo(st.turn));
       st.open = null;
       if(!restanti()){ st.phase = 'over'; }
     });
+  }
+  function azAnnulla(){
+    var o = st && st.open;
+    if(!isHost || !o || o.win || o.wr.length || st.done[o.c + ':' + o.r]){ return; }
+    selTeam = 0;
+    mod(function(){ st.open = null; });
   }
   function azPunti(n, d){
     if(!isHost || !st || !roster[n]){ return; }
@@ -1120,19 +1131,16 @@ button.chip:hover{transform:translateY(-2px) scale(1.05)}
     return {c:0, r:0};
   }
   function puoiAprire(){
-    if(!st || st.phase !== 'playing' || st.open){ return false; }
-    if(isHost){ return true; }
-    return st.turn === myN && !(roster[myN] && roster[myN].offline);
+    return !!(isHost && st && st.phase === 'playing' && !st.open);
   }
   function tentaApri(c, r){
     if(!st || st.phase !== 'playing'){ return; }
-    if(!puoiAprire()){
-      if(!st.open && !isHost && st.turn !== myN && giocabile(c, r) && !st.done[c + ':' + r]){ toast('Non è il tuo turno.'); }
+    if(!isHost){
+      if(!st.open && giocabile(c, r)){ toast('Le domande le apre l\'host: dillo a voce!'); }
       return;
     }
-    if(!giocabile(c, r) || st.done[c + ':' + r]){ return; }
-    if(isHost){ azApri(c, r); }
-    else if(hostConn && hostConn.open){ try{ hostConn.send({t:'act', a:'open', c:c, r:r}); }catch(e){} }
+    if(!puoiAprire() || !giocabile(c, r)){ return; }
+    azApri(c, r);
   }
 
   /* ---------- Interfaccia di gioco ---------- */
@@ -1167,9 +1175,9 @@ button.chip:hover{transform:translateY(-2px) scale(1.05)}
     var h = '';
     if(st.phase === 'playing' && !st.open){
       var r = roster[st.turn], nome = r ? r.name : '...';
-      if(isHost){ h = 'Tocca a ' + nome + '. Da conduttore puoi aprire tu qualsiasi casella.'; }
-      else if(st.turn === myN){ h = 'Tocca a te! Scegli una casella.'; }
-      else { h = 'Tocca a ' + nome + ': aspetta che scelga una casella.'; }
+      if(isHost){ h = 'Tocca a ' + nome + ': apri tu la casella che sceglie. Le caselle già risposte restano consultabili.'; }
+      else if(st.turn === myN){ h = 'Tocca a te! Dì all\'host quale casella vuoi.'; }
+      else { h = 'Tocca a ' + nome + ': sceglie una casella e l\'host la apre.'; }
     }
     $('gHint').textContent = h;
   }
@@ -1217,15 +1225,15 @@ button.chip:hover{transform:translateY(-2px) scale(1.05)}
     q.valori.forEach(function(v, ri){
       q.categorie.forEach(function(c, ci){
         var ok = giocabile(ci, ri), fatta = !!st.done[ci + ':' + ri];
-        var cls = 'gcell' + (!ok ? ' vuota' : (fatta ? ' fatta' : (puoi ? ' puoi' : '')));
-        if(puoi && ok && !fatta && cur.c === ci && cur.r === ri){ cls += ' sel'; }
-        var d = el('div', cls, ok && !fatta ? String(v) : '');
+        var cls = 'gcell' + (!ok ? ' vuota' : (fatta ? ' fatta' : '')) + (ok && puoi ? ' puoi' : '');
+        if(puoi && ok && cur.c === ci && cur.r === ri){ cls += ' sel'; }
+        var d = el('div', cls, ok ? String(v) : '');
         d.dataset.c = ci;
         d.dataset.r = ri;
         d.style.setProperty('--k', k++);
         d.setAttribute('role', 'button');
-        d.setAttribute('aria-label', c.nome + ', ' + v + ' punti' + (!ok ? ', non disponibile' : (fatta ? ', già giocata' : '')));
-        if(!ok || fatta || !puoi){ d.setAttribute('aria-disabled', 'true'); }
+        d.setAttribute('aria-label', c.nome + ', ' + v + ' punti' + (!ok ? ', non disponibile' : (fatta ? ', già risposta' : '')));
+        if(!ok || !puoi){ d.setAttribute('aria-disabled', 'true'); }
         b.appendChild(d);
       });
     });
@@ -1234,7 +1242,9 @@ button.chip:hover{transform:translateY(-2px) scale(1.05)}
     var m = $('qModal'), o = st.phase === 'playing' ? st.open : null;
     if(!o){ m.classList.add('hidden'); return; }
     var x = cella(o.c, o.r), v = roomQuiz.valori[o.r];
-    $('qCat').textContent = roomQuiz.categorie[o.c].nome + ' · ' + v;
+    var gia = !!st.done[o.c + ':' + o.r];
+    $('qCat').textContent = roomQuiz.categorie[o.c].nome + ' · ' + v + (gia ? ' · già risposta' : '');
+    $('qBack').classList.toggle('hidden', !isHost || gia || !!o.win || o.wr.length > 0);
     $('qText').textContent = x.domanda;
     var ans = $('qAns');
     ans.classList.toggle('hidden', !o.rev);
@@ -1590,13 +1600,7 @@ button.chip:hover{transform:translateY(-2px) scale(1.05)}
     if(!d || typeof d !== 'object' || !roster[1]){ return; }
     if(d.t === 'leave'){ conn.bye = true; try{ conn.close(); }catch(e){} connGone(conn); return; }
     if(d.t === 'hb'){ return; }
-    if(d.t === 'act'){
-      if(conn.n && st && st.phase === 'playing' && d.a === 'open' && !st.open && st.turn === conn.n){
-        var c = intIn(d.c, 0, LIM.cat - 1, -1), r = intIn(d.r, 0, LIM.righe - 1, -1);
-        if(c >= 0 && r >= 0){ azApri(c, r); }
-      }
-      return;
-    }
+    if(d.t === 'act'){ return; }
     if(d.t !== 'hello' || conn.n){ return; }
     var n = 0, rejoined = false, hn = Number(d.n);
     if(d.rejoin && roster[hn] && hn > 1 && tokens[hn] && tokens[hn] === String(d.token)){
@@ -1875,6 +1879,7 @@ button.chip:hover{transform:translateY(-2px) scale(1.05)}
   $('qOk').addEventListener('click', function(){ azGiudica(true); });
   $('qKo').addEventListener('click', function(){ azGiudica(false); });
   $('qClose').addEventListener('click', azChiudi);
+  $('qBack').addEventListener('click', azAnnulla);
   $('endAgain').addEventListener('click', azAvvia);
   $('endLobby').addEventListener('click', azLobby);
   $('endExit').addEventListener('click', function(){ uscita(''); });

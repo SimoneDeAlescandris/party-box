@@ -1,0 +1,139 @@
+{
+  "formato": "partybox-jeopardy",
+  "versione": 1,
+  "titolo": "CESARE",
+  "valori": [
+    100,
+    200,
+    300,
+    400,
+    500
+  ],
+  "categorie": [
+    {
+      "nome": "Matematica (logica)",
+      "celle": [
+        {
+          "domanda": "La somma dell’età di 5 ragazze è 48 anni. Tra 10 anni, quanti anni avranno?",
+          "risposta": "48 + (10*5) = 98"
+        },
+        {
+          "domanda": "Qual è il numero più grande fra uno e un milione che non contiene la lettera \"N\" in inglese? (Ad esempio, \"one\" la contiene, \"two\" no)",
+          "risposta": "88 \"Million\" contiene la n. \"Thousand\" contiene la n. \"Hundred\" idem. Quindi deve essere fra 0 e 99. \"Nine\" ha la n, quindi deve si cancellano 90-99. 89 ha la n quindi rimane solo 88: \"eighty-eight\"."
+        },
+        {
+          "domanda": "Dividi 40 per 1/2 e aggiungi 15. Cosa ottieni?",
+          "risposta": "Essendo che si divide per 1/2, in realtà si moltiplica per 2 quindi si avrà [40/(1/2)]+15=(40*2)+15=95"
+        },
+        {
+          "domanda": "Un mattone pesa un chilo più mezzo mattone. Quanto pesa un mattone?",
+          "risposta": "2 kg. x=mattone x = 1 kg + (x/2) x - (x/2) = 1 kg 2x - x = 2 kg x = 2 kg"
+        },
+        {
+          "domanda": "Un cacciatore va a caccia accompagnato da un amico. Fanno una specie di scommessa secondo la quale se il cacciatore manca un colpo deve dare 5 euro all'amico, se invece colpisce esattamente riceve 4 euro. Dopo 12 colpi il cacciatore riceve 12 euro: Quanti colpi ha mancato?",
+          "risposta": "4. Sia \"x\" il numero di colpi mancati (-5€) e \"y\" il numero di colpi presi (+4€). I colpi totali sono 12. Abbiamo il sistema: x + y = 12 4x - 5y = 12 y = 12 - x 4(12 - x) - 5x = 12 --> 48 - 4x - 5x = 12 --> -9x = -36 --> x = 4"
+        }
+      ]
+    },
+    {
+      "nome": "The Last Of Us I",
+      "celle": [
+        {
+          "domanda": "Qual è l'animale di cui Ellie rimane più sbalordita al laboratorio delle Luci nell'università del Colorado?",
+          "risposta": "Giraffa"
+        },
+        {
+          "domanda": "Quale città ha contribuito a costruire il fratello di Joel? A) Denver B) Jackson C) Kansas City D) Salt Lake City",
+          "risposta": "B) Jackson"
+        },
+        {
+          "domanda": "La cosa di cui Ellie ha più paura",
+          "risposta": "Essendo stata sola per lungo tempo teme la solitudine."
+        },
+        {
+          "domanda": "Nome della madre di Ellie",
+          "risposta": "Anna"
+        },
+        {
+          "domanda": "Come si chiama il libro che Ellie legge più volte e cosa rappresenta simbolicamente? A) \"No Pun Intended\" - Rappresenta il suo desiderio di leggerezza in un mondo cupo B) \"The Fireflies' Tale\" - Indica il suo legame con le Luci C) \"The Last Survivor\" - È un riferimento alla sua storia D) \"Hope in the Dark\" - Parla della speranza",
+          "risposta": "A) \"No Pun Intended\" - Rappresenta il suo desiderio di leggerezza in un mondo cupo"
+        }
+      ]
+    },
+    {
+      "nome": "Cultura Generale 1",
+      "celle": [
+        {
+          "domanda": "Chi scrisse il \"Decameron\"?",
+          "risposta": "Giovanni Boccaccio"
+        },
+        {
+          "domanda": "In che anno uscì il primo iPhone della Apple di Steve Jobs?",
+          "risposta": "2007"
+        },
+        {
+          "domanda": "In che anno è avvenuto lo sbarco sulla Luna",
+          "risposta": "1969"
+        },
+        {
+          "domanda": "Quale metallo ha il simbolo chimico AU?",
+          "risposta": "Oro"
+        },
+        {
+          "domanda": "In che hanno è avvenuta la \"Brexit\" (uscita della Gran Bretagna dall'Unione Europea)? La parola \"Brexit\" è acronimo di cosa?",
+          "risposta": "2020. Britain exit."
+        }
+      ]
+    },
+    {
+      "nome": "Pokémon",
+      "celle": [
+        {
+          "domanda": "Il 151 Pokémon nel Pokédex di Prima generazione",
+          "risposta": "Mew"
+        },
+        {
+          "domanda": "Dimmi: - Il Pokémon con il valore dei PS più alto; - Il Pokémon con il valore dei PS più basso; - Il Pokémon con la media delle statiche più alta.",
+          "risposta": "- Blissey; - Shedinja; - Eternatus."
+        },
+        {
+          "domanda": "Dimmi sia il tipo di Pokémon più diffuso che quello meno diffuso.",
+          "risposta": "Fra i 1026 Pokémon attualmente conosciuti 159 sono di tipo Acqua, almeno in parte, (15.5% di quelli esistenti), compresi quelli che assumono questo tipo cambiando forma. Ciò lo rende il tipo più diffuso. Mentre solo 59 sono di tipo Ghiaccio, almeno in parte, (5.8% di quelli esistenti), compresi quelli che assumono questo tipo cambiando forma. Ciò lo rende il meno diffuso."
+        },
+        {
+          "domanda": "Indovina a quale pokémon corrisponde questa descrizione (fino alla VI gen): Capta con l'antenna onde che arrivano dal mondo degli spiriti, che gli ordinano di portare lì le persone.",
+          "risposta": "Dusknoir, Pokémon Platino"
+        },
+        {
+          "domanda": "Pokémon dall'aspetto simile a Godzilla",
+          "risposta": "Groudon"
+        }
+      ]
+    },
+    {
+      "nome": "Cultura Generale 2",
+      "celle": [
+        {
+          "domanda": "Da chi fu incoronato Napoleone come imperatore francese?",
+          "risposta": "Se stesso"
+        },
+        {
+          "domanda": "Attore protagonista nel film di Matrix",
+          "risposta": "Keanu Reeves"
+        },
+        {
+          "domanda": "Quanto è durato il pontificato più breve nella storia della Chiesa cattolica? (Errore massimo di una settimana)",
+          "risposta": "Dodici giorni, dal 15 al 27 settembre 1590. È stato quello di Papa Urbano VII."
+        },
+        {
+          "domanda": "Dov'è morto Dante Alighieri?",
+          "risposta": "Ravenna, nel 1321."
+        },
+        {
+          "domanda": "Quali sono le ossa delle dita?",
+          "risposta": "falange falangina e falangetta"
+        }
+      ]
+    }
+  ]
+}

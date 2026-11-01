@@ -1,0 +1,139 @@
+{
+  "formato": "partybox-jeopardy",
+  "versione": 1,
+  "titolo": "HARAMBE",
+  "valori": [
+    100,
+    200,
+    300,
+    400,
+    500
+  ],
+  "categorie": [
+    {
+      "nome": "Attack On Titan",
+      "celle": [
+        {
+          "domanda": "Per quale motivo Historia Reiss, futura Regina delle Mura, si trova ad inizio serie ad essere parte del 104° Corpo di Addestramento Reclute?",
+          "risposta": "Per non morire da bambina venne costretta dal padre a rinunciare al suo nome ed ogni legame con la famiglia reale poiché figlia illegittima di Re Rod Reiss. Arruolandosi nell'esercito sarebbe poi potuta morire in battaglia."
+        },
+        {
+          "domanda": "Come nascono i Giganti Puri che tipicamente si trovano nell'isola di Paradis?",
+          "risposta": "Attraverso un SIERO utilizzato dai marleyani solo sugli eldiani considerati pericolosi."
+        },
+        {
+          "domanda": "Com'è composto l'esercito in difesa della razza umana (eldiani su Eldia, alias \"Paradis\", dentro le mura) e quali sono i loro ruoli",
+          "risposta": "Armata Ricognitiva (Corpo di Ricerca): esplora il territorio fuori dalle mura al fine di cercare luoghi dove espandersi e capire da dove arrivino i Giganti; Corpo di Guarnigione (Guardia Stazionaria): pattuglia e rinforza le mura tenendo lontani i Giganti e proteggendo la popolazione in caso di attacco; Polizia Militare: i migliori soldati che servono da guardia personale del re e sono responsabili dell'ordine all'interno delle Mura."
+        },
+        {
+          "domanda": "Dimmi quali sono i Nove Giganti originali discendenti da Ymir Fritz ed almeno 9 diversi possessori fra di loro.",
+          "risposta": "Gigante FONDATORE: Karl \"Re\" Fritz, Uri Reiss, Frieda Reiss, Grisha Jaeger, Eren Jaeger; Gigante D'ATTACCO: Eren Kruger, Grisha Jaeger, Eren Jaeger; Gigante COLOSSALE: Berthold Huber, Armin Arlert; Gigante CORAZZATO: Reiner Braun; Gigante FEMMINA: Annie Leonhart; Gigante MASCELLA: Marcel Galliard, Ymir, Porko Galliard, Falco Grice; Gigante BESTIA: Tom Xaver, Zeke Jaeger; Gigante CARRO: Pieck; Gigante MARTELLO: Lara, Tybur, Eren Jaeger."
+        },
+        {
+          "domanda": "Quante sono le dita che indicano Ymir Fritz nel flashback della sua vita (E21, S4, \"Da te, 2000 anni fa\")",
+          "risposta": "13"
+        }
+      ]
+    },
+    {
+      "nome": "Descrizioni dei Pokémon (I-VI gen)",
+      "celle": [
+        {
+          "domanda": "Gli shuriken creati con il muco prodotto dalle sue cosce sono in grado di recidere di netto cavi di acciaio.",
+          "risposta": "Greninja, Pokémon Violetto"
+        },
+        {
+          "domanda": "Usa un tipo speciale di arte marziale che coinvolge tutti gli arti. Le sue fiamme non si estinguono mai.",
+          "risposta": "Infernape, Pokémon Diamante"
+        },
+        {
+          "domanda": "Si dice che prenda per mano i bambini e li accompagni nell'aldilà. Preferisce quelli piccoli e leggeri.",
+          "risposta": "Drifloon, Pokémon Sole"
+        },
+        {
+          "domanda": "Solca i cieli in cerca di nemici molto forti. Riesce a emettere fiammate di un calore tale da fondere ogni cosa. Tuttavia, non rivolge mai le sue micidiale lingue di fuoco contro avversari più deboli di lui.",
+          "risposta": "Charizard, Pokémon Rubino Omega e Zaffiro Alpha"
+        },
+        {
+          "domanda": "La maschera che indossa è il volto che aveva quando era un umano. A volte si mette a piangere mentre la guarda.",
+          "risposta": "Yamask, da Pokémon Nero"
+        }
+      ]
+    },
+    {
+      "nome": "MARVEL",
+      "celle": [
+        {
+          "domanda": "Con chi si è sposata Wanda Maximoff?",
+          "risposta": "Visione"
+        },
+        {
+          "domanda": "Qual è il vero nome di Wolverine?",
+          "risposta": "James \"Logan\" Howlett"
+        },
+        {
+          "domanda": "Quale fu l'ultimo film in cui Stan Lee ha fatto cameo nell'MCU?",
+          "risposta": "Avengers: Endgame"
+        },
+        {
+          "domanda": "In quale film dell'MCU ha fatto la sua comparsa per la prima volta lo Spider-Man di Tom Holland?",
+          "risposta": "Captain America: Civil War (2016). Spider-Man: Homecoming fu nel 2017."
+        },
+        {
+          "domanda": "Prima di Mary Jane Watson chi fu la donna amata da Peter Parker?",
+          "risposta": "Gwen Stacy. Canonicamente, come nello Spider-Man di Andrew Garfield, morì per mano del Goblin."
+        }
+      ]
+    },
+    {
+      "nome": "Indovinelli",
+      "celle": [
+        {
+          "domanda": "Hanno le gambe ma non hanno i piedi, cosa sono?",
+          "risposta": "I pantaloni"
+        },
+        {
+          "domanda": "È la cognata della sorella di tuo padre, chi è?",
+          "risposta": "Tua madre"
+        },
+        {
+          "domanda": "Sale ma non scende, cos'è?",
+          "risposta": "L'età"
+        },
+        {
+          "domanda": "Vado avanti, vado indietro corro e mi fermo ma non cambio mai di posto. Chi sono?",
+          "risposta": "Il pendolo"
+        },
+        {
+          "domanda": "Se 5 gatti catturano 5 topi in 5 minuti, quanti topi servono per catturare 100 topi in 100 minuti?",
+          "risposta": "5"
+        }
+      ]
+    },
+    {
+      "nome": "Geografia",
+      "celle": [
+        {
+          "domanda": "Quale città ospita la sede dell'Unione Europea (UE)?",
+          "risposta": "Bruxeless"
+        },
+        {
+          "domanda": "Qual è il fiume più lungo al mondo?",
+          "risposta": "Rio delle Amazzoni"
+        },
+        {
+          "domanda": "La capitale del Brasile si dice San Paolo o Sau Paolo?",
+          "risposta": "Brasilia"
+        },
+        {
+          "domanda": "Quale fra questi è il Paese è il più grande per estensione? - A) Canada - B) Brasile - C) Cina - D) Stati Uniti",
+          "risposta": "A) Canada (9,9 milioni di Km2) Le altre opzioni erano: B) Brasile (8,5 milioni di Km2) C) Cina (9,7 milioni di Km2) D) Stati Uniti (9,3 milioni di Km2)"
+        },
+        {
+          "domanda": "Elencami gli Stati confinanti con l'Italia.",
+          "risposta": "San Marino, Città del Vaticano, Francia, Svizzera, Austria e Slovenia"
+        }
+      ]
+    }
+  ]
+}

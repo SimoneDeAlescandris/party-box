@@ -3,6 +3,8 @@
 converti_jeopardy.py - Converte una pagina HTML esportata da JeopardyLabs
 in un file JSON compatibile con il formato dei quiz di PartyBox (jeopardy.html).
 
+Requisiti: Python 3.8+ e BeautifulSoup  ->  pip install beautifulsoup4
+
 Uso:
     python converti_jeopardy.py harambe-24.html
     python converti_jeopardy.py harambe-24.html -o quiz_personalizzato.json
@@ -108,7 +110,7 @@ def estrai_titolo_pagina(soup):
             return pulisci(h)
     t = soup.find("title")
     testo = pulisci(t) if t else ""
-    testo = re.sub(r"\s*[-|]?\s*(Jeopardy\s+Template|JeopardyLabs).*$", "", testo, flags=I if 'I' in globals() else re.I).strip()
+    testo = re.sub(r"\s*[-|]?\s*(Jeopardy\s+Template|JeopardyLabs).*$", "", testo, flags=re.I).strip()
     return testo or "Quiz importato"
 
 
@@ -158,7 +160,7 @@ def converti_html_in_quiz(html, titolo_forzato=None):
         for cg in riga.select(".grid-cell"):
             data_col_attr = cg.get("data-col")
             try:
-                col = int(data_col_attr) if data_col_attr is not None else len(per_col)
+                col = int(str(data_col_attr)) if data_col_attr is not None else len(per_col)
             except (TypeError, ValueError):
                 col = len(per_col)
             per_col[col] = cg
